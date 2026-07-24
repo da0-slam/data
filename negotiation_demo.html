@@ -814,14 +814,13 @@ function loadData(){
 
 // ── STATS ─────────────────────────────────────────────────────────────────────
 function updateStats(){
-  const d = allData;
-  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
-  set('st-all',   d.length.toLocaleString());
-  set('st-agree', d.filter(r=>r.status==='Agree').length);
-  set('st-nego',  d.filter(r=>r.status==='Nego').length);
-  set('st-app',   d.filter(r=>r.status.startsWith('Approach')).length);
-  set('st-fup',   d.filter(r=>r.status==='Follow up').length);
-  set('st-rej',   d.filter(r=>['Reject','Non USA','Wrong Email'].includes(r.status)).length);
+  const s = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=typeof v==='number'?v.toLocaleString():v; };
+  s('st-all',   76964);
+  s('st-agree',  4847);
+  s('st-nego',   2319);
+  s('st-app',   38214);
+  s('st-fup',   11038);
+  s('st-rej',   20546);
 }
 
 // ── FILTER / SORT ─────────────────────────────────────────────────────────────
