@@ -1,0 +1,1157 @@
+
+<title>BRANDSLAM Suite — 밈조사 · 스크립트 추출 데모</title>
+<meta name="description" content="밈조사 + 스크립트 추출 라이브 데모 — 국가별 트렌딩 밈 필터 및 USP 결합 A/B/C 스크립트 생성">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0C0C0F;
+    --surface: #17171D;
+    --surface2: #1E1E26;
+    --border: #2C2C38;
+    --orange: #F97316;
+    --orange-dim: rgba(249,115,22,0.12);
+    --orange-glow: rgba(249,115,22,0.25);
+    --text: #F0F0F5;
+    --text-2: #A0A0B0;
+    --text-3: #5A5A6E;
+    --green: #22C55E;
+    --amber: #F59E0B;
+    --blue: #3B82F6;
+    --pink: #EC4899;
+    --r: 10px;
+    --r-sm: 6px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── TOP NAV ── */
+  .topnav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(12,12,15,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; gap: 32px;
+    height: 52px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; font-size: 15px; letter-spacing: -0.3px;
+  }
+  .brand-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--orange);
+    box-shadow: 0 0 6px var(--orange);
+  }
+  .nav-tabs {
+    display: flex; gap: 4px; flex: 1;
+  }
+  .nav-tab {
+    padding: 6px 14px;
+    font-size: 13px; color: var(--text-2);
+    border-radius: var(--r-sm);
+    cursor: pointer; border: none; background: none;
+    transition: color .15s, background .15s;
+  }
+  .nav-tab.active {
+    background: var(--orange-dim);
+    color: var(--orange);
+  }
+  .nav-tab:hover:not(.active) { background: var(--surface); color: var(--text); }
+  .nav-badge {
+    margin-left: auto;
+    font-size: 11px; color: var(--text-3); letter-spacing: .5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── STEP BAR ── */
+  .stepbar {
+    padding: 0 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0;
+    overflow-x: auto;
+  }
+  .step-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 16px; white-space: nowrap;
+    cursor: pointer; border: none; background: none;
+    color: var(--text-3); font-size: 13px;
+    transition: color .15s;
+    position: relative;
+  }
+  .step-item:hover:not(.active) { color: var(--text-2); }
+  .step-item.active { color: var(--text); }
+  .step-item.done { color: var(--text-2); }
+  .step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    background: var(--surface2); color: var(--text-3);
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    transition: all .2s;
+  }
+  .step-item.active .step-num {
+    background: var(--orange); color: #fff; border-color: var(--orange);
+  }
+  .step-item.done .step-num {
+    background: var(--orange-dim); color: var(--orange); border-color: var(--orange);
+  }
+  .step-arrow {
+    color: var(--text-3); font-size: 12px; padding: 0 4px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  /* ── SCREEN PANEL ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── SEARCH ROW ── */
+  .search-row {
+    display: flex; gap: 10px; align-items: center;
+    margin-bottom: 14px;
+  }
+  .search-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 10px 14px;
+    color: var(--text); font-size: 14px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  .search-input:focus { border-color: var(--orange); }
+  .search-input::placeholder { color: var(--text-3); }
+
+  .btn-primary {
+    background: var(--orange);
+    color: #fff; border: none;
+    border-radius: var(--r-sm);
+    padding: 10px 18px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+    transition: opacity .15s, transform .1s;
+  }
+  .btn-primary:hover { opacity: .9; }
+  .btn-primary:active { transform: scale(.98); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+  .auto-filter-badge {
+    margin-left: auto;
+    font-size: 12px; color: var(--green);
+    display: flex; align-items: center; gap: 5px;
+    white-space: nowrap;
+  }
+  .dot-green { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+  /* ── FILTER ROW ── */
+  .filter-row {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 14px;
+    align-items: center;
+  }
+  .chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: none; color: var(--text-2);
+    font-size: 12px; cursor: pointer;
+    transition: all .15s; white-space: nowrap;
+  }
+  .chip:hover { border-color: var(--text-3); color: var(--text); }
+  .chip.active {
+    background: var(--orange-dim);
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+  .filter-sep { color: var(--border); font-size: 16px; margin: 0 2px; }
+
+  /* country chips */
+  .country-chip {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: none; color: var(--text-2);
+    font-size: 13px; cursor: pointer;
+    transition: all .15s; white-space: nowrap;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .country-chip:hover { border-color: var(--text-3); color: var(--text); }
+  .country-chip.active {
+    background: var(--orange-dim);
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+
+  /* ── NOTICE BOX ── */
+  .notice {
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: var(--r-sm);
+    padding: 10px 14px;
+    font-size: 12px; color: #D4A04A;
+    margin-bottom: 18px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+
+  /* ── EMPTY PLACEHOLDER ── */
+  .empty-state {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--text-2);
+    font-size: 14px;
+  }
+
+  /* ── RESULTS GRID ── */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 900px) { .results-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 600px) { .results-grid { grid-template-columns: 1fr; } }
+
+  /* ── VIDEO CARD ── */
+  .video-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+  }
+  .video-card:hover { border-color: rgba(249,115,22,.4); transform: translateY(-2px); }
+  .video-card.selected { border-color: var(--orange); background: rgba(249,115,22,.04); }
+
+  .card-thumb {
+    width: 100%; aspect-ratio: 9/16;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-thumb canvas { width: 100%; height: 100%; display: block; }
+  .card-rank {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--orange); color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .card-duration {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0,0,0,.7); color: #fff;
+    font-size: 11px; padding: 2px 6px; border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .card-platform {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,.6); color: #fff;
+    font-size: 10px; padding: 2px 6px; border-radius: 4px;
+  }
+
+  .card-body { padding: 12px; }
+  .card-creator {
+    font-size: 12px; color: var(--text-2);
+    display: flex; align-items: center; gap: 5px;
+    margin-bottom: 4px;
+  }
+  .creator-av {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; flex-shrink: 0;
+  }
+  .card-title {
+    font-size: 13px; color: var(--text);
+    font-weight: 500; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .card-tags {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin-bottom: 10px;
+  }
+  .tag {
+    font-size: 11px; color: var(--blue);
+    background: rgba(59,130,246,.1);
+    padding: 2px 7px; border-radius: 20px;
+  }
+  .card-metrics {
+    display: flex; gap: 12px;
+    font-size: 12px; color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .metric { display: flex; align-items: center; gap: 4px; }
+  .metric-val { font-weight: 600; color: var(--text); }
+
+  /* ── NAV BUTTONS ── */
+  .nav-btns {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 28px;
+  }
+  .btn-ghost {
+    background: none; border: 1.5px solid var(--border);
+    color: var(--text-2); border-radius: var(--r-sm);
+    padding: 9px 18px; font-size: 13px; cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-ghost:hover { border-color: var(--text-2); color: var(--text); }
+  .btn-skip {
+    background: none; border: none;
+    color: var(--text-3); font-size: 13px; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 2px;
+    transition: color .15s;
+  }
+  .btn-skip:hover { color: var(--text-2); }
+
+  /* ── LOADING SPINNER ── */
+  .loading-bar {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 28px;
+    text-align: center;
+  }
+  .loading-bar.active { display: block; }
+  .spinner {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--orange);
+    animation: spin .7s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-steps { font-size: 12px; color: var(--text-2); }
+  .loading-step { opacity: .4; transition: opacity .3s; }
+  .loading-step.done { opacity: 1; color: var(--green); }
+  .loading-step.current { opacity: 1; color: var(--orange); }
+
+  /* ── SCREEN 2: SCRIPT ── */
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-3);
+    margin-bottom: 8px;
+  }
+  .selected-video-mini {
+    background: var(--surface);
+    border: 1.5px solid var(--orange);
+    border-radius: var(--r);
+    padding: 14px;
+    display: flex; gap: 12px; align-items: center;
+    margin-bottom: 20px;
+  }
+  .mini-thumb {
+    width: 48px; height: 64px; border-radius: 6px;
+    flex-shrink: 0; overflow: hidden;
+  }
+  .mini-thumb canvas { width: 100%; height: 100%; display: block; }
+
+  .usp-area {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .usp-label {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    margin-bottom: 4px;
+  }
+  .usp-sublabel {
+    font-size: 12px; color: var(--text-2);
+    margin-bottom: 12px;
+  }
+  .usp-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 10px 14px;
+    color: var(--text); font-size: 14px;
+    outline: none; resize: none;
+    line-height: 1.5;
+    transition: border-color .15s;
+  }
+  .usp-input:focus { border-color: var(--orange); }
+  .usp-input::placeholder { color: var(--text-3); }
+
+  .script-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 20px;
+  }
+  @media (max-width: 800px) { .script-grid { grid-template-columns: 1fr; } }
+
+  .script-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity .4s, transform .4s, border-color .2s;
+  }
+  .script-card.revealed { opacity: 1; transform: none; }
+  .script-card:hover { border-color: rgba(249,115,22,.35); }
+
+  .script-card-header {
+    padding: 12px 16px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .script-type-badge {
+    font-size: 11px; font-weight: 800; letter-spacing: 1px;
+    padding: 3px 9px; border-radius: 4px;
+  }
+  .badge-a { background: rgba(249,115,22,.15); color: var(--orange); }
+  .badge-b { background: rgba(59,130,246,.15); color: var(--blue); }
+  .badge-c { background: rgba(236,72,153,.15); color: var(--pink); }
+
+  .script-card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .script-card-body { padding: 16px; }
+  .script-hook {
+    font-size: 13px; color: var(--orange);
+    font-weight: 600; margin-bottom: 10px; line-height: 1.5;
+    border-left: 3px solid var(--orange);
+    padding-left: 10px;
+    font-style: italic;
+  }
+  .script-body {
+    font-size: 13px; color: var(--text-2); line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .script-cta {
+    font-size: 12px; color: var(--green);
+    background: rgba(34,197,94,.08);
+    border: 1px solid rgba(34,197,94,.2);
+    border-radius: var(--r-sm);
+    padding: 7px 10px; line-height: 1.5;
+  }
+  .script-card-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 8px;
+  }
+  .btn-copy {
+    flex: 1; background: none;
+    border: 1.5px solid var(--border);
+    color: var(--text-2); border-radius: var(--r-sm);
+    padding: 7px; font-size: 12px; cursor: pointer;
+    transition: all .15s;
+  }
+  .btn-copy:hover { border-color: var(--orange); color: var(--orange); }
+
+  /* ── GENERATING STATE ── */
+  .generating-row {
+    display: none; align-items: center; gap: 10px;
+    margin-top: 16px;
+    color: var(--text-2); font-size: 13px;
+  }
+  .generating-row.active { display: flex; }
+  .gen-spinner {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--border); border-top-color: var(--orange);
+    animation: spin .7s linear infinite; flex-shrink: 0;
+  }
+
+  /* ── DAILY BADGE ── */
+  .daily-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(34,197,94,.08);
+    border: 1px solid rgba(34,197,94,.2);
+    border-radius: 20px; padding: 5px 12px;
+    font-size: 12px; color: var(--green);
+    margin-bottom: 16px;
+  }
+  .pulse { animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+
+  /* tooltip */
+  .tooltip-wrap { position: relative; }
+  .tooltip-wrap:hover .tooltip-box { opacity: 1; pointer-events: auto; }
+  .tooltip-box {
+    position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%);
+    background: #222; color: #fff; font-size: 11px; border-radius: 6px;
+    padding: 6px 10px; white-space: nowrap;
+    opacity: 0; pointer-events: none; transition: opacity .15s;
+    z-index: 10;
+  }
+
+  /* page title */
+  .page-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); margin-bottom: 6px; }
+  .page-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); margin-bottom: 4px; }
+  .page-desc { font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.6; }
+
+  /* ── COPY TOAST ── */
+  #toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: #1E2830; border: 1px solid rgba(34,197,94,.3); border-radius: var(--r-sm);
+    padding: 12px 18px; color: var(--green); font-size: 13px;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity .25s, transform .25s;
+    pointer-events: none; z-index: 999;
+  }
+  #toast.show { opacity: 1; transform: none; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="brand"><div class="brand-dot"></div> BRANDSLAM Suite</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active">① 성공가이드 생성</button>
+    <button class="nav-tab">② OWM 랭킹보드</button>
+    <button class="nav-tab">③ 인플루언서 마켓플레이스</button>
+  </div>
+  <span class="nav-badge">DEV PROTOTYPE · mock data</span>
+</nav>
+
+<!-- STEP BAR -->
+<div class="stepbar" id="stepbar">
+  <button class="step-item active" data-step="1" onclick="goStep(1)">
+    <span class="step-num">1</span> 밈조사
+  </button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" data-step="2" onclick="goStep(2)">
+    <span class="step-num">2</span> 내 상품등록
+  </button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" data-step="3" onclick="goStep(3)">
+    <span class="step-num">3</span> 가이드 추출
+  </button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" data-step="4" onclick="goStep(4)">
+    <span class="step-num">4</span> 스크립트 받기
+  </button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" data-step="5" onclick="goStep(5)">
+    <span class="step-num">5</span> 시딩계획 작성
+  </button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" data-step="6" onclick="goStep(6)">
+    <span class="step-num">6</span> 계약서 생성
+  </button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" data-step="7" onclick="goStep(7)">
+    <span class="step-num">7</span> 실행계획 전달
+  </button>
+</div>
+
+<!-- ═══════════════════ SCREEN 1: 밈조사 ═══════════════════ -->
+<div class="main screen active" id="screen-1">
+  <div class="page-eyebrow">TOOL 1 · SUCCESS GUIDE GENERATOR</div>
+  <div class="page-title">밈조사</div>
+  <div class="page-desc">
+    키워드를 입력하고 국가·카테고리를 선택하면, Apify가 지금 이 순간 가장 잘 되고 있는 영상을 뽑아드립니다.<br>
+    <strong>매일 새로 뽑을 수 있습니다</strong> — 한 달에 한 번이 아니라, 매일 최신 트렌드 확인이 가능합니다.
+  </div>
+
+  <!-- daily badge -->
+  <div class="daily-badge">
+    <span class="dot-green pulse"></span>
+    실시간 수집 가능 — 마지막 업데이트: 방금 전
+  </div>
+
+  <!-- search row -->
+  <div class="search-row">
+    <input class="search-input" id="keyword-input" type="text" placeholder="제품 키워드 입력 (예: 각질제거 손발팩, 탈모 앰플…)" value="각질제거 손발팩" />
+    <button class="btn-primary" id="start-btn" onclick="startExtraction()">
+      ✦ Apify로 밈 추출 시작
+    </button>
+    <span class="auto-filter-badge">
+      <span class="dot-green"></span> 자동 필터: 상위 인게이지 10개
+    </span>
+  </div>
+
+  <!-- filter row: sort -->
+  <div class="filter-row" id="sort-chips">
+    <button class="chip active" onclick="setSort(this,'engage')">정렬: 인게이지율순</button>
+    <button class="chip" onclick="setSort(this,'view')">정렬: 조회수순</button>
+    <button class="chip" onclick="setSort(this,'recent')">정렬: 최신순</button>
+    <span class="filter-sep">|</span>
+    <button class="chip active" onclick="setPeriod(this,'14')">기간: 최근 14일</button>
+    <button class="chip" onclick="setPeriod(this,'30')">기간: 최근 30일</button>
+    <span class="filter-sep">|</span>
+    <button class="chip active" onclick="setPlatform(this,'tiktok')">플랫폼: TikTok</button>
+    <button class="chip" onclick="setPlatform(this,'instagram')">플랫폼: Instagram</button>
+  </div>
+
+  <!-- filter row: country -->
+  <div class="filter-row" id="country-chips">
+    <button class="country-chip" onclick="setCountry(this,'US')">🇺🇸 미국</button>
+    <button class="country-chip" onclick="setCountry(this,'JP')">🇯🇵 일본</button>
+    <button class="country-chip" onclick="setCountry(this,'AE')">🇦🇪 중동</button>
+    <button class="country-chip" onclick="setCountry(this,'CN')">🇨🇳 중국</button>
+    <button class="country-chip active" onclick="setCountry(this,'KR')">🇰🇷 한국</button>
+  </div>
+
+  <!-- filter row: category -->
+  <div class="filter-row" id="cat-chips">
+    <button class="chip active" onclick="setCat(this,'all')">전체</button>
+    <button class="chip" onclick="setCat(this,'scalp')">두피/탈모</button>
+    <button class="chip" onclick="setCat(this,'skincare')">스킨케어</button>
+    <button class="chip" onclick="setCat(this,'bodycare')">바디케어</button>
+    <button class="chip" onclick="setCat(this,'haircare')">헤어케어</button>
+    <button class="chip" onclick="setCat(this,'supplement')">이너뷰티</button>
+  </div>
+
+  <!-- notice -->
+  <div class="notice">
+    💡 전체 218개를 다 분석하면 LLM 토큰이 과다 소비됩니다 — <strong>상위 인게이지 10개</strong>만 자동 필터링해 스크립트·후킹포인트를 심층 분석합니다. (나머지는 썸네일/지표만 표시)
+  </div>
+
+  <!-- loading bar -->
+  <div class="loading-bar" id="loading-bar">
+    <div class="spinner"></div>
+    <div style="font-size:13px;color:var(--text);margin-bottom:10px;font-weight:600">Apify에서 데이터 수집 중...</div>
+    <div class="loading-steps" id="loading-steps">
+      <div class="loading-step" id="ls1">🔍 TikTok 크롤링 시작...</div>
+      <div class="loading-step" id="ls2">📊 인게이지 필터링...</div>
+      <div class="loading-step" id="ls3">🧠 스크립트 분석 중...</div>
+      <div class="loading-step" id="ls4">✅ 상위 10개 선별 완료</div>
+    </div>
+  </div>
+
+  <!-- empty state -->
+  <div class="empty-state" id="empty-state">
+    키워드 입력 후 <strong>Apify로 밈 추출 시작</strong>을 누르면 인게이지 상위 영상이 여기 표시됩니다.
+  </div>
+
+  <!-- results grid -->
+  <div class="results-grid" id="results-grid" style="display:none"></div>
+
+  <div class="nav-btns">
+    <button class="btn-ghost">← 뒤로가기</button>
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="btn-skip" onclick="goStep(4)">이 단계 건너뛰기 →</button>
+      <button class="btn-primary" id="next-btn" onclick="goStep(4)" style="display:none">
+        스크립트 추출로 이동 →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ SCREEN 4: 스크립트 추출 ═══════════════════ -->
+<div class="main screen" id="screen-4">
+  <div class="page-eyebrow">TOOL 1 · SUCCESS GUIDE GENERATOR</div>
+  <div class="page-title">스크립트 추출 + USP 결합</div>
+  <div class="page-desc">
+    밈조사에서 선택한 영상의 스크립트를 기반으로, 브랜드 USP를 입력하면<br>
+    A안·B안·C안 3가지 응용 스크립트를 즉시 생성합니다.
+  </div>
+
+  <!-- selected video mini -->
+  <div class="section-label">선택된 레퍼런스 영상</div>
+  <div class="selected-video-mini" id="selected-video-mini">
+    <div class="mini-thumb"><canvas id="mini-canvas" width="48" height="64"></canvas></div>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px" id="mini-title">탈모 앰플 TOP 5 추천</div>
+      <div style="font-size:12px;color:var(--text-2)" id="mini-creator">@hairexpert_kr</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:2px" id="mini-metrics">조회수 2.1M · 인게이지율 8.4%</div>
+    </div>
+    <button class="btn-ghost" onclick="goStep(1)" style="margin-left:auto;font-size:12px;padding:6px 12px">영상 바꾸기</button>
+  </div>
+
+  <!-- original hook -->
+  <div class="section-label" style="margin-bottom:6px">원본 후킹 포인트</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:20px;font-size:13px;color:var(--text-2);line-height:1.7;font-style:italic;border-left:3px solid var(--orange)" id="original-hook">
+    "이거 하나로 3개월째 빠지던 머리카락이 멈췄어요..."
+  </div>
+
+  <!-- USP input -->
+  <div class="usp-area">
+    <div class="usp-label">브랜드 USP 입력</div>
+    <div class="usp-sublabel">인플루언서에게 전달할 핵심 소구점을 입력하세요 (제품명, 주요 성분, 차별점)</div>
+    <textarea class="usp-input" id="usp-input" rows="3" placeholder="예: 두피 미세순환 특허 기술 · 모낭 직접 영양 공급 · 임상 12주 후 탈락모 63% 감소 확인"></textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px">
+      <button class="btn-primary" onclick="generateScripts()" id="gen-btn">
+        ✦ A/B/C 스크립트 생성
+      </button>
+    </div>
+  </div>
+
+  <!-- generating indicator -->
+  <div class="generating-row" id="generating-row">
+    <div class="gen-spinner"></div>
+    <span id="gen-status">Claude가 3가지 응용 스크립트를 생성하는 중...</span>
+  </div>
+
+  <!-- script grid -->
+  <div class="script-grid" id="script-grid"></div>
+
+  <!-- download notice -->
+  <div class="notice" id="dl-notice" style="display:none;margin-top:16px">
+    💡 오늘 미팅 끝나고 이 스크립트 파일로도 같이 보내드릴 수 있습니다.
+    <button onclick="downloadScripts()" style="margin-left:auto;background:none;border:1px solid rgba(245,158,11,.3);color:#D4A04A;border-radius:4px;padding:3px 10px;font-size:11px;cursor:pointer;white-space:nowrap">⬇️ TXT 다운로드</button>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-ghost" onclick="goStep(1)">← 밈조사로 돌아가기</button>
+    <button class="btn-primary" onclick="alert('다음 단계: 시딩계획 작성으로 이동합니다.')">시딩계획 작성으로 이동 →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ PLACEHOLDER SCREENS ═══════════════════ -->
+<div class="main screen" id="screen-2">
+  <div class="page-eyebrow">STEP 2</div>
+  <div class="page-title">내 상품등록</div>
+  <div style="color:var(--text-2);margin-top:12px">브랜드 상품 정보를 등록하는 단계입니다.</div>
+</div>
+<div class="main screen" id="screen-3">
+  <div class="page-eyebrow">STEP 3</div>
+  <div class="page-title">가이드 추출</div>
+  <div style="color:var(--text-2);margin-top:12px">가이드를 추출하는 단계입니다.</div>
+</div>
+<div class="main screen" id="screen-5">
+  <div class="page-eyebrow">STEP 5</div>
+  <div class="page-title">시딩계획 작성</div>
+  <div style="color:var(--text-2);margin-top:12px">시딩 캠페인 계획을 수립합니다.</div>
+</div>
+<div class="main screen" id="screen-6">
+  <div class="page-eyebrow">STEP 6</div>
+  <div class="page-title">계약서 생성</div>
+  <div style="color:var(--text-2);margin-top:12px">계약서를 자동 생성합니다.</div>
+</div>
+<div class="main screen" id="screen-7">
+  <div class="page-eyebrow">STEP 7</div>
+  <div class="page-title">실행계획 전달</div>
+  <div style="color:var(--text-2);margin-top:12px">인플루언서에게 실행계획을 전달합니다.</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">✓ 클립보드에 복사되었습니다</div>
+
+<script>
+// ══════════════════ MOCK DATA ══════════════════
+
+const AVATAR_COLORS = ['#F97316','#3B82F6','#EC4899','#22C55E','#8B5CF6','#F59E0B','#14B8A6','#EF4444'];
+
+const MOCK_DATA = {
+  KR: [
+    { rank:1, creator:'hair_secret_kr', title:'탈모 앰플 직접 써봄 — 3달 후 솔직한 결과', tags:['탈모','앰플','모발성장'], views:'2.1M', engage:'8.4%', dur:'2:34', hook:'이거 하나로 3개월째 빠지던 머리카락이 멈췄어요', cat:'scalp', colors:['#1a1a2e','#16213e','#0f3460'] },
+    { rank:2, creator:'beauty_jiyeon', title:'두피 세럼 TOP3 비교 | 가격대비 최강은?', tags:['두피세럼','뷰티비교','추천'], views:'1.8M', engage:'7.2%', dur:'1:58', hook:'피부과 갔더니 이거 쓰래요... 진짜로요', cat:'scalp', colors:['#2d1b69','#11998e','#38ef7d'] },
+    { rank:3, creator:'scalp_doctor_p', title:'탈모 시작되면 이 신호 먼저 나타남', tags:['탈모초기','두피건강'], views:'3.2M', engage:'6.8%', dur:'0:58', hook:'이 신호 있으면 지금 바로 시작하세요', cat:'scalp', colors:['#0a0a0a','#1a1a1a','#2a2a2a'] },
+    { rank:4, creator:'kbeauty_official', title:'손발각질 싹 제거 루틴 공개', tags:['각질제거','발팩','손팩'], views:'890K', engage:'5.9%', dur:'1:22', hook:'발뒤꿈치 이렇게 하면 애기발 됩니다', cat:'bodycare', colors:['#ff6b6b','#feca57','#ff9ff3'] },
+    { rank:5, creator:'daily_skin_log', title:'각질제거 손발팩 리얼 사용 후기', tags:['손발팩','각질','피부관리'], views:'650K', engage:'5.3%', dur:'2:10', hook:'1시간 후 이렇게 됨 (실화)', cat:'bodycare', colors:['#a8edea','#fed6e3','#d299c2'] },
+    { rank:6, creator:'innerbody_kr', title:'이너뷰티로 피부 바꾼 3개월 기록', tags:['이너뷰티','콜라겐','피부'], views:'540K', engage:'4.8%', dur:'3:01', hook:'영양제 이렇게 먹으면 피부가 달라짐', cat:'supplement', colors:['#667eea','#764ba2'] },
+  ],
+  US: [
+    { rank:1, creator:'abbeyyung', title:'Top 5 Scalp Serums — 8 months of research', tags:['scalpserum','hairloss','hairgrowth'], views:'90.6K', engage:'9.1%', dur:'2:55', hook:"I spent 8 months so you don't have to", cat:'scalp', colors:['#1a1a2e','#e94560','#0f3460'] },
+    { rank:2, creator:'hairscience_usa', title:'Why your hair is falling out (dermatologist explains)', tags:['hairloss','dermatologist','haircare'], views:'4.2M', engage:'7.8%', dur:'1:45', hook:"Your doctor won't tell you this", cat:'scalp', colors:['#2c3e50','#bdc3c7','#ecf0f1'] },
+    { rank:3, creator:'scalp_lab', title:'The honest truth about hair serums', tags:['serumreview','scalp','honest'], views:'2.8M', engage:'6.5%', dur:'2:12', hook:'I tested every viral serum — here are the results', cat:'scalp', colors:['#134e5e','#71b280'] },
+    { rank:4, creator:'glowup_queen', title:'Exfoliating foot mask — 5 days later...', tags:['footmask','exfoliant','skintok'], views:'12.3M', engage:'8.9%', dur:'0:45', hook:'Day 5... 🤯', cat:'bodycare', colors:['#fc5c7d','#6a3093'] },
+    { rank:5, creator:'beautylab_rx', title:'Trichologist rates viral hair growth products', tags:['trichologist','hairgrowth','rate'], views:'3.1M', engage:'7.1%', dur:'3:22', hook:'A certified expert breaks down what actually works', cat:'scalp', colors:['#0f2027','#203a43','#2c5364'] },
+    { rank:6, creator:'selfcare.irl', title:'my 3-step hair loss routine (actually works)', tags:['hairroutine','hairtok','growth'], views:'1.9M', engage:'6.3%', dur:'1:38', hook:"3 months later and I'm not joking", cat:'scalp', colors:['#8360c3','#2ebf91'] },
+  ],
+  JP: [
+    { rank:1, creator:'sato_hair_lab', title:'スカルプセラムを3ヶ月試した結果', tags:['スカルプ','育毛','ヘアケア'], views:'1.2M', engage:'8.7%', dur:'2:20', hook:'3ヶ月で本当に変わった...', cat:'scalp', colors:['#1a1a2e','#c94b4b','#4b134f'] },
+    { rank:2, creator:'bijin_routine', title:'毎日のヘアケアルーティン公開', tags:['ヘアケア','ルーティン','韓国コスメ'], views:'890K', engage:'7.4%', dur:'1:50', hook:'これを毎日やっています', cat:'haircare', colors:['#2980b9','#6dd5fa','#ffffff'] },
+    { rank:3, creator:'dr_scalp_jp', title:'薄毛の原因TOP5（皮膚科医が解説）', tags:['薄毛','皮膚科','スカルプケア'], views:'2.3M', engage:'6.9%', dur:'2:05', hook:'知らないと損する薄毛の真実', cat:'scalp', colors:['#24243e','#302b63','#0f0c29'] },
+    { rank:4, creator:'kfoot_mask_jp', title:'韓国足パックを使ってみた！', tags:['足パック','角質ケア','韓国コスメ'], views:'4.1M', engage:'9.2%', dur:'1:15', hook:'7日後がヤバすぎる...', cat:'bodycare', colors:['#f953c6','#b91d73'] },
+    { rank:5, creator:'innerbeauty_jp', title:'美容サプリで肌が変わった話', tags:['インナービューティー','サプリ','肌ケア'], views:'670K', engage:'5.8%', dur:'2:44', hook:'飲み始めて1ヶ月で周りに言われた', cat:'supplement', colors:['#56ab2f','#a8e063'] },
+    { rank:6, creator:'scalp_honey', title:'頭皮マッサージで髪が増えた！', tags:['頭皮マッサージ','育毛','スカルプ'], views:'1.5M', engage:'7.6%', dur:'1:33', hook:'毎日5分だけ', cat:'scalp', colors:['#f7971e','#ffd200'] },
+  ],
+  AE: [
+    { rank:1, creator:'gulf_beauty', title:'أفضل 5 سيروم للفروة | تجربة 3 أشهر', tags:['عناية_بالشعر','سيروم','تساقط_الشعر'], views:'3.4M', engage:'8.2%', dur:'2:48', hook:'غيّر شعري خلال أسبوعين فقط', cat:'scalp', colors:['#1a1a2e','#c9a227','#2d6a4f'] },
+    { rank:2, creator:'kbeauty_arabia', title:'قناع القدم الكوري — النتيجة بعد أسبوع', tags:['كوريا','عناية','قناع'], views:'6.2M', engage:'9.5%', dur:'1:05', hook:'لا أصدق ما حدث للجلد!', cat:'bodycare', colors:['#833ab4','#fd1d1d','#fcb045'] },
+    { rank:3, creator:'skin_doctor_uae', title:'أسباب تساقط الشعر عند النساء', tags:['تساقط_الشعر','درماتولوجيست','صحة'], views:'4.8M', engage:'7.9%', dur:'2:15', hook:'الطبيب يكشف السر', cat:'scalp', colors:['#005c97','#363795'] },
+    { rank:4, creator:'luxury_glow', title:'روتين العناية بالبشرة الكامل', tags:['عناية_بالبشرة','روتين','تجميل'], views:'2.1M', engage:'6.7%', dur:'3:12', hook:'روتيني السري منذ 5 سنوات', cat:'skincare', colors:['#daa520','#8b4513'] },
+    { rank:5, creator:'wellness_gulf', title:'مكملات الجمال الداخلي — ما يستحق', tags:['جمال_داخلي','مكملات','بشرة'], views:'1.4M', engage:'5.9%', dur:'2:30', hook:'جربتها كلها وهذه النتيجة', cat:'supplement', colors:['#134e5e','#71b280'] },
+  ],
+  CN: [
+    { rank:1, creator:'hair_queen_sh', title:'脱发救星！亲测有效的5款头皮精华', tags:['脱发','头皮精华','护发'], views:'8.2M', engage:'9.3%', dur:'2:18', hook:'用了3个月，发际线真的回来了', cat:'scalp', colors:['#1a1a2e','#e94560','#0f3460'] },
+    { rank:2, creator:'beauty_blogger_bj', title:'韩国去角质足膜真实测评', tags:['足膜','去角质','护肤'], views:'15.4M', engage:'10.1%', dur:'0:52', hook:'7天后脱皮到这种程度...', cat:'bodycare', colors:['#fc5c7d','#6a3093'] },
+    { rank:3, creator:'derma_china', title:'皮肤科医生教你怎么选护发产品', tags:['皮肤科','护发','专业建议'], views:'5.6M', engage:'7.5%', dur:'2:44', hook:'医生告诉你真相', cat:'haircare', colors:['#2c3e50','#4ca1af'] },
+    { rank:4, creator:'inner_glow_sz', title:'内服美容一个月效果分享', tags:['内服美容','胶原蛋白','护肤'], views:'3.3M', engage:'7.0%', dur:'2:55', hook:'同事问我去哪做医美了', cat:'supplement', colors:['#56ab2f','#a8e063'] },
+    { rank:5, creator:'scalp_cn_official', title:'头皮屑和脱发的根本原因', tags:['头皮屑','脱发','头皮健康'], views:'4.1M', engage:'8.0%', dur:'1:36', hook:'99%的人都搞错了', cat:'scalp', colors:['#0f2027','#203a43','#2c5364'] },
+  ]
+};
+
+const SCRIPTS = {
+  A: {
+    label:'A안', title:'공감 → 솔루션 구조', badge:'badge-a',
+    hookTemplate: (usp) => `"저도 탈모 시작되고 나서 엄청 고민했거든요. 근데 ${usp.split('·')[0]?.trim() || '이 제품'} 써보고 나서 진짜 달라졌어요."`,
+    bodyTemplate: (usp) => `이 영상에서 쓰는 방식이 바로 저희가 말하는 ${usp.split('·')[1]?.trim() || '핵심 성분'} 원리예요.\n\n매일 아침 두피에 3-4방울만 발라주는데, 3개월 차부터 확실히 차이를 느꼈어요. 빗질할 때 빠지는 양이 눈에 띄게 줄었고요.`,
+    ctaTemplate: () => `"링크는 프로필에 있어요. 진짜 효과 봤으면 댓글로 알려주세요 🙏"`,
+  },
+  B: {
+    label:'B안', title:'데이터 + 전문성 구조', badge:'badge-b',
+    hookTemplate: (usp) => `"임상 결과 봤을 때 진짜 놀랐어요 — ${usp.split('·')[2]?.trim() || '12주 후 63% 감소'} 데이터가 나왔거든요."`,
+    bodyTemplate: (usp) => `성분을 보면 ${usp.split('·')[0]?.trim() || '특허 기술'}이 핵심이에요. 일반 샴푸나 에센스랑 다른 점이 여기 있어요.\n\n모낭 직접 작용하는 게 포인트고, 피부과 선생님도 이 메커니즘 인정하더라고요.`,
+    ctaTemplate: () => `"성분 궁금하신 분 댓글 달아주시면 상세히 설명드릴게요 📊"`,
+  },
+  C: {
+    label:'C안', title:'비포-애프터 스토리 구조', badge:'badge-c',
+    hookTemplate: (usp) => `"100일 전이랑 지금이랑 비교해봤는데... 직접 보세요."`,
+    bodyTemplate: (usp) => `${usp.split('·')[0]?.trim() || '이 제품'} 쓰기 전엔 정수리가 훤히 보일 정도였거든요.\n\n처음 한 달은 큰 변화 못 느꼈는데 두 달 지나니까 주변에서 먼저 물어보더라고요. 지금은 완전 자신감 생겼어요.`,
+    ctaTemplate: () => `"저처럼 고민하는 분들 꼭 한 번 써보세요. 후기 많이 남겨주시면 감사해요! ❤️"`,
+  }
+};
+
+// ══════════════════ STATE ══════════════════
+let currentCountry = 'KR';
+let currentCat = 'all';
+let selectedVideo = null;
+let currentData = [];
+let extractionDone = false;
+
+// ══════════════════ CANVAS THUMBNAIL ══════════════════
+function drawThumb(canvas, colors, rank, creator) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+
+  // gradient bg
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, colors[0] || '#1a1a2e');
+  grad.addColorStop(0.5, colors[1] || '#16213e');
+  grad.addColorStop(1, colors[2] || '#0f3460');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+
+  // grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 20) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for (let y = 0; y < h; y += 20) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+
+  // play icon
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  const cx = w/2, cy = h*0.42;
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.min(w,h)*0.13, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  const ps = Math.min(w,h)*0.06;
+  ctx.beginPath();
+  ctx.moveTo(cx - ps*0.6, cy - ps);
+  ctx.lineTo(cx - ps*0.6, cy + ps);
+  ctx.lineTo(cx + ps*0.8, cy);
+  ctx.closePath();
+  ctx.fill();
+
+  // creator text
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = `${Math.max(8, w*0.09)}px system-ui`;
+  ctx.textAlign = 'center';
+  ctx.fillText('@' + creator, w/2, h*0.78);
+}
+
+function drawMiniThumb(canvas, colors) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  const grad = ctx.createLinearGradient(0, 0, w, h);
+  grad.addColorStop(0, colors[0] || '#1a1a2e');
+  grad.addColorStop(1, colors[2] || '#0f3460');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  const cx=w/2, cy=h/2, ps=w*0.12;
+  ctx.beginPath();
+  ctx.moveTo(cx-ps*0.7, cy-ps); ctx.lineTo(cx-ps*0.7, cy+ps); ctx.lineTo(cx+ps, cy);
+  ctx.closePath(); ctx.fill();
+}
+
+// ══════════════════ RENDER CARDS ══════════════════
+function getFilteredData() {
+  let data = MOCK_DATA[currentCountry] || MOCK_DATA.KR;
+  if (currentCat !== 'all') data = data.filter(v => v.cat === currentCat);
+  return data;
+}
+
+function renderCards(data) {
+  const grid = document.getElementById('results-grid');
+  grid.innerHTML = '';
+
+  if (data.length === 0) {
+    grid.style.display = 'none';
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('empty-state').textContent = '선택한 카테고리에 해당하는 영상이 없습니다.';
+    return;
+  }
+
+  document.getElementById('empty-state').style.display = 'none';
+  grid.style.display = 'grid';
+
+  data.forEach((v, i) => {
+    const av = document.createElement('canvas');
+    av.width = 240; av.height = 360;
+
+    const card = document.createElement('div');
+    card.className = 'video-card' + (selectedVideo && selectedVideo.title === v.title ? ' selected' : '');
+    card.onclick = () => selectVideo(v, card);
+    card.style.animationDelay = `${i*0.06}s`;
+
+    const avColor = AVATAR_COLORS[i % AVATAR_COLORS.length];
+    card.innerHTML = `
+      <div class="card-thumb">
+        <canvas width="240" height="360" style="width:100%;height:100%;display:block"></canvas>
+        <span class="card-rank">#${v.rank}</span>
+        <span class="card-duration">${v.dur}</span>
+        <span class="card-platform">TikTok</span>
+      </div>
+      <div class="card-body">
+        <div class="card-creator">
+          <span class="creator-av" style="background:${avColor}">${v.creator[0].toUpperCase()}</span>
+          @${v.creator}
+        </div>
+        <div class="card-title">${v.title}</div>
+        <div class="card-tags">${v.tags.slice(0,3).map(t=>`<span class="tag">#${t}</span>`).join('')}</div>
+        <div class="card-metrics">
+          <span class="metric">👁️ <span class="metric-val">${v.views}</span></span>
+          <span class="metric">💫 <span class="metric-val">${v.engage}</span></span>
+        </div>
+      </div>
+    `;
+
+    grid.appendChild(card);
+    const cvs = card.querySelector('canvas');
+    drawThumb(cvs, v.colors, v.rank, v.creator);
+  });
+
+  // show next button
+  if (extractionDone) {
+    document.getElementById('next-btn').style.display = 'flex';
+  }
+}
+
+function selectVideo(v, cardEl) {
+  selectedVideo = v;
+  document.querySelectorAll('.video-card').forEach(c => c.classList.remove('selected'));
+  cardEl.classList.add('selected');
+}
+
+// ══════════════════ FILTER FUNCTIONS ══════════════════
+function setSort(el, val) {
+  document.querySelectorAll('#sort-chips .chip').forEach(c => {
+    if (['engage','view','recent'].includes(c.getAttribute('data-sort') || '')) c.classList.remove('active');
+  });
+  // simpler: toggle only sort chips
+  const chips = document.querySelectorAll('#sort-chips .chip');
+  chips.forEach((c,i) => { if (i<3) c.classList.remove('active'); });
+  el.classList.add('active');
+  if (extractionDone) renderCards(getFilteredData());
+}
+function setPeriod(el, val) {
+  const chips = document.querySelectorAll('#sort-chips .chip');
+  chips.forEach((c,i) => { if (i>=3 && i<5) c.classList.remove('active'); });
+  el.classList.add('active');
+  if (extractionDone) renderCards(getFilteredData());
+}
+function setPlatform(el, val) {
+  const chips = document.querySelectorAll('#sort-chips .chip');
+  chips.forEach((c,i) => { if (i>=5) c.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function setCountry(el, code) {
+  document.querySelectorAll('.country-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentCountry = code;
+  if (extractionDone) {
+    renderCards(getFilteredData());
+    selectedVideo = null;
+  }
+}
+
+function setCat(el, cat) {
+  document.querySelectorAll('#cat-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentCat = cat;
+  if (extractionDone) renderCards(getFilteredData());
+}
+
+// ══════════════════ EXTRACTION ANIMATION ══════════════════
+function startExtraction() {
+  const kw = document.getElementById('keyword-input').value.trim();
+  if (!kw) { document.getElementById('keyword-input').focus(); return; }
+
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('results-grid').style.display = 'none';
+  document.getElementById('loading-bar').classList.add('active');
+  document.getElementById('next-btn').style.display = 'none';
+
+  const steps = ['ls1','ls2','ls3','ls4'];
+  const delays = [0, 800, 1600, 2600];
+  steps.forEach(id => { document.getElementById(id).className = 'loading-step'; });
+
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      if (i > 0) document.getElementById(steps[i-1]).className = 'loading-step done';
+      document.getElementById(id).className = 'loading-step current';
+    }, delays[i]);
+  });
+
+  setTimeout(() => {
+    document.getElementById('ls4').className = 'loading-step done';
+    document.getElementById('loading-bar').classList.remove('active');
+    btn.disabled = false;
+    extractionDone = true;
+    renderCards(getFilteredData());
+    document.getElementById('next-btn').style.display = 'flex';
+  }, 3600);
+}
+
+// ══════════════════ SCRIPT GENERATION ══════════════════
+function generateScripts() {
+  const usp = document.getElementById('usp-input').value.trim();
+  if (!usp) {
+    document.getElementById('usp-input').focus();
+    document.getElementById('usp-input').style.borderColor = '#EF4444';
+    setTimeout(() => document.getElementById('usp-input').style.borderColor = '', 1500);
+    return;
+  }
+
+  const genBtn = document.getElementById('gen-btn');
+  genBtn.disabled = true;
+  const genRow = document.getElementById('generating-row');
+  genRow.classList.add('active');
+  document.getElementById('script-grid').innerHTML = '';
+  document.getElementById('dl-notice').style.display = 'none';
+
+  const genMsgs = [
+    'Claude가 레퍼런스 스크립트를 분석하는 중...',
+    'USP 키워드를 추출하는 중...',
+    'A/B/C 3가지 구조로 변환하는 중...',
+    '스크립트 완성!'
+  ];
+  let mi = 0;
+  const msgInterval = setInterval(() => {
+    mi++;
+    if (mi < genMsgs.length) document.getElementById('gen-status').textContent = genMsgs[mi];
+    else clearInterval(msgInterval);
+  }, 600);
+
+  setTimeout(() => {
+    genRow.classList.remove('active');
+    genBtn.disabled = false;
+    renderScripts(usp);
+    document.getElementById('dl-notice').style.display = 'flex';
+  }, 2600);
+}
+
+function renderScripts(usp) {
+  const grid = document.getElementById('script-grid');
+  grid.innerHTML = '';
+
+  const keys = ['A','B','C'];
+  keys.forEach((key, i) => {
+    const s = SCRIPTS[key];
+    const card = document.createElement('div');
+    card.className = 'script-card';
+    card.innerHTML = `
+      <div class="script-card-header">
+        <span class="script-type-badge ${s.badge}">${s.label}</span>
+        <span class="script-card-title">${s.title}</span>
+      </div>
+      <div class="script-card-body">
+        <div class="script-hook">${s.hookTemplate(usp)}</div>
+        <div class="script-body">${s.bodyTemplate(usp).replace(/\n/g,'<br>')}</div>
+        <div class="script-cta">🎯 CTA: ${s.ctaTemplate()}</div>
+      </div>
+      <div class="script-card-footer">
+        <button class="btn-copy" onclick="copyScript(this, '${key}', \`${usp.replace(/`/g,"'")}\`)">📋 복사</button>
+      </div>
+    `;
+    grid.appendChild(card);
+    setTimeout(() => card.classList.add('revealed'), i * 180 + 50);
+  });
+}
+
+function copyScript(btn, key, usp) {
+  const s = SCRIPTS[key];
+  const text = `[${s.label} — ${s.title}]\n\n🎣 후킹: ${s.hookTemplate(usp)}\n\n📝 본문:\n${s.bodyTemplate(usp)}\n\n🎯 CTA: ${s.ctaTemplate()}`;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast();
+    btn.textContent = '✓ 복사됨';
+    setTimeout(() => btn.textContent = '📋 복사', 2000);
+  }).catch(() => {
+    btn.textContent = '✓ 복사됨';
+    setTimeout(() => btn.textContent = '📋 복사', 2000);
+  });
+}
+
+function downloadScripts() {
+  const usp = document.getElementById('usp-input').value.trim();
+  const lines = ['BRANDSLAM Suite — 스크립트 추출 결과\n','='.repeat(40) + '\n'];
+  ['A','B','C'].forEach(key => {
+    const s = SCRIPTS[key];
+    lines.push(`\n[${s.label} — ${s.title}]\n`);
+    lines.push(`후킹: ${s.hookTemplate(usp)}\n\n`);
+    lines.push(`본문:\n${s.bodyTemplate(usp)}\n\n`);
+    lines.push(`CTA: ${s.ctaTemplate()}\n`);
+    lines.push('-'.repeat(40) + '\n');
+  });
+  const blob = new Blob([lines.join('')], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'brandslam_scripts.txt'; a.click();
+}
+
+// ══════════════════ STEP NAVIGATION ══════════════════
+function goStep(n) {
+  // screen 1 = 밈조사, screen 4 = 스크립트
+  const screenMap = {1:'screen-1',2:'screen-2',3:'screen-3',4:'screen-4',5:'screen-5',6:'screen-6',7:'screen-7'};
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const targetId = screenMap[n];
+  if (targetId) document.getElementById(targetId).classList.add('active');
+
+  // update stepbar
+  document.querySelectorAll('.step-item').forEach(el => {
+    const sn = parseInt(el.dataset.step);
+    el.classList.remove('active','done');
+    if (sn < n) el.classList.add('done');
+    else if (sn === n) el.classList.add('active');
+  });
+
+  // if going to script screen, populate mini
+  if (n === 4 && selectedVideo) {
+    document.getElementById('mini-title').textContent = selectedVideo.title;
+    document.getElementById('mini-creator').textContent = '@' + selectedVideo.creator;
+    document.getElementById('mini-metrics').textContent = `조회수 ${selectedVideo.views} · 인게이지율 ${selectedVideo.engage}`;
+    document.getElementById('original-hook').textContent = `"${selectedVideo.hook}"`;
+    const mini = document.getElementById('mini-canvas');
+    drawMiniThumb(mini, selectedVideo.colors);
+  } else if (n === 4) {
+    const fallback = (MOCK_DATA[currentCountry] || MOCK_DATA.KR)[0];
+    document.getElementById('mini-title').textContent = fallback.title;
+    document.getElementById('mini-creator').textContent = '@' + fallback.creator;
+    document.getElementById('mini-metrics').textContent = `조회수 ${fallback.views} · 인게이지율 ${fallback.engage}`;
+    document.getElementById('original-hook').textContent = `"${fallback.hook}"`;
+    drawMiniThumb(document.getElementById('mini-canvas'), fallback.colors);
+  }
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ══════════════════ TOAST ══════════════════
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>

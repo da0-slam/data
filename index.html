@@ -222,6 +222,76 @@
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* FORM */
+  .form-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 24px; margin-bottom: 20px; }
+  .form-section { margin-bottom: 24px; }
+  .form-section-title { font-size: 12px; font-weight: 700; letter-spacing: .5px; color: var(--text); margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text-2); }
+  .form-input { background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--r-sm); padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; transition: border-color .15s; width: 100%; font-family: inherit; }
+  .form-input:focus { border-color: var(--orange); }
+  .form-input::placeholder { color: var(--text-3); }
+  .usp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .usp-num { width: 20px; height: 20px; border-radius: 50%; background: var(--orange-dim); color: var(--orange); font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* GUIDE */
+  .guide-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 20px; }
+  @media (max-width: 700px) { .guide-grid { grid-template-columns: 1fr; } }
+  .guide-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 18px; opacity: 0; transform: translateY(12px); transition: opacity .4s, transform .4s; }
+  .guide-card.in { opacity: 1; transform: none; }
+  .guide-card.wide { grid-column: 1 / -1; }
+  .guide-card.accent { border-color: rgba(249,115,22,.3); background: rgba(249,115,22,.02); }
+  .guide-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+  .guide-card.accent .guide-label { color: var(--orange); }
+  .guide-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 10px; line-height: 1.4; }
+  .guide-body { font-size: 13px; color: var(--text-2); line-height: 1.7; }
+  .guide-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+  .guide-tag { font-size: 12px; color: var(--blue); background: rgba(59,130,246,.08); padding: 3px 9px; border-radius: 20px; }
+  .guide-tag.orange { color: var(--orange); background: var(--orange-dim); }
+  .guide-msg { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--text-2); margin-bottom: 8px; line-height: 1.5; }
+  .guide-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); margin-top: 5px; flex-shrink: 0; }
+
+  /* SEED */
+  .seed-wrap { overflow-x: auto; border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); margin-top: 16px; }
+  .seed-table { width: 100%; border-collapse: collapse; }
+  .seed-table th { background: #5B21B6; color: #fff; font-size: 12px; font-weight: 700; padding: 11px 16px; text-align: left; }
+  .seed-table td { padding: 11px 16px; font-size: 13px; color: var(--text); border-bottom: 1px solid var(--border); background: var(--surface); }
+  .seed-table tr:last-child td { border-bottom: none; }
+  .seed-table .row-sub td { background: rgba(91,33,182,.04); }
+  .tier-badge { font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 4px; }
+  .tier-nano { background: rgba(34,197,94,.1); color: #15803D; }
+  .tier-micro { background: rgba(59,130,246,.1); color: #1D4ED8; }
+  .tier-macro { background: rgba(249,115,22,.1); color: var(--orange); }
+
+  /* CONTRACT */
+  .contract-wrap { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 36px; max-width: 800px; margin: 0 auto; }
+  .contract-hdr { text-align: center; margin-bottom: 28px; border-bottom: 2px solid var(--orange); padding-bottom: 20px; }
+  .contract-hdr-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 5px; }
+  .contract-hdr-sub { font-size: 13px; color: var(--text-3); }
+  .contract-sec { margin-bottom: 22px; }
+  .contract-sec-ttl { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--orange); text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .contract-row { display: flex; gap: 12px; margin-bottom: 9px; font-size: 13px; }
+  .contract-k { min-width: 130px; color: var(--text-3); flex-shrink: 0; }
+  .contract-v { color: var(--text); font-weight: 500; }
+  .contract-cl { font-size: 12px; color: var(--text-2); line-height: 1.85; padding-left: 14px; position: relative; margin-bottom: 5px; }
+  .contract-cl::before { content: "•"; position: absolute; left: 0; color: var(--orange); }
+  .contract-signs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 24px; }
+  .contract-sign-box { background: var(--surface2); border-radius: var(--r-sm); padding: 16px; text-align: center; }
+  .contract-sign-lbl { font-size: 11px; color: var(--text-3); margin-bottom: 26px; }
+  .contract-sign-name { font-size: 13px; font-weight: 600; color: var(--text); border-top: 1px solid var(--border); padding-top: 8px; }
+
+  /* EXEC PLAN */
+  .exec-wrap { overflow-x: auto; border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); margin-top: 16px; }
+  .exec-table { width: 100%; border-collapse: collapse; }
+  .exec-table th { background: #5B21B6; color: #fff; font-size: 12px; font-weight: 700; padding: 12px 18px; text-align: left; }
+  .exec-table td { padding: 12px 18px; font-size: 13px; color: var(--text); border-bottom: 1px solid var(--border); background: var(--surface); }
+  .exec-table tr.exec-total td { background: #5B21B6; color: #fff; font-weight: 700; border-bottom: none; }
+  .exec-table tr:nth-child(even):not(.exec-total) td { background: rgba(91,33,182,.04); }
+  .exec-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .exec-badge { font-size: 11px; background: rgba(91,33,182,.07); color: #5B21B6; border: 1px solid rgba(91,33,182,.18); border-radius: 20px; padding: 3px 10px; }
 </style>
 
 <!-- NAV -->
@@ -319,7 +389,7 @@
     <button class="btn-ghost">← 뒤로가기</button>
     <div style="display:flex;gap:12px;align-items:center">
       <button class="btn-ghost" onclick="goStep(4)" style="border-color:transparent;color:var(--text-3);font-size:12px">이 단계 건너뛰기 →</button>
-      <button class="btn-primary" id="next-btn" onclick="goStep(4)" style="display:none">스크립트 추출로 이동 →</button>
+      <button class="btn-primary" id="next-btn" onclick="goStep(2)" style="display:none">다음: 내 상품등록 →</button>
     </div>
   </div>
 </div>
@@ -367,16 +437,284 @@
 
   <div class="nav-btns" style="margin-top:28px">
     <button class="btn-ghost" onclick="goStep(1)">← 밈조사로 돌아가기</button>
-    <button class="btn-primary" onclick="alert('다음 단계: 시딩계획 작성으로 이동합니다.')">시딩계획 작성으로 이동 →</button>
+    <button class="btn-primary" onclick="goStep(5)">시딩계획 작성으로 이동 →</button>
   </div>
 </div>
 
-<!-- placeholder screens -->
-<div class="main screen" id="screen-2"><div class="page-eyebrow">STEP 2</div><div class="page-title">내 상품등록</div></div>
-<div class="main screen" id="screen-3"><div class="page-eyebrow">STEP 3</div><div class="page-title">가이드 추출</div></div>
-<div class="main screen" id="screen-5"><div class="page-eyebrow">STEP 5</div><div class="page-title">시딩계획 작성</div></div>
-<div class="main screen" id="screen-6"><div class="page-eyebrow">STEP 6</div><div class="page-title">계약서 생성</div></div>
-<div class="main screen" id="screen-7"><div class="page-eyebrow">STEP 7</div><div class="page-title">실행계획 전달</div></div>
+<!-- ═══ SCREEN 2: 내 상품등록 ═══ -->
+<div class="main screen" id="screen-2">
+  <div class="page-eyebrow">STEP 2 · PRODUCT REGISTRATION</div>
+  <div class="page-title">내 상품등록</div>
+  <div class="page-desc">브랜드와 상품 정보를 입력하면 AI가 밈 데이터와 결합해 콘텐츠 가이드를 자동 추출합니다.</div>
+
+  <div class="form-card">
+    <div class="form-section">
+      <div class="form-section-title">브랜드 · 상품 기본 정보</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">브랜드명 *</label>
+          <input class="form-input" id="f-brand" placeholder="예: 텔로엑트" value="텔로엑트">
+        </div>
+        <div class="form-group">
+          <label class="form-label">상품명 *</label>
+          <input class="form-input" id="f-product" placeholder="예: 두피 앰플" value="두피 앰플">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">카테고리</label>
+        <div class="filter-row" id="cat-row-2" style="margin:0">
+          <button class="chip active" onclick="setCat2(this,'scalp')">두피/탈모</button>
+          <button class="chip" onclick="setCat2(this,'haircare')">헤어케어</button>
+          <button class="chip" onclick="setCat2(this,'skincare')">스킨케어</button>
+          <button class="chip" onclick="setCat2(this,'bodycare')">바디케어</button>
+          <button class="chip" onclick="setCat2(this,'inner')">이너뷰티</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">핵심 USP (최대 3개)</div>
+      <div class="usp-row">
+        <span class="usp-num">1</span>
+        <input class="form-input" id="f-usp1" placeholder="예: 두피 미세순환 특허 기술" value="두피 미세순환 특허 기술" style="flex:1">
+      </div>
+      <div class="usp-row">
+        <span class="usp-num">2</span>
+        <input class="form-input" id="f-usp2" placeholder="예: 모낭 직접 영양 공급" value="모낭 직접 영양 공급" style="flex:1">
+      </div>
+      <div class="usp-row">
+        <span class="usp-num">3</span>
+        <input class="form-input" id="f-usp3" placeholder="예: 임상 12주 후 탈락모 63% 감소" value="임상 12주 후 탈락모 63% 감소" style="flex:1">
+      </div>
+    </div>
+
+    <div class="form-section" style="margin-bottom:0">
+      <div class="form-section-title">타겟 & 상세 정보</div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">타겟 고객</label>
+          <input class="form-input" id="f-target" placeholder="예: 20-40대 탈모 고민 여성" value="20-40대 탈모 고민 여성">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">타겟 국가</label>
+          <input class="form-input" id="f-market" placeholder="예: 미국, 한국" value="미국">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">주요 성분 (선택)</label>
+        <textarea class="form-input" id="f-ingredients" rows="2" style="resize:none;line-height:1.5" placeholder="예: 바이오틴, 판테놀, 펩타이드 복합물">바이오틴, 판테놀, 펩타이드 복합물, 병풀추출물</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-btns">
+    <button class="btn-ghost" onclick="goStep(1)">← 밈조사로</button>
+    <button class="btn-primary" onclick="saveProduct()">✦ 가이드 추출 시작 →</button>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3: 가이드 추출 ═══ -->
+<div class="main screen" id="screen-3">
+  <div class="page-eyebrow">STEP 3 · GUIDE EXTRACTION</div>
+  <div class="page-title">가이드 추출</div>
+  <div class="page-desc">밈 분석 데이터와 브랜드 USP를 결합해 콘텐츠 제작 가이드를 자동 도출합니다.</div>
+
+  <div class="loading-bar" id="guide-loading">
+    <div class="spinner"></div>
+    <div style="font-size:13px;color:var(--text);margin-bottom:10px;font-weight:600">AI가 가이드를 추출하는 중...</div>
+    <div class="loading-step" id="gl1">🧠 레퍼런스 밈 패턴 분석...</div>
+    <div class="loading-step" id="gl2">🎯 브랜드 USP 매핑...</div>
+    <div class="loading-step" id="gl3">✍️ 콘텐츠 앵글 도출...</div>
+    <div class="loading-step" id="gl4">✅ 가이드 생성 완료</div>
+  </div>
+
+  <div id="guide-result" style="display:none">
+    <div class="selected-video-mini" style="margin-bottom:20px">
+      <div class="mini-thumb">
+        <img id="guide-mini-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:6px">
+        <canvas id="guide-mini-cvs" width="48" height="64" style="border-radius:6px"></canvas>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:3px">레퍼런스 밈</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="guide-ref-title">—</div>
+        <div style="font-size:12px;color:var(--text-2)" id="guide-ref-creator">—</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;padding-left:12px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:3px">대상 상품</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)" id="guide-pname">—</div>
+        <div style="font-size:12px;color:var(--text-2)" id="guide-bname">—</div>
+      </div>
+    </div>
+    <div class="guide-grid" id="guide-cards"></div>
+  </div>
+
+  <div class="nav-btns" style="margin-top:28px">
+    <button class="btn-ghost" onclick="goStep(2)">← 상품등록으로</button>
+    <button class="btn-primary" onclick="goStep(4)">스크립트 생성 →</button>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 5: 시딩계획 ═══ -->
+<div class="main screen" id="screen-5">
+  <div class="page-eyebrow">STEP 5 · SEEDING PLAN</div>
+  <div class="page-title">시딩계획 작성</div>
+  <div class="page-desc">생성된 스크립트를 기반으로 KOC 등급별 시딩 계획을 자동 구성합니다.</div>
+
+  <div class="notice">📋 스크립트 A/B/C 3가지 버전에 맞춰 나노·마이크로·매크로 3개 티어로 분배합니다.</div>
+
+  <div class="selected-video-mini" id="seed-product-mini" style="margin-bottom:20px">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--orange-dim);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📦</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:2px">캠페인 상품</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text)" id="seed-product-label">—</div>
+      <div style="font-size:12px;color:var(--text-2)" id="seed-usp-label">—</div>
+    </div>
+  </div>
+
+  <div class="section-label">KOC 시딩 계획</div>
+  <div class="seed-wrap">
+    <table class="seed-table">
+      <thead><tr><th>KOC 등급</th><th>콘텐츠 유형</th><th>플랫폼</th><th>수량</th><th>집행 시기</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tier-badge tier-macro">매크로</span></td><td>리뷰형 — 기능·임상 소개</td><td>TikTok</td><td>3회</td><td>1주차</td></tr>
+        <tr class="row-sub"><td><span class="tier-badge tier-micro">마이크로</span></td><td>튜토리얼 — 사용 루틴 시연</td><td>TikTok</td><td>5회</td><td>1-2주차</td></tr>
+        <tr><td><span class="tier-badge tier-nano">나노</span></td><td>공감형 — 비포·애프터 스토리</td><td>TikTok / IG</td><td>20건</td><td>2-3주차</td></tr>
+        <tr class="row-sub"><td><span class="tier-badge tier-nano">나노</span></td><td>해시태그 챌린지 참여</td><td>TikTok</td><td>30건</td><td>3-4주차</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:20px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:18px">
+    <div class="section-label" style="margin-bottom:12px">캠페인 타임라인</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center">
+      <div style="background:var(--surface2);border-radius:var(--r-sm);padding:12px"><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">1주차</div><div style="font-size:12px;font-weight:600;color:var(--text)">매크로 KOC</div><div style="font-size:11px;color:var(--orange)">신뢰 형성</div></div>
+      <div style="background:var(--surface2);border-radius:var(--r-sm);padding:12px"><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">1-2주차</div><div style="font-size:12px;font-weight:600;color:var(--text)">마이크로 KOC</div><div style="font-size:11px;color:var(--blue)">루틴 확산</div></div>
+      <div style="background:var(--surface2);border-radius:var(--r-sm);padding:12px"><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">2-3주차</div><div style="font-size:12px;font-weight:600;color:var(--text)">나노 KOC</div><div style="font-size:11px;color:var(--green)">공감 증폭</div></div>
+      <div style="background:var(--surface2);border-radius:var(--r-sm);padding:12px"><div style="font-size:11px;color:var(--text-3);margin-bottom:4px">3-4주차</div><div style="font-size:12px;font-weight:600;color:var(--text)">챌린지 집중</div><div style="font-size:11px;color:var(--pink)">바이럴</div></div>
+    </div>
+  </div>
+
+  <div class="nav-btns" style="margin-top:28px">
+    <button class="btn-ghost" onclick="goStep(4)">← 스크립트로</button>
+    <button class="btn-primary" onclick="goStep(6)">계약서 생성 →</button>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 6: 계약서 ═══ -->
+<div class="main screen" id="screen-6">
+  <div class="page-eyebrow">STEP 6 · CONTRACT</div>
+  <div class="page-title">계약서 생성</div>
+  <div class="page-desc">시딩계획 정보를 바탕으로 KOC 협업 계약서 초안을 자동 생성합니다.</div>
+
+  <div class="contract-wrap">
+    <div class="contract-hdr">
+      <div class="contract-hdr-title">KOC 콘텐츠 협업 계약서</div>
+      <div class="contract-hdr-sub" id="contract-date-str">작성일: —</div>
+    </div>
+
+    <div class="contract-sec">
+      <div class="contract-sec-ttl">계약 당사자</div>
+      <div class="contract-row"><span class="contract-k">갑 (브랜드사)</span><span class="contract-v" id="ct-brand">—</span></div>
+      <div class="contract-row"><span class="contract-k">을 (KOC / 인플루언서)</span><span class="contract-v">계약 체결 시 기재</span></div>
+    </div>
+
+    <div class="contract-sec">
+      <div class="contract-sec-ttl">협업 내용</div>
+      <div class="contract-row"><span class="contract-k">대상 상품</span><span class="contract-v" id="ct-product">—</span></div>
+      <div class="contract-row"><span class="contract-k">핵심 소구점</span><span class="contract-v" id="ct-usp">—</span></div>
+      <div class="contract-row"><span class="contract-k">타겟 고객</span><span class="contract-v" id="ct-target">—</span></div>
+      <div class="contract-row"><span class="contract-k">콘텐츠 형태</span><span class="contract-v">세로형 영상 9:16 (TikTok)</span></div>
+      <div class="contract-row"><span class="contract-k">제출 기한</span><span class="contract-v">계약 체결 후 14일 이내</span></div>
+    </div>
+
+    <div class="contract-sec">
+      <div class="contract-sec-ttl">콘텐츠 가이드라인</div>
+      <div class="contract-cl">제공된 스크립트(A/B/C안) 중 1개를 선택해 자연스럽게 재구성하여 제작합니다.</div>
+      <div class="contract-cl">게시물에 브랜드 협찬 고지를 반드시 포함합니다 (#AD 또는 #협찬).</div>
+      <div class="contract-cl">경쟁 브랜드 또는 유사 제품을 직접 비교·언급하지 않습니다.</div>
+      <div class="contract-cl">허위·과장 의학적 효능 표현은 삼가며, 개인 경험 기반으로 표현합니다.</div>
+      <div class="contract-cl">게시 후 최소 90일간 콘텐츠를 유지합니다.</div>
+    </div>
+
+    <div class="contract-sec">
+      <div class="contract-sec-ttl">지식재산권</div>
+      <div class="contract-cl">콘텐츠 저작권은 KOC에 귀속되며, 브랜드사는 광고 재활용 권리를 별도 협의 후 사용할 수 있습니다.</div>
+      <div class="contract-cl">브랜드사 제공 이미지·영상 자료는 해당 캠페인 외 사용을 금지합니다.</div>
+    </div>
+
+    <div class="contract-signs">
+      <div class="contract-sign-box">
+        <div class="contract-sign-lbl">갑 (브랜드사) 서명</div>
+        <div class="contract-sign-name" id="ct-sign-brand">—</div>
+      </div>
+      <div class="contract-sign-box">
+        <div class="contract-sign-lbl">을 (KOC) 서명</div>
+        <div class="contract-sign-name">_______________</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+    <button class="btn-ghost" style="display:flex;align-items:center;gap:6px" onclick="showToast()">📋 클립보드 복사</button>
+    <button class="btn-ghost" style="display:flex;align-items:center;gap:6px" onclick="showToast()">⬇️ 다운로드</button>
+  </div>
+
+  <div class="nav-btns" style="margin-top:14px">
+    <button class="btn-ghost" onclick="goStep(5)">← 시딩계획으로</button>
+    <button class="btn-primary" onclick="goStep(7)">실행계획 전달 →</button>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 7: 실행계획 전달 ═══ -->
+<div class="main screen" id="screen-7">
+  <div class="page-eyebrow">STEP 7 · EXECUTION PLAN</div>
+  <div class="page-title">실행계획 전달</div>
+  <div class="page-desc">KOC 시딩 캠페인 전체 실행 구성을 클라이언트에게 전달합니다.</div>
+
+  <div class="selected-video-mini" style="margin-bottom:24px">
+    <div style="width:36px;height:36px;border-radius:8px;background:rgba(91,33,182,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🚀</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7C3AED;margin-bottom:2px">캠페인 준비 완료</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text)" id="exec-title">—</div>
+      <div style="font-size:12px;color:var(--text-2)">스크립트 A/B/C · 시딩계획 · 계약서 — 모두 준비되었습니다</div>
+    </div>
+    <div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;flex-shrink:0">✓ 전달 준비 완료</div>
+  </div>
+
+  <div class="section-label">실행 서비스 구성</div>
+  <div style="font-size:13px;color:var(--text-2);margin-bottom:12px" id="exec-campaign-sub">—</div>
+
+  <div class="exec-wrap">
+    <table class="exec-table">
+      <thead><tr><th>서비스</th><th>형태</th><th>수량</th></tr></thead>
+      <tbody>
+        <tr><td>매크로 KOC 리뷰 콘텐츠 (기능 소개)</td><td>TikTok 영상</td><td>3회</td></tr>
+        <tr><td>마이크로 KOC 튜토리얼</td><td>TikTok 영상</td><td>5회</td></tr>
+        <tr><td>나노 KOC 공감 스토리</td><td>TikTok / IG 릴스</td><td>20건</td></tr>
+        <tr><td>해시태그 챌린지 시딩</td><td>TikTok</td><td>30건</td></tr>
+        <tr class="exec-total"><td>합계</td><td></td><td>58건</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="exec-badges">
+    <span class="exec-badge">✓ A/B/C 스크립트 생성</span>
+    <span class="exec-badge">✓ 촬영 컷 가이드 포함</span>
+    <span class="exec-badge">✓ KOC 시딩계획 수립</span>
+    <span class="exec-badge">✓ 계약서 초안 생성</span>
+    <span class="exec-badge">✓ 콘텐츠 가이드라인 포함</span>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:20px;justify-content:center">
+    <button class="btn-ghost" style="display:flex;align-items:center;gap:6px" onclick="showToast()">📋 전체 복사</button>
+    <button class="btn-primary" style="display:flex;align-items:center;gap:6px;padding:11px 24px" onclick="showToast()">📤 클라이언트 전달</button>
+  </div>
+
+  <div class="nav-btns" style="margin-top:20px">
+    <button class="btn-ghost" onclick="goStep(6)">← 계약서로</button>
+    <button class="btn-ghost" onclick="goStep(1)" style="color:var(--orange);border-color:rgba(249,115,22,.3)">새 캠페인 시작 ↺</button>
+  </div>
+</div>
 
 <!-- VIDEO MODAL -->
 <div class="modal-bg" id="video-modal" onclick="closeModal(event)">
@@ -444,6 +782,20 @@ function firstUsp(u){ const p=u.split(/[·,]/); return (p[0]||'').trim()||'이 �
 function secondUsp(u){ const p=u.split(/[·,]/); return (p[1]||'').trim(); }
 function thirdUsp(u){ const p=u.split(/[·,]/); return (p[2]||'').trim(); }
 
+// ══ CN DATA (Xiaohongshu — top 10 by engagement) ══
+const CN_DATA = [
+  {rank:1,creator:"是龙儿啊",nickname:"是龙儿啊",title:"#梳头的好处 #坚持梳头 — 매일 빗질로 두피 혈행 개선!",hook:"梳头真的有好处！坚持一个月的变化让我惊讶了。",tags:["梳头","护发","养发","头皮养护"],views:"7.9万",plays:78951,diggs:27927,engage:"64.2% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/69736818000000000903a44d",colors:["#8B1A1A","#C41230","#FF9999"],cover:"https://sns-na-i27.xhscdn.com/1040g00831u2365q418005njtf3bg84ljhbptil0?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:2,creator:"皮肤科田歆教授",nickname:"皮肤科田歆教授",title:"#梳头是最简单的养生方式 #如何成为发量王者 #养发护发",hook:"皮肤科医生告诉你！梳头这样做，白发少了头发密了。",tags:["养发护发","梳头","发量","皮肤科"],views:"6.1万",plays:61094,diggs:32440,engage:"46.7% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/695a4eb50000000021033b43",colors:["#1a2a6c","#b21f1f","#fdbb2d"],cover:"https://sns-na-i27.xhscdn.com/spectrum/1040g0k031qts8291n0005p7qnj40if3qja3rmlo?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:3,creator:"鸡哥扒成分（学营养版）",nickname:"鸡哥扒成分",title:"#头皮八段锦 #中式养发 #养发护发 — 두피 팔단금 양발법",hook:"头皮八段锦！中式养发的秘密，偷偷惊艳所有人。",tags:["养发护发","头皮八段锦","中式养发","变美"],views:"4.5万",plays:44747,diggs:37702,engage:"15.5% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/69686bfc000000001a024030",colors:["#134e5e","#71b280","#1a1a2e"],cover:"https://sns-na-i27.xhscdn.com/spectrum/1040g34o31rpor0eli6105n9lajclm2056tv9nig?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:4,creator:"鱼鳞鲜鲜",nickname:"鱼鳞鲜鲜",title:"#护发养发头发护理 #防脱洗发水 #沉浸式洗头",hook:"沉浸式洗头 🧖 防脱洗发水真的好用！头发护理分享。",tags:["护发","防脱洗发水","脱发","沉浸式洗头"],views:"4.3万",plays:43366,diggs:37736,engage:"12.8% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/69bbbc270000000023012ff6",colors:["#2d6a4f","#40916c","#74c69d"],cover:"https://sns-na-i11.xhscdn.com/spectrum/1040g34o31ttucle5hg0g5ninhnng8l7p8c7ith0?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:5,creator:"emi的日系面部瑜伽",nickname:"emi日系面部瑜伽",title:"法令纹的根本原因 在于 头皮！ — 두피와 피부 주름의 관계",hook:"法令纹的根本原因在于头皮！日本面部瑜伽老师教你逆龄。",tags:["面部瑜伽","头皮","法令纹","逆龄"],views:"4.3万",plays:42768,diggs:15510,engage:"63.5% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/69d25e96000000001a0303b9",colors:["#fc5c7d","#6a3093","#1a1a2e"],cover:"https://sns-na-i11.xhscdn.com/1040g2sg31uj3uufe2qe05qc1bj38caa7et2ahq0?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:6,creator:"马宝儿",nickname:"马宝儿",title:"小说女主里的海藻般的头发！#中式养发 #绸缎发",hook:"小说女主里的海藻般的头发我也有！中式养发分享。",tags:["中式养发","绸缎发","护发","沉浸式"],views:"4.0万",plays:39765,diggs:34989,engage:"11.5% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/6965d9ae0000000022023289",colors:["#c94b4b","#4b134f","#2d1b69"],cover:"https://sns-na-i11.xhscdn.com/spectrum/1040g34o31r951r986u105n6p9pdlsntqkpgajho?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:7,creator:"秃头少女",nickname:"秃头少女",title:"3년 양발 경험담 — 发量从少到多，总结了最全养发攻略",hook:"快三年了！之前发量少毛躁干枯，养发过程总结来了。",tags:["养发","脱发","发量","护发经验"],views:"3.2万",plays:31536,diggs:17221,engage:"44.8% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/68134ef0000000002301140c",colors:["#0f3460","#e94560","#1a1a2e"],cover:"https://sns-na-i27.xhscdn.com/1040g2sg31guhk2tdj4505oen0idk14vhn3sid00?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:8,creator:"陈莴笋",nickname:"陈莴笋",title:"#脂皮 #控油 #头油 — 기름진 두피 세발 가이드",hook:"油皮必看！脂皮头皮控油洗头方法，新手第一课。",tags:["脂皮","头油","控油","养发护发"],views:"3.0万",plays:30283,diggs:15702,engage:"47.4% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/6a51bc82000000001003e03e",colors:["#8360c3","#2ebf91","#134e5e"],cover:"https://sns-na-i11.xhscdn.com/1040g008322iobdb7n0004a17moad859l76au7no?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:9,creator:"JY的助眠",nickname:"JY的助眠",title:"#asmr #头皮按摩 #头皮清洁 — ASMR 두피 마사지",hook:"ASMR 头皮按摩清洁，酥麻解压，帮你进入深度睡眠。",tags:["asmr","头皮按摩","头皮清洁","助眠"],views:"2.2万",plays:22464,diggs:15370,engage:"29.9% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/69823496000000002102b04d",colors:["#1a1a2e","#e94560","#0f3460"],cover:"https://sns-na-i11.xhscdn.com/1040g00831s4qofdulm005p4j365qmk4d3uf4c2g?imageView2/2/w/576/format/webp/q/87",platform:"XHS"},
+  {rank:10,creator:"猫哥er",nickname:"猫哥er",title:"#头皮按摩 — 酥麻解压！家庭美容院头皮护理",hook:"酥麻解压爽！猫哥家庭美容院头皮护理，希望帮你缓解焦虑。",tags:["头皮按摩","解压","asmr","护发"],views:"1.8万",plays:17899,diggs:14518,engage:"17.4% 저장",dur:"—",url:"https://www.xiaohongshu.com/discovery/item/69edea350000000036032c8e",colors:["#2d6a4f","#f953c6","#1a1a2e"],cover:"https://sns-na-i11.xhscdn.com/1040g00831ve10ghq2i00401e1p8g9ujq20qk258?imageView2/2/w/576/format/webp/q/87",platform:"XHS"}
+];
+
 // ══ STATE ══
 let currentCountry = 'US';
 let currentCat = 'all';
@@ -482,7 +834,8 @@ function drawMini(cvs,colors){
 }
 
 // ══ RENDER ══
-function getUS() {
+function getCountryData() {
+  if(currentCountry==='CN') return [...CN_DATA];
   let d = [...US_DATA];
   if(currentCat==='scalp') d=d.filter(v=>v.tags.some(t=>['scalpcare','scalphealth','scalp','hairloss','hairgrowth','hairthinning','scalpboostingampoule','folligenshampoo','femalepatternhairloss'].includes(t)));
   else if(currentCat==='haircare') d=d.filter(v=>v.tags.some(t=>['haircareroutine','haircaretips','hairtok','haircare','hairroutine'].includes(t)));
@@ -490,6 +843,7 @@ function getUS() {
   else if(currentCat==='bodycare') d=d.filter(v=>v.tags.some(t=>['bodycare','footmask'].includes(t)));
   return d;
 }
+function getUS() { return getCountryData(); }
 
 function renderCards(data) {
   const grid=document.getElementById('results-grid');
@@ -497,10 +851,10 @@ function renderCards(data) {
   const es=document.getElementById('empty-state');
   cs.style.display='none'; es.style.display='none'; grid.style.display='none';
 
-  if(currentCountry!=='US'){
+  if(currentCountry!=='US' && currentCountry!=='CN'){
     cs.style.display='block'; return;
   }
-  if(!extracted){ es.style.display='block'; return; }
+  if(currentCountry==='US' && !extracted){ es.style.display='block'; return; }
   if(data.length===0){
     es.style.display='block';
     es.innerHTML='선택한 카테고리에 해당하는 영상이 없습니다.';
@@ -522,7 +876,7 @@ function renderCards(data) {
         </div>
         <span class="card-rank" style="z-index:3">#${i+1}</span>
         <span class="card-duration" style="z-index:3">${v.dur}</span>
-        <span class="card-platform" style="z-index:3">TikTok</span>
+        <span class="card-platform" style="z-index:3">${v.platform||'TikTok'}</span>
       </div>
       <div class="card-body">
         <div class="card-creator"><span class="creator-av" style="background:${avC}">${v.creator[0].toUpperCase()}</span>@${v.creator}</div>
@@ -551,7 +905,9 @@ function setChipGroup(el,group){ /* visual toggle only */
 function setCountry(el,code){
   document.querySelectorAll('.country-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active'); currentCountry=code;
-  renderCards(getUS());
+  const data=getCountryData();
+  renderCards(data);
+  if(code==='CN') document.getElementById('next-btn').style.display='flex';
 }
 function setCat(el,cat){
   document.querySelectorAll('#cat-row .chip').forEach(c=>c.classList.remove('active'));
@@ -581,7 +937,7 @@ function startExtraction(){
     document.getElementById('ls4').className='loading-step done';
     document.getElementById('loading-bar').classList.remove('active');
     btn.disabled=false; extracted=true;
-    if(currentCountry==='US') renderCards(getUS());
+    if(currentCountry==='US'||currentCountry==='CN') renderCards(getCountryData());
     else { document.getElementById('coming-soon-box').style.display='block'; }
     document.getElementById('next-btn').style.display='flex';
   },3800);
@@ -711,7 +1067,7 @@ function buildRefStrip() {
   const row=document.getElementById('ref-thumbs-row');
   if(!row) return;
   row.innerHTML='';
-  const src = extracted ? US_DATA : US_DATA.slice(0,5);
+  const src = currentCountry==='CN' ? CN_DATA : (extracted ? US_DATA : US_DATA.slice(0,5));
   src.forEach((v,i)=>{
     const wrap=document.createElement('div');
     wrap.className='ref-thumb'+(selectedVideo&&selectedVideo.url===v.url?' active':'');
@@ -785,6 +1141,136 @@ function downloadScripts(){
   a.download='brandslam_scripts.txt'; a.click();
 }
 
+// ══ PRODUCT STATE ══
+let productData = {
+  brand:'텔로엑트', product:'두피 앰플', category:'scalp',
+  usp1:'두피 미세순환 특허 기술', usp2:'모낭 직접 영양 공급', usp3:'임상 12주 후 탈락모 63% 감소',
+  target:'20-40대 탈모 고민 여성', market:'미국', ingredients:'바이오틴, 판테놀, 펩타이드 복합물'
+};
+
+function setCat2(el, cat) {
+  document.querySelectorAll('#cat-row-2 .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); productData.category = cat;
+}
+
+function saveProduct() {
+  productData.brand = document.getElementById('f-brand').value.trim() || '브랜드';
+  productData.product = document.getElementById('f-product').value.trim() || '상품';
+  productData.usp1 = document.getElementById('f-usp1').value.trim();
+  productData.usp2 = document.getElementById('f-usp2').value.trim();
+  productData.usp3 = document.getElementById('f-usp3').value.trim();
+  productData.target = document.getElementById('f-target').value.trim();
+  productData.market = document.getElementById('f-market').value.trim();
+  productData.ingredients = document.getElementById('f-ingredients').value.trim();
+  const uspCombo = [productData.usp1, productData.usp2, productData.usp3].filter(Boolean).join(' · ');
+  document.getElementById('usp-input').value = uspCombo;
+  goStep(3);
+}
+
+// ══ GUIDE EXTRACTION ══
+function extractGuide() {
+  const lb = document.getElementById('guide-loading');
+  lb.classList.add('active');
+  document.getElementById('guide-result').style.display = 'none';
+  const ids = ['gl1','gl2','gl3','gl4'];
+  ids.forEach(id=>document.getElementById(id).className='loading-step');
+  const delays = [0,700,1500,2400];
+  ids.forEach((id,i)=>{
+    setTimeout(()=>{
+      if(i>0) document.getElementById(ids[i-1]).className='loading-step done';
+      document.getElementById(id).className='loading-step current';
+    }, delays[i]);
+  });
+  setTimeout(()=>{
+    document.getElementById('gl4').className='loading-step done';
+    lb.classList.remove('active');
+    renderGuide();
+    document.getElementById('guide-result').style.display='block';
+  }, 3200);
+}
+
+function renderGuide() {
+  const v = selectedVideo || US_DATA[0];
+  const p = productData;
+  document.getElementById('guide-ref-title').textContent = v.title.substring(0,55)+(v.title.length>55?'…':'');
+  document.getElementById('guide-ref-creator').textContent = '@'+v.creator;
+  document.getElementById('guide-pname').textContent = p.product;
+  document.getElementById('guide-bname').textContent = p.brand;
+  const gImg=document.getElementById('guide-mini-img'), gCvs=document.getElementById('guide-mini-cvs');
+  if(v.cover){ gImg.src=v.cover; gImg.style.display='block'; gCvs.style.display='none';
+    gImg.onerror=()=>{gImg.style.display='none';gCvs.style.display='block';drawMini(gCvs,v.colors);}; }
+  else { gImg.style.display='none'; gCvs.style.display='block'; drawMini(gCvs,v.colors); }
+
+  const usps=[p.usp1,p.usp2,p.usp3].filter(Boolean);
+  const catLabel={scalp:'두피/탈모',haircare:'헤어케어',skincare:'스킨케어',bodycare:'바디케어',inner:'이너뷰티'}[p.category]||p.category;
+  const cards=document.getElementById('guide-cards');
+  cards.innerHTML=`
+    <div class="guide-card accent">
+      <div class="guide-label">콘텐츠 앵글</div>
+      <div class="guide-title">"${catLabel} 고민 공감 → 과학적 해결책"</div>
+      <div class="guide-body">타겟(${p.target})의 일상 고민에서 시작해 ${p.usp1||'핵심 기술'}로 자연스럽게 연결합니다. 레퍼런스의 <em>"${v.hook.substring(0,38)}…"</em> 구조를 응용합니다.</div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-label">후킹 포인트 (레퍼런스에서 추출)</div>
+      <div class="guide-title">오프닝 후크 전략</div>
+      <div class="guide-body" style="border-left:3px solid var(--orange);padding-left:10px;color:var(--text);font-style:italic">"${v.hook}"</div>
+      <div class="guide-body" style="margin-top:10px">→ 이 구조를 응용해 <strong>${p.product}</strong> 후킹으로 변환합니다.</div>
+    </div>
+    <div class="guide-card">
+      <div class="guide-label">핵심 메시지 (USP 기반)</div>
+      <div class="guide-title">KOC에게 전달할 포인트</div>
+      ${usps.map(u=>`<div class="guide-msg"><div class="guide-dot"></div><span>${u}</span></div>`).join('')}
+      ${p.ingredients?`<div class="guide-body" style="margin-top:8px;font-size:12px;color:var(--text-3)">주요 성분: ${p.ingredients}</div>`:''}
+    </div>
+    <div class="guide-card">
+      <div class="guide-label">콘텐츠 가이드라인</div>
+      <div class="guide-title">주의사항 & 권장사항</div>
+      <div class="guide-msg"><div class="guide-dot" style="background:var(--green)"></div><span>개인 경험 기반 자연스러운 표현 권장</span></div>
+      <div class="guide-msg"><div class="guide-dot" style="background:var(--green)"></div><span>실제 사용 영상 / 비포·애프터 적극 활용</span></div>
+      <div class="guide-msg"><div class="guide-dot" style="background:#EF4444"></div><span>허위 의학적 효능 표현 금지</span></div>
+      <div class="guide-msg"><div class="guide-dot" style="background:#EF4444"></div><span>경쟁 브랜드 직접 언급 자제</span></div>
+    </div>
+    <div class="guide-card wide">
+      <div class="guide-label">추천 해시태그</div>
+      <div class="guide-title">콘텐츠 배포용 태그</div>
+      <div class="guide-tags">
+        ${['#'+(p.brand||'브랜드'),'#'+(p.product.replace(/\s/g,'')||'상품'),'#scalpcare','#haircare','#kbeauty','#두피케어','#탈모케어'].map(t=>`<span class="guide-tag orange">${t}</span>`).join('')}
+        ${v.tags.slice(0,4).map(t=>`<span class="guide-tag">#${t}</span>`).join('')}
+      </div>
+    </div>`;
+  cards.querySelectorAll('.guide-card').forEach((c,i)=>{setTimeout(()=>c.classList.add('in'),i*150+50);});
+}
+
+// ══ POPULATE STEPS 5/6/7 ══
+function populateSeed() {
+  const p=productData;
+  const lbl=document.getElementById('seed-product-label');
+  const uspLbl=document.getElementById('seed-usp-label');
+  if(lbl) lbl.textContent=`${p.brand} ${p.product}`;
+  if(uspLbl){ const u=[p.usp1,p.usp2,p.usp3].filter(Boolean); uspLbl.textContent=u.slice(0,2).join(' · ')||'—'; }
+}
+
+function populateContract() {
+  const p=productData;
+  const usps=[p.usp1,p.usp2,p.usp3].filter(Boolean).join(' · ');
+  const now=new Date();
+  const ds=`${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일`;
+  document.getElementById('contract-date-str').textContent='작성일: '+ds;
+  document.getElementById('ct-brand').textContent=p.brand;
+  document.getElementById('ct-product').textContent=`${p.brand} ${p.product}`;
+  document.getElementById('ct-usp').textContent=usps||'—';
+  document.getElementById('ct-target').textContent=p.target||'—';
+  document.getElementById('ct-sign-brand').textContent=p.brand+' (인)';
+}
+
+function populateExec() {
+  const p=productData;
+  const el=document.getElementById('exec-title');
+  if(el) el.textContent=`${p.brand} ${p.product} · KOC 시딩 캠페인`;
+  const sub=document.getElementById('exec-campaign-sub');
+  if(sub) sub.textContent=`${p.market||'미국'} 집중 / ${({scalp:'두피·탈모',haircare:'헤어케어',skincare:'스킨케어',bodycare:'바디케어',inner:'이너뷰티'}[p.category])||p.category} 카테고리`;
+}
+
 // ══ NAVIGATION ══
 function goStep(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -795,11 +1281,15 @@ function goStep(n){
     el.classList.remove('active','done');
     if(sn<n) el.classList.add('done'); else if(sn===n) el.classList.add('active');
   });
+  if(n===3) extractGuide();
   if(n===4){
-    if(!selectedVideo && extracted && currentCountry==='US') selectedVideo=US_DATA[0];
+    if(!selectedVideo) selectedVideo=getCountryData()[0]||US_DATA[0];
     buildRefStrip();
     populateMini();
   }
+  if(n===5) populateSeed();
+  if(n===6) populateContract();
+  if(n===7) populateExec();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -830,14 +1320,33 @@ function tiktokVideoId(url) {
 }
 
 function openModal(idx) {
-  const data = getUS();
-  const v = data[idx] || US_DATA[idx];
+  const data = getCountryData();
+  const v = data[idx];
   if (!v) return;
   modalVideoIdx = idx;
 
-  const vid = tiktokVideoId(v.url);
   const iframe = document.getElementById('modal-iframe');
-  iframe.src = vid ? `https://www.tiktok.com/embed/v2/${vid}?autoplay=1` : '';
+  const isXHS = v.platform === 'XHS';
+  if (isXHS) {
+    iframe.src = '';
+    iframe.style.display = 'none';
+    let xhsImg = document.getElementById('modal-xhs-img');
+    if (!xhsImg) {
+      xhsImg = document.createElement('img');
+      xhsImg.id = 'modal-xhs-img';
+      xhsImg.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;min-height:600px;max-height:700px';
+      document.getElementById('modal-embed').appendChild(xhsImg);
+    }
+    xhsImg.src = v.cover || ''; xhsImg.style.display = 'block';
+  } else {
+    iframe.style.display = 'block';
+    const xhsImg = document.getElementById('modal-xhs-img');
+    if (xhsImg) xhsImg.style.display = 'none';
+    const vid = tiktokVideoId(v.url);
+    iframe.src = vid ? `https://www.tiktok.com/embed/v2/${vid}?autoplay=1` : '';
+  }
+  const tiktokLink = document.getElementById('modal-tiktok-link');
+  tiktokLink.textContent = isXHS ? '↗ 小红书에서 원본 보기' : '↗ TikTok에서 원본 보기';
 
   const avC = AV_COLORS[idx % AV_COLORS.length];
   const av = document.getElementById('modal-av');
@@ -871,8 +1380,8 @@ function closeModalDirect() {
 }
 
 function useAsRef() {
-  const data = getUS();
-  const v = data[modalVideoIdx] || US_DATA[modalVideoIdx];
+  const data = getCountryData();
+  const v = data[modalVideoIdx];
   if (v) {
     selectedVideo = v;
     document.querySelectorAll('.video-card').forEach((c, i) => {
