@@ -191,8 +191,7 @@
   .shot-picker-grid { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; }
   .shot-picker-item { flex-shrink: 0; width: 72px; cursor: pointer; }
   .shot-picker-item-img { aspect-ratio: 9/16; border-radius: 8px; overflow: hidden; border: 2px solid transparent; transition: border-color .15s; position: relative; }
-  .shot-picker-item-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .shot-picker-item-img canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .shot-picker-item-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .shot-picker-item:hover .shot-picker-item-img { border-color: var(--orange); }
   .shot-picker-item-name { font-size: 9px; color: var(--text-3); margin-top: 4px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -1118,30 +1117,44 @@ function selectVideoForScript(v) {
   document.querySelectorAll('.video-card').forEach(c=>c.classList.remove('selected'));
 }
 
+const SECTIONS = [
+  {eng:'HOOK',  label:'① 훅 구간',  desc:'오프닝 · 문제 공감 · 시선 붙잡기'},
+  {eng:'BODY',  label:'② 내용 구간', desc:'솔루션 · 제품 사용 · 증거 제시'},
+  {eng:'CTA',   label:'③ 클로징',   desc:'행동 유도 · 링크 안내 · 마무리'}
+];
+
 function renderScripts(usp){
   const grid=document.getElementById('script-grid'); grid.innerHTML='';
-  const ref = selectedVideo || (extracted ? US_DATA[0] : US_DATA[0]);
-  ['A','B','C'].forEach((key,i)=>{
+  const pool = getCountryData();
+  ['A','B','C'].forEach((key,ci)=>{
     const s=SCRIPTS[key];
-    const shots=SHOT_GUIDES[key];
-    const pool = getCountryData();
-  const ref = selectedVideo || pool[0];
-  const shotsHtml=shots.map((_,si)=>{
-    const vidIdx = (si + (key==='A'?0:key==='B'?2:5)) % pool.length;
-    const shotVid = pool[vidIdx] || ref;
-    const shotId = `shot-${key}-${si}`;
-    return `
-      <div class="shot-frame">
-        <div class="shot-img-wrap" id="${shotId}" data-key="${key}" data-si="${si}" onclick="openShotPicker('${shotId}','${key}',${si})">
-          <canvas class="shot-canvas-fallback" id="${shotId}-cvs" width="80" height="142" data-type="${key}" data-idx="${si}"></canvas>
-          <img id="${shotId}-img" src="${shotVid.cover||''}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1" onerror="this.style.display='none'">
-          <div class="shot-overlay" style="z-index:2"><span class="shot-overlay-label">${shots[si].label}</span></div>
-          <span class="shot-num" style="z-index:4">${si+1}</span>
-          <div class="shot-change-btn"><div class="shot-change-inner">📷 변경</div></div>
-        </div>
-        <div class="shot-caption">${shots[si].desc.replace(/\n/g,'<br>')}</div>
-      </div>`;
-  }).join('');
+    const offset = key==='A'?0 : key==='B'?3 : 6;
+    const ref = selectedVideo || pool[0];
+
+    const shotsHtml = SECTIONS.map((sec, si)=>{
+      const vidIdx = (offset + si) % pool.length;
+      const sv = pool[vidIdx] || ref;
+      const shotId = `shot-${key}-${si}`;
+      const avC = AV_COLORS[vidIdx % AV_COLORS.length];
+      return `
+        <div class="shot-frame">
+          <div class="shot-img-wrap" id="${shotId}" onclick="openShotPicker('${shotId}','${key}',${si})">
+            <div style="position:absolute;inset:0;background:linear-gradient(160deg,${sv.colors[0]||'#1a1a2e'},${sv.colors[2]||'#0f3460'})"></div>
+            <img src="${sv.cover||''}" alt="@${sv.creator}"
+              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;transition:opacity .25s"
+              onerror="this.style.opacity='0'">
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.88) 0%,transparent 48%);pointer-events:none"></div>
+            <div style="position:absolute;top:5px;left:5px;background:rgba(0,0,0,.72);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;letter-spacing:.4px">${sec.eng}</div>
+            <div style="position:absolute;bottom:6px;left:6px;right:6px">
+              <div style="font-size:9px;font-weight:700;color:#fff">${sec.label}</div>
+              <div style="font-size:8px;color:rgba(255,255,255,.65);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${sv.creator.substring(0,14)}</div>
+            </div>
+            <div class="shot-change-btn"><div class="shot-change-inner">📷 변경</div></div>
+          </div>
+          <div class="shot-caption">${sec.desc}</div>
+        </div>`;
+    }).join('');
+
     const card=document.createElement('div'); card.className='script-card';
     card.innerHTML=`
       <div class="script-card-header"><span class="script-type-badge ${s.badge}">${s.label}</span><span class="script-card-title">${s.title}</span></div>
@@ -1151,16 +1164,12 @@ function renderScripts(usp){
         <div class="script-cta">🎯 CTA: ${s.cta()}</div>
       </div>
       <div class="shot-guide">
-        <div class="shot-guide-label">촬영 컷 가이드</div>
+        <div class="shot-guide-label">구간별 레퍼런스 영상</div>
         <div class="shot-frames">${shotsHtml}</div>
       </div>
       <div class="script-card-footer"><button class="btn-copy" onclick="copyScript('${key}','${usp.replace(/'/g,"\\'")}',this)">📋 복사</button></div>`;
     grid.appendChild(card);
-    // draw shot canvases
-    card.querySelectorAll('canvas[data-type]').forEach(cvs=>{
-      drawShotComp(cvs, cvs.dataset.type, parseInt(cvs.dataset.idx));
-    });
-    setTimeout(()=>card.classList.add('revealed'),i*200+60);
+    setTimeout(()=>card.classList.add('revealed'),ci*200+60);
   });
 }
 
@@ -1357,9 +1366,9 @@ let _shotTarget = null; // {wrapId, key, si}
 
 function openShotPicker(wrapId, key, si) {
   _shotTarget = {wrapId, key, si};
-  const shots = SHOT_GUIDES[key];
+  const sec = SECTIONS[si] || {label:`컷 ${si+1}`};
   document.getElementById('shot-picker-title').textContent =
-    `컷 ${si+1} — ${shots[si].label} 이미지 선택`;
+    `${sec.label} 이미지 선택`;
 
   const grid = document.getElementById('shot-picker-grid');
   grid.innerHTML = '';
@@ -1370,13 +1379,13 @@ function openShotPicker(wrapId, key, si) {
     item.className = 'shot-picker-item';
     item.onclick = () => applyShotImg(idx);
     item.innerHTML = `
-      <div class="shot-picker-item-img">
-        <canvas width="72" height="128" id="spick-cvs-${idx}"></canvas>
-        <img src="${v.cover||''}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1" onerror="this.style.display='none'">
+      <div class="shot-picker-item-img" style="background:linear-gradient(160deg,${v.colors[0]||'#1a1a2e'},${v.colors[2]||'#0f3460'})">
+        <img src="${v.cover||''}" alt=""
+          style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block"
+          onerror="this.style.opacity='0'">
       </div>
       <div class="shot-picker-item-name">@${v.creator}</div>`;
     grid.appendChild(item);
-    drawThumb(document.getElementById(`spick-cvs-${idx}`), v.colors, v.creator);
   });
 
   document.getElementById('shot-picker').classList.add('open');
@@ -1392,13 +1401,15 @@ function applyShotImg(vidIdx) {
 
   const wrap = document.getElementById(wrapId);
   if (!wrap) return;
-  const img = document.getElementById(wrapId + '-img');
-  const cvs = document.getElementById(wrapId + '-cvs');
-  if (img) {
-    img.src = v.cover || '';
-    img.style.display = 'block';
-    img.onerror = () => { img.style.display = 'none'; if(cvs) cvs.style.zIndex='2'; };
-  }
+  // update gradient bg
+  const grad = wrap.querySelector('div[style*="linear-gradient"]');
+  if (grad) grad.style.background = `linear-gradient(160deg,${v.colors[0]||'#1a1a2e'},${v.colors[2]||'#0f3460'})`;
+  // update thumbnail image
+  const img = wrap.querySelector('img');
+  if (img) { img.src = v.cover || ''; img.style.opacity = '1'; img.onerror = () => { img.style.opacity='0'; }; }
+  // update creator label
+  const nameEl = wrap.querySelector('div[style*="rgba(255,255,255,.65)"]');
+  if (nameEl) nameEl.textContent = `@${v.creator.substring(0,14)}`;
   closeShotPickerDirect();
   showToast();
 }
