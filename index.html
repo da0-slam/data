@@ -1,0 +1,591 @@
+
+<title>BRANDSLAM Suite — 밈조사 · 스크립트 추출</title>
+<meta name="description" content="밈조사 + 스크립트 추출 라이브 데모 — 국가별 트렌딩 밈 필터 및 USP 결합 A/B/C 스크립트 생성">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0C0C0F;
+    --surface: #17171D;
+    --surface2: #1E1E26;
+    --border: #2C2C38;
+    --orange: #F97316;
+    --orange-dim: rgba(249,115,22,0.12);
+    --text: #F0F0F5;
+    --text-2: #A0A0B0;
+    --text-3: #5A5A6E;
+    --green: #22C55E;
+    --amber: #F59E0B;
+    --blue: #3B82F6;
+    --pink: #EC4899;
+    --r: 10px;
+    --r-sm: 6px;
+  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.5; min-height: 100vh; }
+
+  /* NAV */
+  .topnav { position: sticky; top: 0; z-index: 100; background: rgba(12,12,15,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 32px; height: 52px; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; letter-spacing: -0.3px; }
+  .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+  .nav-tabs { display: flex; gap: 4px; flex: 1; }
+  .nav-tab { padding: 6px 14px; font-size: 13px; color: var(--text-2); border-radius: var(--r-sm); cursor: pointer; border: none; background: none; transition: color .15s, background .15s; }
+  .nav-tab.active { background: var(--orange-dim); color: var(--orange); }
+  .nav-tab:hover:not(.active) { background: var(--surface); color: var(--text); }
+  .nav-badge { margin-left: auto; font-size: 11px; color: var(--text-3); letter-spacing: .5px; white-space: nowrap; }
+
+  /* STEP BAR */
+  .stepbar { padding: 0 24px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; overflow-x: auto; }
+  .step-item { display: flex; align-items: center; gap: 8px; padding: 12px 16px; white-space: nowrap; cursor: pointer; border: none; background: none; color: var(--text-3); font-size: 13px; transition: color .15s; }
+  .step-item:hover:not(.active) { color: var(--text-2); }
+  .step-item.active { color: var(--text); }
+  .step-item.done { color: var(--text-2); }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: var(--surface2); color: var(--text-3); border: 1.5px solid var(--border); flex-shrink: 0; transition: all .2s; }
+  .step-item.active .step-num { background: var(--orange); color: #fff; border-color: var(--orange); }
+  .step-item.done .step-num { background: var(--orange-dim); color: var(--orange); border-color: var(--orange); }
+  .step-arrow { color: var(--border); font-size: 12px; padding: 0 4px; }
+
+  /* MAIN */
+  .main { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .page-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); margin-bottom: 6px; }
+  .page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); margin-bottom: 4px; }
+  .page-desc { font-size: 14px; color: var(--text-2); margin-bottom: 20px; line-height: 1.6; }
+
+  /* SEARCH */
+  .search-row { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+  .search-input { flex: 1; min-width: 220px; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r-sm); padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; transition: border-color .15s; }
+  .search-input:focus { border-color: var(--orange); }
+  .search-input::placeholder { color: var(--text-3); }
+  .btn-primary { background: var(--orange); color: #fff; border: none; border-radius: var(--r-sm); padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: opacity .15s, transform .1s; }
+  .btn-primary:hover { opacity: .9; }
+  .btn-primary:active { transform: scale(.98); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .auto-badge { font-size: 12px; color: var(--green); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .dot-green { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+  /* FILTERS */
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+  .chip { padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: none; color: var(--text-2); font-size: 12px; cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .chip:hover { border-color: var(--text-3); color: var(--text); }
+  .chip.active { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+  .filter-sep { color: var(--border); font-size: 16px; margin: 0 2px; }
+  .country-chip { padding: 5px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: none; color: var(--text-2); font-size: 13px; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 5px; }
+  .country-chip:hover { border-color: var(--text-3); color: var(--text); }
+  .country-chip.active { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+
+  /* NOTICE */
+  .notice { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: var(--r-sm); padding: 10px 14px; font-size: 12px; color: #D4A04A; margin-bottom: 18px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  /* DAILY BADGE */
+  .daily-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--green); margin-bottom: 16px; }
+  .pulse { animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.35; } }
+
+  /* LOADING */
+  .loading-bar { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 28px; text-align: center; }
+  .loading-bar.active { display: block; }
+  .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--orange); animation: spin .7s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-step { opacity: .4; transition: opacity .3s; font-size: 12px; line-height: 1.9; }
+  .loading-step.done { opacity: 1; color: var(--green); }
+  .loading-step.current { opacity: 1; color: var(--orange); }
+
+  /* EMPTY */
+  .empty-state { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 60px 24px; text-align: center; color: var(--text-2); font-size: 14px; }
+  .coming-soon { background: var(--surface); border: 1px dashed var(--border); border-radius: var(--r); padding: 48px 24px; text-align: center; }
+  .coming-soon-icon { font-size: 28px; margin-bottom: 10px; }
+  .coming-soon-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .coming-soon-desc { font-size: 13px; color: var(--text-3); }
+
+  /* GRID */
+  .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 900px) { .results-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 580px) { .results-grid { grid-template-columns: 1fr; } }
+
+  /* VIDEO CARD */
+  .video-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; cursor: pointer; transition: border-color .2s, transform .15s; }
+  .video-card:hover { border-color: rgba(249,115,22,.4); transform: translateY(-2px); }
+  .video-card.selected { border-color: var(--orange); background: rgba(249,115,22,.04); }
+  .card-thumb { width: 100%; aspect-ratio: 9/16; position: relative; overflow: hidden; }
+  .card-thumb canvas { width: 100%; height: 100%; display: block; }
+  .card-rank { position: absolute; top: 8px; left: 8px; background: var(--orange); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+  .card-duration { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,.75); color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-variant-numeric: tabular-nums; }
+  .card-platform { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.65); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+  .card-body { padding: 12px; }
+  .card-creator { font-size: 12px; color: var(--text-2); display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+  .creator-av { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; flex-shrink: 0; }
+  .card-title { font-size: 13px; color: var(--text); font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; min-height: 22px; }
+  .tag { font-size: 11px; color: var(--blue); background: rgba(59,130,246,.1); padding: 2px 7px; border-radius: 20px; }
+  .card-metrics { display: flex; gap: 12px; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+  .metric-val { font-weight: 600; color: var(--text); }
+
+  /* NAV BTNS */
+  .nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+  .btn-ghost { background: none; border: 1.5px solid var(--border); color: var(--text-2); border-radius: var(--r-sm); padding: 9px 18px; font-size: 13px; cursor: pointer; transition: all .15s; }
+  .btn-ghost:hover { border-color: var(--text-2); color: var(--text); }
+
+  /* SCRIPT SCREEN */
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); margin-bottom: 8px; }
+  .selected-video-mini { background: var(--surface); border: 1.5px solid var(--orange); border-radius: var(--r); padding: 14px; display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
+  .mini-thumb { width: 48px; height: 64px; border-radius: 6px; flex-shrink: 0; overflow: hidden; }
+  .mini-thumb canvas { width: 100%; height: 100%; display: block; }
+  .usp-area { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 20px; }
+  .usp-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .usp-sublabel { font-size: 12px; color: var(--text-2); margin-bottom: 12px; }
+  .usp-input { width: 100%; background: var(--surface2); border: 1.5px solid var(--border); border-radius: var(--r-sm); padding: 10px 14px; color: var(--text); font-size: 14px; outline: none; resize: none; line-height: 1.5; transition: border-color .15s; }
+  .usp-input:focus { border-color: var(--orange); }
+  .usp-input::placeholder { color: var(--text-3); }
+  .script-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+  @media (max-width: 800px) { .script-grid { grid-template-columns: 1fr; } }
+  .script-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r); overflow: hidden; opacity: 0; transform: translateY(16px); transition: opacity .4s, transform .4s, border-color .2s; }
+  .script-card.revealed { opacity: 1; transform: none; }
+  .script-card:hover { border-color: rgba(249,115,22,.35); }
+  .script-card-header { padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .script-type-badge { font-size: 11px; font-weight: 800; letter-spacing: 1px; padding: 3px 9px; border-radius: 4px; }
+  .badge-a { background: rgba(249,115,22,.15); color: var(--orange); }
+  .badge-b { background: rgba(59,130,246,.15); color: var(--blue); }
+  .badge-c { background: rgba(236,72,153,.15); color: var(--pink); }
+  .script-card-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .script-card-body { padding: 16px; }
+  .script-hook { font-size: 13px; color: var(--orange); font-weight: 600; margin-bottom: 10px; line-height: 1.5; border-left: 3px solid var(--orange); padding-left: 10px; font-style: italic; }
+  .script-body { font-size: 13px; color: var(--text-2); line-height: 1.7; margin-bottom: 12px; }
+  .script-cta { font-size: 12px; color: var(--green); background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2); border-radius: var(--r-sm); padding: 7px 10px; line-height: 1.5; }
+  .script-card-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
+  .btn-copy { width: 100%; background: none; border: 1.5px solid var(--border); color: var(--text-2); border-radius: var(--r-sm); padding: 7px; font-size: 12px; cursor: pointer; transition: all .15s; }
+  .btn-copy:hover { border-color: var(--orange); color: var(--orange); }
+
+  .gen-row { display: none; align-items: center; gap: 10px; margin-top: 14px; color: var(--text-2); font-size: 13px; }
+  .gen-row.active { display: flex; }
+  .gen-spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); border-top-color: var(--orange); animation: spin .7s linear infinite; flex-shrink: 0; }
+
+  .dl-notice { display: none; background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.2); border-radius: var(--r-sm); padding: 10px 14px; font-size: 12px; color: #D4A04A; margin-top: 16px; align-items: center; gap: 10px; }
+  .dl-notice.active { display: flex; }
+  .btn-dl { background: none; border: 1px solid rgba(245,158,11,.3); color: #D4A04A; border-radius: 4px; padding: 4px 12px; font-size: 11px; cursor: pointer; white-space: nowrap; margin-left: auto; }
+
+  /* ORIGINAL HOOK BOX */
+  .hook-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: var(--r); padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: var(--text-2); line-height: 1.7; font-style: italic; }
+
+  /* TOAST */
+  #toast { position: fixed; bottom: 28px; right: 28px; background: #1E2830; border: 1px solid rgba(34,197,94,.3); border-radius: var(--r-sm); padding: 12px 18px; color: var(--green); font-size: 13px; opacity: 0; transform: translateY(8px); transition: opacity .25s, transform .25s; pointer-events: none; z-index: 999; }
+  #toast.show { opacity: 1; transform: none; }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+
+<!-- NAV -->
+<nav class="topnav">
+  <div class="brand"><div class="brand-dot"></div> BRANDSLAM Suite</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active">① 성공가이드 생성</button>
+    <button class="nav-tab">② OWM 랭킹보드</button>
+    <button class="nav-tab">③ 인플루언서 마켓플레이스</button>
+  </div>
+  <span class="nav-badge">DEV PROTOTYPE · live data</span>
+</nav>
+
+<!-- STEP BAR -->
+<div class="stepbar">
+  <button class="step-item active" onclick="goStep(1)"><span class="step-num">1</span> 밈조사</button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" onclick="goStep(2)"><span class="step-num">2</span> 내 상품등록</button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" onclick="goStep(3)"><span class="step-num">3</span> 가이드 추출</button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" onclick="goStep(4)"><span class="step-num">4</span> 스크립트 받기</button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" onclick="goStep(5)"><span class="step-num">5</span> 시딩계획 작성</button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" onclick="goStep(6)"><span class="step-num">6</span> 계약서 생성</button>
+  <span class="step-arrow">›</span>
+  <button class="step-item" onclick="goStep(7)"><span class="step-num">7</span> 실행계획 전달</button>
+</div>
+
+<!-- ═══ SCREEN 1: 밈조사 ═══ -->
+<div class="main screen active" id="screen-1">
+  <div class="page-eyebrow">TOOL 1 · SUCCESS GUIDE GENERATOR</div>
+  <div class="page-title">밈조사</div>
+  <div class="page-desc">키워드를 입력하고 국가·카테고리를 선택하면, Apify가 지금 이 순간 가장 잘 되고 있는 영상을 뽑아드립니다.<br><strong>매일 새로 뽑을 수 있습니다</strong> — 한 달에 한 번이 아니라, 매일 최신 트렌드를 확인할 수 있습니다.</div>
+
+  <div class="daily-badge"><span class="dot-green pulse"></span> 실시간 수집 가능 — 마지막 업데이트: 방금 전</div>
+
+  <div class="search-row">
+    <input class="search-input" id="kw" type="text" placeholder="제품 키워드 입력 (예: 각질제거 손발팩, 탈모 앰플…)" value="scalp serum" />
+    <button class="btn-primary" id="start-btn" onclick="startExtraction()">✦ Apify로 밈 추출 시작</button>
+    <span class="auto-badge"><span class="dot-green"></span> 자동 필터: 상위 인게이지 10개</span>
+  </div>
+
+  <div class="filter-row">
+    <button class="chip active" onclick="setChipGroup(this,'sort')">정렬: 인게이지율순</button>
+    <button class="chip" onclick="setChipGroup(this,'sort')">정렬: 조회수순</button>
+    <button class="chip" onclick="setChipGroup(this,'sort')">정렬: 최신순</button>
+    <span class="filter-sep">|</span>
+    <button class="chip active" onclick="setChipGroup(this,'period')">기간: 최근 14일</button>
+    <button class="chip" onclick="setChipGroup(this,'period')">기간: 최근 30일</button>
+    <span class="filter-sep">|</span>
+    <button class="chip active" onclick="setChipGroup(this,'platform')">플랫폼: TikTok</button>
+    <button class="chip" onclick="setChipGroup(this,'platform')">플랫폼: Instagram</button>
+  </div>
+
+  <div class="filter-row" id="country-row">
+    <button class="country-chip" onclick="setCountry(this,'US')">🇺🇸 미국</button>
+    <button class="country-chip" onclick="setCountry(this,'JP')">🇯🇵 일본</button>
+    <button class="country-chip" onclick="setCountry(this,'AE')">🇦🇪 중동</button>
+    <button class="country-chip" onclick="setCountry(this,'CN')">🇨🇳 중국</button>
+    <button class="country-chip active" onclick="setCountry(this,'KR')">🇰🇷 한국</button>
+  </div>
+
+  <div class="filter-row" id="cat-row">
+    <button class="chip active" onclick="setCat(this,'all')">전체</button>
+    <button class="chip" onclick="setCat(this,'scalp')">두피/탈모</button>
+    <button class="chip" onclick="setCat(this,'haircare')">헤어케어</button>
+    <button class="chip" onclick="setCat(this,'skincare')">스킨케어</button>
+    <button class="chip" onclick="setCat(this,'bodycare')">바디케어</button>
+  </div>
+
+  <div class="notice">💡 전체 218개를 다 분석하면 LLM 토큰이 과다 소비됩니다 — <strong>상위 인게이지 10개</strong>만 자동 필터링해 스크립트·후킹포인트를 심층 분석합니다.</div>
+
+  <div class="loading-bar" id="loading-bar">
+    <div class="spinner"></div>
+    <div style="font-size:13px;color:var(--text);margin-bottom:10px;font-weight:600">Apify에서 데이터 수집 중...</div>
+    <div id="loading-steps">
+      <div class="loading-step" id="ls1">🔍 TikTok 크롤링 시작...</div>
+      <div class="loading-step" id="ls2">📊 인게이지 필터링...</div>
+      <div class="loading-step" id="ls3">🧠 스크립트 분석 중...</div>
+      <div class="loading-step" id="ls4">✅ 상위 10개 선별 완료</div>
+    </div>
+  </div>
+
+  <div class="empty-state" id="empty-state">키워드 입력 후 <strong>Apify로 밈 추출 시작</strong>을 누르면 인게이지 상위 영상이 여기 표시됩니다.</div>
+  <div id="coming-soon-box" style="display:none">
+    <div class="coming-soon">
+      <div class="coming-soon-icon">🌏</div>
+      <div class="coming-soon-title">해당 국가 데이터 수집 예정</div>
+      <div class="coming-soon-desc">현재 미국(🇺🇸) 데이터가 수집되어 있습니다. 다른 국가는 순차적으로 추가됩니다.</div>
+    </div>
+  </div>
+  <div class="results-grid" id="results-grid" style="display:none"></div>
+
+  <div class="nav-btns">
+    <button class="btn-ghost">← 뒤로가기</button>
+    <div style="display:flex;gap:12px;align-items:center">
+      <button class="btn-ghost" onclick="goStep(4)" style="border-color:transparent;color:var(--text-3);font-size:12px">이 단계 건너뛰기 →</button>
+      <button class="btn-primary" id="next-btn" onclick="goStep(4)" style="display:none">스크립트 추출로 이동 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 4: 스크립트 추출 ═══ -->
+<div class="main screen" id="screen-4">
+  <div class="page-eyebrow">TOOL 1 · SUCCESS GUIDE GENERATOR</div>
+  <div class="page-title">스크립트 추출 + USP 결합</div>
+  <div class="page-desc">밈조사에서 선택한 영상의 스크립트를 기반으로, 브랜드 USP를 입력하면 A안·B안·C안 3가지 응용 스크립트를 즉시 생성합니다.</div>
+
+  <div class="section-label">선택된 레퍼런스 영상</div>
+  <div class="selected-video-mini" id="sel-mini">
+    <div class="mini-thumb"><canvas id="mini-cvs" width="48" height="64"></canvas></div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="mini-title">—</div>
+      <div style="font-size:12px;color:var(--text-2)" id="mini-creator">—</div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:2px" id="mini-metrics">—</div>
+    </div>
+    <button class="btn-ghost" onclick="goStep(1)" style="font-size:12px;padding:6px 12px;white-space:nowrap">영상 바꾸기</button>
+  </div>
+
+  <div class="section-label">원본 후킹 포인트</div>
+  <div class="hook-box" id="hook-box">영상을 선택하면 원본 캡션이 여기 표시됩니다.</div>
+
+  <div class="usp-area">
+    <div class="usp-label">브랜드 USP 입력</div>
+    <div class="usp-sublabel">인플루언서에게 전달할 핵심 소구점 (제품명, 주요 성분, 차별점)</div>
+    <textarea class="usp-input" id="usp-input" rows="3" placeholder="예: 두피 미세순환 특허 기술 · 모낭 직접 영양 공급 · 임상 12주 후 탈락모 63% 감소 확인"></textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px">
+      <button class="btn-primary" id="gen-btn" onclick="generateScripts()">✦ A/B/C 스크립트 생성</button>
+    </div>
+  </div>
+
+  <div class="gen-row" id="gen-row"><div class="gen-spinner"></div><span id="gen-status">Claude가 스크립트를 생성하는 중...</span></div>
+  <div class="script-grid" id="script-grid"></div>
+  <div class="dl-notice" id="dl-notice">💡 오늘 미팅 끝나고 파일로도 같이 보내드릴 수 있습니다.<button class="btn-dl" onclick="downloadScripts()">⬇️ TXT 다운로드</button></div>
+
+  <div class="nav-btns" style="margin-top:28px">
+    <button class="btn-ghost" onclick="goStep(1)">← 밈조사로 돌아가기</button>
+    <button class="btn-primary" onclick="alert('다음 단계: 시딩계획 작성으로 이동합니다.')">시딩계획 작성으로 이동 →</button>
+  </div>
+</div>
+
+<!-- placeholder screens -->
+<div class="main screen" id="screen-2"><div class="page-eyebrow">STEP 2</div><div class="page-title">내 상품등록</div></div>
+<div class="main screen" id="screen-3"><div class="page-eyebrow">STEP 3</div><div class="page-title">가이드 추출</div></div>
+<div class="main screen" id="screen-5"><div class="page-eyebrow">STEP 5</div><div class="page-title">시딩계획 작성</div></div>
+<div class="main screen" id="screen-6"><div class="page-eyebrow">STEP 6</div><div class="page-title">계약서 생성</div></div>
+<div class="main screen" id="screen-7"><div class="page-eyebrow">STEP 7</div><div class="page-title">실행계획 전달</div></div>
+
+<div id="toast">✓ 클립보드에 복사되었습니다</div>
+
+<script>
+// ══ REAL DATA (US — top 10 by engagement, from Google Sheets) ══
+const US_DATA = [
+  {rank:1,creator:"isabella.fruto01",nickname:"isabella.fruto01",title:"Healthy hair starts with a healthy scalp ✨🫧 I've been loving how fresh and clean my scalp feels...",hook:"Healthy hair starts with a healthy scalp ✨🫧 I've been loving how fresh and clean my scalp feels after using this — 8.2K views, 34.4% engagement",tags:["alivelab","scalpcare","healthyscalp","haircareroutine","kbeauty"],views:"8.2K",plays:8200,diggs:2100,engage:"34.4%",dur:"0:32",url:"https://www.tiktok.com/@isabella.fruto01/video/7660328583067454751",colors:["#0f2027","#203a43","#2c5364"]},
+  {rank:2,creator:"northernfindsandfaves",nickname:"northernfindsandfaves",title:"I've been adding more scalp care into my routine lately, and this one definitely caught my attention ✨",hook:"I've been adding more scalp care into my routine lately, and this one definitely caught my attention. ✨ This P...",tags:["tiktokshopfinds","dealsforyoudays","haircareroutine","hairserum","summerwins"],views:"257",plays:257,diggs:35,engage:"18.3%",dur:"0:17",url:"https://www.tiktok.com/@northernfindsandfaves/video/7652531858109893902",colors:["#1a1a2e","#c94b4b","#4b134f"]},
+  {rank:3,creator:"kimberlycherrell",nickname:"Kimberly Cherrell",title:"Here is my scalp care routine 😊 ~PEPTIDES~ @CÉCRED edge drops OR @VEGAMOUR Growth Serum",hook:"Replying to @Genesis Dezeree$$ Here is my scalp care routine 😊  ~PEPTIDES~ @CÉCRED edge drops OR @VEGAMOUR Gr...",tags:["scalpcare","hairroutine","peptides"],views:"24.6K",plays:24600,diggs:2100,engage:"11.4%",dur:"3:16",url:"https://www.tiktok.com/@kimberlycherrell/video/7660153946786368781",colors:["#2d6a4f","#40916c","#1b4332"]},
+  {rank:4,creator:"sasainseoul",nickname:"sasa",title:"Korean hair care routine — This is my go-to shampoo and real remedies! Partnered with @Dr.FORHAIR",hook:"Korean hair care routine This is my go-to shampoo and my real remedies! This is partnered with @Dr.FORHAIR  [...]",tags:["drforhair","folligenshampoo","folligenserum","hairloss","hairgrowth"],views:"175.2K",plays:175200,diggs:13000,engage:"10%",dur:"2:22",url:"https://www.tiktok.com/@sasainseoul/video/7651642764525899028",colors:["#c94b4b","#4b134f","#2d1b69"]},
+  {rank:5,creator:"abbeyjbenson",nickname:"Abbey 🤍",title:"5 Tips for Scalp Health that will help transform and grow your hair",hook:"5 Tips for Scalp Health that will help transform and grow your hair #scalphealth #hairtransformation #healthyh...",tags:["scalphealth","hairtransformation","healthyhairtips","hairgrowthtips","scalpcare","hairjourney"],views:"2.4M",plays:2400000,diggs:167000,engage:"9.3%",dur:"3:54",url:"https://www.tiktok.com/@abbeyjbenson/video/7476860247278193966",colors:["#134e5e","#71b280","#1a1a2e"]},
+  {rank:6,creator:"sofiahairhealth",nickname:"Sofia Sevilla 💖",title:"4 scalp care tips 💆🏻‍♀️✨ #hairgrowth #hairthinning #hairroutine #hairloss #femalepatternhairloss",hook:"4 scalp care tips 💆🏻‍♀️✨ — hairgrowth, hairthinning, hairroutine, hairloss, femalepatternhairloss",tags:["hairgrowth","hairthinning","hairroutine","hairloss","femalepatternhairloss"],views:"194.9K",plays:194900,diggs:12500,engage:"8.5%",dur:"2:17",url:"https://www.tiktok.com/@sofiahairhealth/video/7582642998106688790",colors:["#8360c3","#2ebf91","#134e5e"]},
+  {rank:7,creator:"allybiochemist",nickname:"Dr Ally | Biochemist",title:"Five things that are worth the money — scalp health edition!",hook:"five things that are worth the money, scalp health edition!  what are your go to haircare products to keep you...",tags:["haircaretips","scalpcare","haircareroutine","scalphealth","hairtips"],views:"4.5K",plays:4500,diggs:284,engage:"8.4%",dur:"0:10",url:"https://www.tiktok.com/@allybiochemist/video/7664679812467887381",colors:["#0f3460","#e94560","#1a1a2e"]},
+  {rank:8,creator:"carolineloves.you",nickname:"caroline",title:"just moisturize your scalp pleaseeeee /ad",hook:"just moisturize your scalp pleaseeeee /ad",tags:["scalpcare","haircare","moisturize"],views:"205.2K",plays:205200,diggs:12700,engage:"8.1%",dur:"0:21",url:"https://www.tiktok.com/@carolineloves.you/video/7468228314403065110",colors:["#fc5c7d","#6a3093","#1a1a2e"]},
+  {rank:9,creator:"ava.roxana",nickname:"Ava 🐆",title:"The one I swear by @epais Scalp Boosting Ampoule #hair #scalpcare #hairtransformation #EPAIS",hook:"The one l swear by @epais Scalp Boosting Ampoule #hair#scalpcare#hairtransformation #EPAIS #ScalpBoostingAmpou...",tags:["hair","scalpcare","hairtransformation","epais","scalpboostingampoule"],views:"182.4K",plays:182400,diggs:10800,engage:"7.9%",dur:"0:39",url:"https://www.tiktok.com/@ava.roxana/video/7657403460542844191",colors:["#f953c6","#b91d73","#2d1b69"]},
+  {rank:10,creator:"abbeyyung",nickname:"Abbey Yung",title:"Top 5 scalp serums — officially adding to The Abbey Yung Method! 8 months of research",hook:"Here are my top 5 recommendations for scalp serums that I am officially adding to The Abbey Yung Method! I've spent the last 8+ months...",tags:["scalpserum","scalphealth","hairloss","hairgrowth","abbeyyungmethod"],views:"90.6K",plays:90600,diggs:5800,engage:"7.7%",dur:"2:55",url:"https://www.tiktok.com/@abbeyyung/video/7655442788594519326",colors:["#1a1a2e","#e94560","#0f3460"]}
+];
+
+const SCRIPTS = {
+  A:{label:"A안",title:"공감 → 솔루션 구조",badge:"badge-a",
+    hook:(usp)=>`"저도 탈모 시작되고 진짜 고민 많이 했거든요. 근데 ${firstUsp(usp)} 써보고 나서 확실히 달라졌어요."`,
+    body:(usp)=>`이 영상에서 쓰는 방식이 바로 ${secondUsp(usp) || '저희 핵심 원리'}예요.\n\n매일 두피에 3-4방울만 발라주는데, 3개월 차부터 빗질할 때 빠지는 양이 눈에 띄게 줄었고요. 주변에서도 먼저 물어봐요.`,
+    cta:()=>`"링크는 프로필에 있어요. 효과 봤으면 댓글로 알려주세요 🙏"`},
+  B:{label:"B안",title:"데이터 + 전문성 구조",badge:"badge-b",
+    hook:(usp)=>`"임상 결과 봤을 때 진짜 놀랐어요 — ${thirdUsp(usp) || '12주 임상에서 유의미한 결과'}가 나왔거든요."`,
+    body:(usp)=>`성분을 보면 ${firstUsp(usp)}이 핵심이에요. 일반 샴푸나 에센스랑 다른 점이 여기 있어요.\n\n${secondUsp(usp) || '모낭 직접 작용'}하는 게 포인트고, 피부과에서도 이 메커니즘을 인정해요.`,
+    cta:()=>`"성분 궁금하신 분 댓글 달아주시면 상세히 설명드릴게요 📊"`},
+  C:{label:"C안",title:"비포-애프터 스토리 구조",badge:"badge-c",
+    hook:(usp)=>`"100일 전이랑 지금이랑 비교해봤는데... 직접 보세요."`,
+    body:(usp)=>`${firstUsp(usp)} 쓰기 전엔 정수리가 훤히 보일 정도였거든요.\n\n처음 한 달은 큰 변화 못 느꼈는데 두 달 지나니까 주변에서 먼저 물어보더라고요. ${thirdUsp(usp) || '임상 결과'} 믿고 시작했는데 진짜였어요.`,
+    cta:()=>`"저처럼 고민하는 분들 꼭 한 번 써보세요. 후기 남겨주시면 감사해요! ❤️"`}
+};
+
+function firstUsp(u){ const p=u.split(/[·,]/); return (p[0]||'').trim()||'이 제품'; }
+function secondUsp(u){ const p=u.split(/[·,]/); return (p[1]||'').trim(); }
+function thirdUsp(u){ const p=u.split(/[·,]/); return (p[2]||'').trim(); }
+
+// ══ STATE ══
+let currentCountry = 'KR';
+let currentCat = 'all';
+let selectedVideo = null;
+let extracted = false;
+const AV_COLORS = ['#F97316','#3B82F6','#EC4899','#22C55E','#8B5CF6','#F59E0B','#14B8A6','#EF4444','#06B6D4','#84CC16'];
+
+// ══ CANVAS ══
+function drawThumb(cvs, colors, creator) {
+  const ctx=cvs.getContext('2d'), w=cvs.width, h=cvs.height;
+  const g=ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,colors[0]||'#1a1a2e'); g.addColorStop(.55,colors[1]||'#16213e'); g.addColorStop(1,colors[2]||'#0f3460');
+  ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+  for(let x=0;x<w;x+=18){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+  for(let y=0;y<h;y+=18){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+  ctx.fillStyle='rgba(255,255,255,0.13)';
+  const cx=w/2,cy=h*.42,r=Math.min(w,h)*.14;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  const ps=r*.55;
+  ctx.beginPath();ctx.moveTo(cx-ps*.6,cy-ps);ctx.lineTo(cx-ps*.6,cy+ps);ctx.lineTo(cx+ps*.85,cy);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.42)';
+  ctx.font=`${Math.max(8,w*.08)}px system-ui`;
+  ctx.textAlign='center';
+  ctx.fillText('@'+creator.replace(/[^\w.]/g,'').substring(0,12),w/2,h*.8);
+}
+function drawMini(cvs,colors){
+  const ctx=cvs.getContext('2d'),w=cvs.width,h=cvs.height;
+  const g=ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(0,colors[0]||'#1a1a2e');g.addColorStop(1,colors[2]||'#0f3460');
+  ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='rgba(255,255,255,0.4)';
+  const ps=w*.14;const cx=w/2,cy=h/2;
+  ctx.beginPath();ctx.moveTo(cx-ps*.7,cy-ps);ctx.lineTo(cx-ps*.7,cy+ps);ctx.lineTo(cx+ps,cy);ctx.closePath();ctx.fill();
+}
+
+// ══ RENDER ══
+function getUS() {
+  let d = [...US_DATA];
+  if(currentCat==='scalp') d=d.filter(v=>v.tags.some(t=>['scalpcare','scalphealth','scalp','hairloss','hairgrowth','hairthinning','scalpboostingampoule','folligenshampoo','femalepatternhairloss'].includes(t)));
+  else if(currentCat==='haircare') d=d.filter(v=>v.tags.some(t=>['haircareroutine','haircaretips','hairtok','haircare','hairroutine'].includes(t)));
+  else if(currentCat==='skincare') d=d.filter(v=>v.tags.some(t=>['skincare','kbeauty'].includes(t)));
+  else if(currentCat==='bodycare') d=d.filter(v=>v.tags.some(t=>['bodycare','footmask'].includes(t)));
+  return d;
+}
+
+function renderCards(data) {
+  const grid=document.getElementById('results-grid');
+  const cs=document.getElementById('coming-soon-box');
+  const es=document.getElementById('empty-state');
+  cs.style.display='none'; es.style.display='none'; grid.style.display='none';
+
+  if(currentCountry!=='US'){
+    cs.style.display='block'; return;
+  }
+  if(!extracted){ es.style.display='block'; return; }
+  if(data.length===0){
+    es.style.display='block';
+    es.innerHTML='선택한 카테고리에 해당하는 영상이 없습니다.';
+    return;
+  }
+  grid.style.display='grid';
+  grid.innerHTML='';
+  data.forEach((v,i)=>{
+    const card=document.createElement('div');
+    card.className='video-card'+(selectedVideo&&selectedVideo.url===v.url?' selected':'');
+    card.onclick=()=>selectVideo(v,card);
+    const avC=AV_COLORS[i%AV_COLORS.length];
+    card.innerHTML=`
+      <div class="card-thumb">
+        <canvas width="240" height="360" style="width:100%;height:100%;display:block"></canvas>
+        <span class="card-rank">#${i+1}</span>
+        <span class="card-duration">${v.dur}</span>
+        <span class="card-platform">TikTok</span>
+      </div>
+      <div class="card-body">
+        <div class="card-creator"><span class="creator-av" style="background:${avC}">${v.creator[0].toUpperCase()}</span>@${v.creator}</div>
+        <div class="card-title">${v.title}</div>
+        <div class="card-tags">${v.tags.slice(0,4).map(t=>`<span class="tag">#${t}</span>`).join('')}</div>
+        <div class="card-metrics"><span>👁️ <span class="metric-val">${v.views}</span></span><span style="margin-left:12px">💫 <span class="metric-val">${v.engage}</span></span></div>
+      </div>`;
+    grid.appendChild(card);
+    drawThumb(card.querySelector('canvas'),v.colors,v.creator);
+  });
+  if(extracted) document.getElementById('next-btn').style.display='flex';
+}
+
+function selectVideo(v,cardEl){
+  selectedVideo=v;
+  document.querySelectorAll('.video-card').forEach(c=>c.classList.remove('selected'));
+  cardEl.classList.add('selected');
+}
+
+// ══ FILTERS ══
+function setChipGroup(el,group){ /* visual toggle only */
+  const row=el.closest('.filter-row');
+  row.querySelectorAll('.chip').forEach(c=>{ if(!c.classList.contains('filter-sep')) c.classList.remove('active'); });
+  el.classList.add('active');
+}
+function setCountry(el,code){
+  document.querySelectorAll('.country-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); currentCountry=code;
+  renderCards(getUS());
+}
+function setCat(el,cat){
+  document.querySelectorAll('#cat-row .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); currentCat=cat;
+  if(extracted) renderCards(getUS());
+}
+
+// ══ EXTRACTION ══
+function startExtraction(){
+  const btn=document.getElementById('start-btn');
+  btn.disabled=true;
+  document.getElementById('empty-state').style.display='none';
+  document.getElementById('coming-soon-box').style.display='none';
+  document.getElementById('results-grid').style.display='none';
+  document.getElementById('loading-bar').classList.add('active');
+  document.getElementById('next-btn').style.display='none';
+  const ids=['ls1','ls2','ls3','ls4'];
+  ids.forEach(id=>{document.getElementById(id).className='loading-step';});
+  const delays=[0,800,1700,2800];
+  ids.forEach((id,i)=>{
+    setTimeout(()=>{
+      if(i>0) document.getElementById(ids[i-1]).className='loading-step done';
+      document.getElementById(id).className='loading-step current';
+    },delays[i]);
+  });
+  setTimeout(()=>{
+    document.getElementById('ls4').className='loading-step done';
+    document.getElementById('loading-bar').classList.remove('active');
+    btn.disabled=false; extracted=true;
+    if(currentCountry==='US') renderCards(getUS());
+    else { document.getElementById('coming-soon-box').style.display='block'; }
+    document.getElementById('next-btn').style.display='flex';
+  },3800);
+}
+
+// ══ SCRIPTS ══
+function generateScripts(){
+  const usp=document.getElementById('usp-input').value.trim();
+  if(!usp){
+    const inp=document.getElementById('usp-input');
+    inp.style.borderColor='#EF4444'; inp.focus();
+    setTimeout(()=>inp.style.borderColor='',1500); return;
+  }
+  const btn=document.getElementById('gen-btn'); btn.disabled=true;
+  const row=document.getElementById('gen-row'); row.classList.add('active');
+  document.getElementById('script-grid').innerHTML='';
+  document.getElementById('dl-notice').classList.remove('active');
+  const msgs=['Claude가 레퍼런스 스크립트를 분석하는 중...','USP 키워드 추출 중...','A/B/C 구조로 변환 중...','스크립트 완성!'];
+  let mi=0;
+  const iv=setInterval(()=>{ mi++; if(mi<msgs.length) document.getElementById('gen-status').textContent=msgs[mi]; else clearInterval(iv); },650);
+  setTimeout(()=>{
+    row.classList.remove('active'); btn.disabled=false;
+    renderScripts(usp);
+    document.getElementById('dl-notice').classList.add('active');
+  },2800);
+}
+
+function renderScripts(usp){
+  const grid=document.getElementById('script-grid'); grid.innerHTML='';
+  ['A','B','C'].forEach((key,i)=>{
+    const s=SCRIPTS[key];
+    const card=document.createElement('div'); card.className='script-card';
+    card.innerHTML=`
+      <div class="script-card-header"><span class="script-type-badge ${s.badge}">${s.label}</span><span class="script-card-title">${s.title}</span></div>
+      <div class="script-card-body">
+        <div class="script-hook">${s.hook(usp)}</div>
+        <div class="script-body">${s.body(usp).replace(/\n/g,'<br>')}</div>
+        <div class="script-cta">🎯 CTA: ${s.cta()}</div>
+      </div>
+      <div class="script-card-footer"><button class="btn-copy" onclick="copyScript('${key}','${usp.replace(/'/g,"\\'")}',this)">📋 복사</button></div>`;
+    grid.appendChild(card);
+    setTimeout(()=>card.classList.add('revealed'),i*200+60);
+  });
+}
+
+function copyScript(key,usp,btn){
+  const s=SCRIPTS[key];
+  const txt=`[${s.label} — ${s.title}]\n\n후킹: ${s.hook(usp)}\n\n본문:\n${s.body(usp)}\n\nCTA: ${s.cta()}`;
+  navigator.clipboard.writeText(txt).catch(()=>{});
+  showToast(); btn.textContent='✓ 복사됨'; setTimeout(()=>btn.textContent='📋 복사',2000);
+}
+
+function downloadScripts(){
+  const usp=document.getElementById('usp-input').value.trim();
+  const lines=['BRANDSLAM Suite — 스크립트 추출 결과\n'+'='.repeat(40)+'\n'];
+  ['A','B','C'].forEach(k=>{
+    const s=SCRIPTS[k];
+    lines.push(`\n[${s.label} — ${s.title}]\n후킹: ${s.hook(usp)}\n\n본문:\n${s.body(usp)}\n\nCTA: ${s.cta()}\n${'-'.repeat(40)}\n`);
+  });
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([lines.join('')],{type:'text/plain;charset=utf-8'}));
+  a.download='brandslam_scripts.txt'; a.click();
+}
+
+// ══ NAVIGATION ══
+function goStep(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const t=document.getElementById('screen-'+n)||(n===4?document.getElementById('screen-4'):null);
+  if(t) t.classList.add('active');
+  document.querySelectorAll('.step-item').forEach(el=>{
+    const sn=parseInt(el.textContent.match(/\d/)?.[0]||0);
+    el.classList.remove('active','done');
+    if(sn<n) el.classList.add('done'); else if(sn===n) el.classList.add('active');
+  });
+  if(n===4){
+    const v=selectedVideo||(extracted&&currentCountry==='US'?US_DATA[0]:null);
+    if(v){
+      document.getElementById('mini-title').textContent=v.title;
+      document.getElementById('mini-creator').textContent='@'+v.creator;
+      document.getElementById('mini-metrics').textContent=`조회수 ${v.views} · 인게이지율 ${v.engage}`;
+      document.getElementById('hook-box').textContent=`"${v.hook}"`;
+      drawMini(document.getElementById('mini-cvs'),v.colors);
+    }
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showToast(){
+  const t=document.getElementById('toast'); t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+// init — KR default: show coming soon after first click, or just show empty
+document.getElementById('empty-state').style.display='block';
+</script>
