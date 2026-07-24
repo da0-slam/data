@@ -3,34 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>컨택·협상 자동화 — BRANDSLAM Suite</title>
-<meta name="description" content="BRANDSLAM Suite 컨택·협상 자동화 데모 — 인플루언서 협상 파이프라인">
+<title>인플루언서 협상 관리 — BRANDSLAM</title>
+<meta name="description" content="BRANDSLAM 인플루언서 컨택·협상 관리 대시보드">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" crossorigin="anonymous"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 :root{
-  --bg:#080B10;
-  --s0:#0F1318;
-  --s1:#141820;
-  --s2:#1C2130;
-  --s3:#232840;
-  --border:#22283A;
-  --border2:#2E3550;
-  --accent:#4B6FEE;
-  --accent-d:rgba(75,111,238,.14);
-  --green:#1EC87A;
-  --green-d:rgba(30,200,122,.13);
-  --orange:#FF7A35;
-  --orange-d:rgba(255,122,53,.13);
-  --blue:#38B2FF;
-  --blue-d:rgba(56,178,255,.13);
-  --red:#FF4D5A;
-  --red-d:rgba(255,77,90,.12);
-  --muted:#4A5370;
-  --text:#D6DAE8;
-  --text2:#717A96;
-  --text3:#3C4260;
+  --bg:#070A0F;
+  --s0:#0D1117;
+  --s1:#131820;
+  --s2:#1A2030;
+  --s3:#222A3C;
+  --border:#1E2638;
+  --border2:#2A3448;
+  --accent:#4A6CF0;
+  --accent-d:rgba(74,108,240,.14);
+  --green:#18C774;
+  --green-d:rgba(24,199,116,.13);
+  --orange:#F57C35;
+  --orange-d:rgba(245,124,53,.13);
+  --amber:#F0A500;
+  --amber-d:rgba(240,165,0,.12);
+  --blue:#36AEFF;
+  --blue-d:rgba(54,174,255,.12);
+  --violet:#9B7FFF;
+  --violet-d:rgba(155,127,255,.12);
+  --red:#F04A5A;
+  --red-d:rgba(240,74,90,.10);
+  --muted:#3E4A60;
+  --text:#CDD1DF;
+  --text2:#6B7590;
+  --text3:#333D55;
   --r:7px;
+  --panel-w:360px;
 }
 
 html,body{height:100%;overflow:hidden}
@@ -41,1009 +47,850 @@ body{
   font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR','Helvetica Neue',system-ui,sans-serif;
   display:flex;
   flex-direction:column;
-  font-variant-numeric:tabular-nums;
   font-size:13px;
   line-height:1.4;
+  font-variant-numeric:tabular-nums;
 }
 
 /* ── TOPBAR ── */
 .topbar{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  padding:0 22px;
-  height:50px;
+  display:flex;align-items:center;gap:12px;
+  padding:0 20px;height:48px;
   background:var(--s0);
   border-bottom:1px solid var(--border);
   flex-shrink:0;
+  z-index:20;
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:9px;
+.logo{
+  display:flex;align-items:center;gap:8px;flex-shrink:0;text-decoration:none;
+}
+
+.logo-mark{
+  width:26px;height:26px;border-radius:6px;
+  background:var(--accent);
+  display:grid;place-items:center;
+  font-size:9px;font-weight:900;color:#fff;letter-spacing:-.02em;
   flex-shrink:0;
 }
 
-.brand-logo{
-  width:28px;height:28px;
-  background:var(--accent);
-  border-radius:7px;
-  display:grid;place-items:center;
-  font-size:10px;font-weight:900;
-  color:#fff;letter-spacing:-.03em;
-}
+.logo-name{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text2);text-transform:uppercase}
 
-.brand-name{
-  font-size:12px;font-weight:700;
-  letter-spacing:.07em;
-  color:var(--text2);
-  text-transform:uppercase;
-}
+.page-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap}
 
-.topbar-sep{width:1px;height:18px;background:var(--border);flex-shrink:0}
-
-.page-title{
-  font-size:14px;font-weight:600;
-  color:var(--text);
-  white-space:nowrap;
-}
-
-.campaign-pill{
-  font-size:11px;
-  color:var(--text2);
-  background:var(--s2);
-  padding:3px 11px;
-  border-radius:20px;
-  border:1px solid var(--border);
-  white-space:nowrap;
+.campaign-tag{
+  font-size:11px;color:var(--text2);
+  background:var(--s2);border:1px solid var(--border2);
+  padding:3px 10px;border-radius:20px;white-space:nowrap;
 }
 
 .spacer{flex:1}
 
-.rec-badge{
-  display:flex;align-items:center;gap:6px;
-  font-size:10px;font-weight:700;
-  letter-spacing:.08em;
-  color:var(--red);
-  opacity:.75;
-  flex-shrink:0;
-}
-
-.rec-dot{
-  width:7px;height:7px;
-  border-radius:50%;
-  background:var(--red);
-  animation:blink 1.3s step-end infinite;
-}
-
-@keyframes blink{50%{opacity:0}}
-
-/* ── STATS ── */
-.stats-row{
-  display:flex;
-  gap:0;
-  background:var(--border);
-  border-bottom:1px solid var(--border);
-  flex-shrink:0;
-}
-
-.stat-card{
-  flex:1;
-  padding:12px 20px;
-  background:var(--s0);
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.stat-card+.stat-card{border-left:1px solid var(--border)}
-
-.stat-icon{
-  width:32px;height:32px;
-  border-radius:8px;
-  display:grid;place-items:center;
-  font-size:14px;
-  flex-shrink:0;
-}
-
-.stat-info{display:flex;flex-direction:column;gap:2px}
-
-.stat-label{
-  font-size:10px;
-  color:var(--text2);
-  letter-spacing:.05em;
-  text-transform:uppercase;
+.result-count{
+  font-size:12px;color:var(--text2);
+  background:var(--s2);padding:3px 12px;border-radius:20px;
   white-space:nowrap;
 }
 
-.stat-value{
-  font-size:22px;font-weight:700;
-  line-height:1;
-  transition:color .4s;
+/* ── STATS ── */
+.stats{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  background:var(--s0);
 }
 
-.stat-card.c-all   .stat-icon{background:var(--s2)}
-.stat-card.c-all   .stat-value{color:var(--text)}
-.stat-card.c-neg   .stat-icon{background:var(--orange-d)}
-.stat-card.c-neg   .stat-value{color:var(--orange)}
-.stat-card.c-stand .stat-icon{background:var(--green-d)}
-.stat-card.c-stand .stat-value{color:var(--green)}
-.stat-card.c-done  .stat-icon{background:var(--s2)}
-.stat-card.c-done  .stat-value{color:var(--muted)}
-.stat-card.c-rej   .stat-icon{background:var(--red-d)}
-.stat-card.c-rej   .stat-value{color:var(--red)}
+.sc{
+  flex:1;padding:10px 18px;
+  display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:background .15s;
+  border-right:1px solid var(--border);
+}
+
+.sc:last-child{border-right:none}
+.sc:hover{background:var(--s1)}
+.sc.active{background:var(--s2)}
+
+.sc-ico{
+  width:28px;height:28px;border-radius:7px;
+  display:grid;place-items:center;font-size:13px;flex-shrink:0;
+}
+
+.sc-info{display:flex;flex-direction:column;gap:1px;min-width:0}
+
+.sc-val{font-size:20px;font-weight:700;line-height:1}
+.sc-lbl{font-size:10px;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+
+.sc.all   .sc-ico{background:var(--s3)} .sc.all   .sc-val{color:var(--text)}
+.sc.agree .sc-ico{background:var(--green-d)} .sc.agree .sc-val{color:var(--green)}
+.sc.nego  .sc-ico{background:var(--orange-d)} .sc.nego  .sc-val{color:var(--orange)}
+.sc.app   .sc-ico{background:var(--blue-d)} .sc.app   .sc-val{color:var(--blue)}
+.sc.fup   .sc-ico{background:var(--amber-d)} .sc.fup   .sc-val{color:var(--amber)}
+.sc.rej   .sc-ico{background:var(--red-d)} .sc.rej   .sc-val{color:var(--red)}
 
 /* ── FILTER ROW ── */
 .filter-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 22px;
+  display:flex;align-items:center;gap:8px;
+  padding:9px 20px;
   background:var(--s1);
   border-bottom:1px solid var(--border);
   flex-shrink:0;
   flex-wrap:wrap;
 }
 
-.filter-label{
-  font-size:10px;
-  color:var(--text3);
-  letter-spacing:.05em;
-  text-transform:uppercase;
-  white-space:nowrap;
-  flex-shrink:0;
-}
-
-.chips{display:flex;gap:5px;flex-wrap:wrap}
-
 .chip{
   display:inline-flex;align-items:center;gap:4px;
-  padding:5px 13px;
-  border-radius:20px;
-  border:1px solid var(--border);
-  background:transparent;
-  color:var(--text2);
-  font-size:12px;
-  cursor:pointer;
-  transition:all .18s;
-  white-space:nowrap;
-  font-family:inherit;
+  padding:5px 13px;border-radius:20px;
+  border:1px solid var(--border2);background:transparent;
+  color:var(--text2);font-size:12px;cursor:pointer;
+  transition:all .16s;white-space:nowrap;font-family:inherit;
 }
 
-.chip:hover{border-color:var(--border2);color:var(--text)}
+.chip:hover{border-color:var(--border);color:var(--text);background:var(--s2)}
 
 .chip.active{
-  background:var(--accent-d);
   border-color:var(--accent);
-  color:var(--accent);
-  font-weight:600;
+  background:var(--accent-d);
+  color:var(--accent);font-weight:600;
 }
 
-.vdiv{width:1px;height:20px;background:var(--border);flex-shrink:0}
+.chip.agree.active  {border-color:var(--green);background:var(--green-d);color:var(--green)}
+.chip.nego.active   {border-color:var(--orange);background:var(--orange-d);color:var(--orange)}
+.chip.app.active    {border-color:var(--blue);background:var(--blue-d);color:var(--blue)}
+.chip.fup.active    {border-color:var(--amber);background:var(--amber-d);color:var(--amber)}
+.chip.rej.active    {border-color:var(--red);background:var(--red-d);color:var(--red)}
 
-.sort-btn{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:5px 12px;
-  border-radius:var(--r);
-  border:1px solid var(--border);
-  background:transparent;
-  color:var(--text2);
-  font-size:12px;
-  cursor:pointer;
-  transition:all .18s;
-  white-space:nowrap;
-  font-family:inherit;
+.vdiv{width:1px;height:18px;background:var(--border2);flex-shrink:0}
+
+.search-wrap{
+  position:relative;display:flex;align-items:center;margin-left:auto;
 }
 
-.sort-btn:hover,.sort-btn.active{background:var(--s2);color:var(--text);border-color:var(--border2)}
-
-.filter-spacer{flex:1}
-
-.btn-start{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:8px 18px;
-  border-radius:var(--r);
-  border:none;
-  background:var(--accent);
-  color:#fff;
-  font-size:13px;font-weight:700;
-  cursor:pointer;
-  transition:all .18s;
-  font-family:inherit;
-  white-space:nowrap;
-  flex-shrink:0;
+.search-icon{
+  position:absolute;left:10px;color:var(--text3);font-size:12px;pointer-events:none;
 }
 
-.btn-start:hover{background:#3a5ee0;transform:translateY(-1px);box-shadow:0 4px 16px rgba(75,111,238,.3)}
-.btn-start:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.search-input{
+  padding:6px 10px 6px 30px;
+  background:var(--s0);border:1px solid var(--border2);
+  border-radius:var(--r);color:var(--text);
+  font-size:12px;font-family:inherit;width:200px;
+  outline:none;transition:border-color .15s;
+}
 
-.btn-start.pulse{animation:pulsebtn .55s ease 4}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--text3)}
 
-@keyframes pulsebtn{
-  0%,100%{box-shadow:0 0 0 0 rgba(75,111,238,.5);transform:scale(1)}
-  50%{box-shadow:0 0 0 10px rgba(75,111,238,0);transform:scale(1.04)}
+/* ── BODY ── */
+.body{
+  flex:1;display:flex;min-height:0;
+  position:relative;
 }
 
 /* ── TABLE ── */
-.table-wrap{flex:1;overflow:auto}
+.table-area{
+  flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;
+  transition:margin-right .25s ease;
+}
+
+.table-area.panel-open{margin-right:var(--panel-w)}
+
+.table-wrap{flex:1;overflow-y:auto;overflow-x:auto}
 
 table{
-  width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  min-width:760px;
+  width:100%;border-collapse:separate;border-spacing:0;
+  min-width:680px;
 }
 
 thead th{
-  position:sticky;top:0;
+  position:sticky;top:0;z-index:10;
   background:var(--s0);
   border-bottom:1px solid var(--border);
-  padding:9px 16px;
-  font-size:10px;
-  font-weight:600;
-  letter-spacing:.06em;
-  color:var(--text2);
-  text-align:left;
+  padding:8px 14px;
+  font-size:10px;font-weight:600;
+  letter-spacing:.06em;color:var(--text2);
+  text-align:left;text-transform:uppercase;
   white-space:nowrap;
-  text-transform:uppercase;
-  z-index:10;
+  user-select:none;
 }
 
-thead th:first-child{width:48px;padding:9px 16px}
+thead th.sortable{cursor:pointer}
+thead th.sortable:hover{color:var(--text);background:var(--s1)}
+thead th.sort-asc::after{content:' ↑';color:var(--accent)}
+thead th.sort-desc::after{content:' ↓';color:var(--accent)}
+
+thead th:first-child{width:46px;text-align:right;padding-right:8px}
 
 tbody tr{
   border-bottom:1px solid var(--border);
-  transition:background .12s,opacity .3s;
+  cursor:pointer;transition:background .1s;
 }
 
 tbody tr:hover{background:rgba(255,255,255,.025)}
-tbody tr.selected{background:rgba(75,111,238,.07)}
-tbody tr.hidden{display:none}
+tbody tr.row-sel{background:rgba(74,108,240,.09)!important}
 
 tbody td{
-  padding:13px 16px;
-  vertical-align:middle;
-  color:var(--text);
+  padding:11px 14px;
+  color:var(--text);vertical-align:middle;
 }
 
-tbody td:first-child{padding:13px 16px}
-
-/* checkbox */
-.cb-wrap{display:flex;align-items:center}
-
-.cb{
-  width:16px;height:16px;
-  border:1.5px solid var(--border2);
-  border-radius:4px;
-  background:transparent;
-  cursor:pointer;
-  display:grid;place-items:center;
-  transition:all .15s;
-  flex-shrink:0;
-  position:relative;
+tbody td:first-child{
+  text-align:right;padding-right:8px;
+  color:var(--text3);font-size:11px;
 }
 
-.cb.checked{background:var(--accent);border-color:var(--accent)}
+.handle-line{display:flex;align-items:center;gap:6px}
 
-.cb.checked::after{
-  content:'';
-  display:block;
-  width:9px;height:5px;
-  border-left:2px solid #fff;
-  border-bottom:2px solid #fff;
-  transform:translateY(-1px) rotate(-45deg);
+.handle{font-size:13px;font-weight:600;color:var(--text)}
+
+.ext-link{
+  color:var(--text3);font-size:11px;text-decoration:none;
+  padding:1px 4px;border-radius:3px;border:1px solid var(--border2);
+  transition:all .14s;line-height:1;flex-shrink:0;
 }
 
-/* influencer cell */
-.inf-cell{display:flex;flex-direction:column;gap:2px}
+.ext-link:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-d)}
 
-.inf-handle{
-  font-size:13px;font-weight:600;
-  color:var(--text);
+.contact-sub{
+  font-size:11px;color:var(--text2);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;
 }
 
-.inf-meta{
-  font-size:11px;color:var(--text2);
-  display:flex;align-items:center;gap:8px;
-}
-
-.platform-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:10px;
-  letter-spacing:.03em;
-}
-
-.pdot{
+.sbadge{
   display:inline-block;
-  width:5px;height:5px;
-  border-radius:50%;
+  padding:3px 9px;border-radius:10px;
+  font-size:11px;font-weight:600;letter-spacing:.02em;
+  white-space:nowrap;
 }
 
-.pdot.TikTok  {background:#ffffff}
-.pdot.Instagram{background:#E1306C}
-.pdot.YouTube {background:#FF0000}
+.price-cell{font-size:12px;color:var(--text);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.price-cell.after{color:var(--green);font-weight:600}
 
-/* numbers */
-.num-big{font-size:13px;color:var(--text)}
-.num-sub{font-size:11px;color:var(--text2);margin-top:1px}
-
-.engage-bar{
-  display:flex;flex-direction:column;gap:4px;
+/* ── PAGINATION ── */
+.pag-row{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 20px;
+  background:var(--s0);border-top:1px solid var(--border);
+  flex-shrink:0;
+  font-size:12px;color:var(--text2);
 }
 
-.engage-track{
-  width:60px;height:3px;
-  background:var(--border2);
-  border-radius:2px;
+.pag-btn{
+  padding:5px 14px;border-radius:var(--r);
+  border:1px solid var(--border2);background:var(--s1);
+  color:var(--text2);cursor:pointer;font-size:12px;font-family:inherit;
+  transition:all .15s;
+}
+
+.pag-btn:hover:not(:disabled){background:var(--s2);color:var(--text);border-color:var(--accent)}
+.pag-btn:disabled{opacity:.35;cursor:not-allowed}
+
+.pag-pages{display:flex;gap:4px}
+
+.pag-num{
+  width:30px;height:26px;border-radius:5px;border:1px solid transparent;
+  background:transparent;color:var(--text2);cursor:pointer;font-size:12px;
+  display:grid;place-items:center;transition:all .14s;font-family:inherit;
+}
+
+.pag-num.cur{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+.pag-num:hover:not(.cur){background:var(--s2);color:var(--text)}
+
+.pag-ellipsis{width:24px;display:grid;place-items:center;color:var(--text3)}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{
+  position:absolute;right:0;top:0;bottom:0;
+  width:var(--panel-w);
+  background:var(--s0);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  transform:translateX(100%);
+  transition:transform .25s ease;
+  z-index:15;
   overflow:hidden;
 }
 
-.engage-fill{
-  height:100%;
-  border-radius:2px;
-  background:var(--accent);
-  transition:width .4s;
-}
+.detail-panel.open{transform:translateX(0)}
 
-.engage-fill.high{background:var(--green)}
-
-/* fee */
-.fee-val{font-size:13px;font-weight:600;color:var(--text)}
-
-/* stage */
-.stage-cell{display:flex;align-items:center;gap:10px}
-
-.dots{display:flex;gap:4px;align-items:center}
-
-.d{
-  width:8px;height:8px;
-  border-radius:50%;
-  background:var(--border2);
-  transition:background .35s,box-shadow .35s;
+.detail-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  padding:18px 18px 14px;
+  border-bottom:1px solid var(--border);
   flex-shrink:0;
 }
 
-.d.past{background:var(--green)}
-.d.curr{
-  background:var(--orange);
-  box-shadow:0 0 0 3px rgba(255,122,53,.2),0 0 8px rgba(255,122,53,.5);
-  animation:pdot 1.8s ease infinite;
-}
-.d.done-all{background:var(--green)}
-.d.rejected{background:var(--red)}
+.detail-handle{font-size:16px;font-weight:700;color:var(--text)}
+.detail-platform{font-size:11px;color:var(--text2);margin-top:2px}
 
-@keyframes pdot{
-  0%,100%{box-shadow:0 0 0 3px rgba(255,122,53,.2),0 0 8px rgba(255,122,53,.5)}
-  50%{box-shadow:0 0 0 4px rgba(255,122,53,.08),0 0 14px rgba(255,122,53,.3)}
+.close-btn{
+  width:26px;height:26px;border-radius:50%;
+  border:1px solid var(--border2);background:var(--s2);
+  color:var(--text2);cursor:pointer;font-size:12px;
+  display:grid;place-items:center;flex-shrink:0;margin-top:2px;
+  transition:all .14s;font-family:inherit;
 }
 
-.stage-badge{
-  font-size:11px;font-weight:600;
-  padding:3px 9px;
-  border-radius:10px;
-  letter-spacing:.02em;
-  white-space:nowrap;
-  transition:background .3s,color .3s;
+.close-btn:hover{background:var(--red-d);border-color:var(--red);color:var(--red)}
+
+.detail-body{flex:1;overflow-y:auto;padding:0 18px 24px}
+
+.detail-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:12px;padding:14px 0;
+  border-bottom:1px solid var(--border);
 }
 
-.sb-idle{background:var(--s2);color:var(--text3)}
-.sb-c1{background:var(--blue-d);color:var(--blue)}
-.sb-c2{background:var(--orange-d);color:var(--orange)}
-.sb-c3{background:var(--accent-d);color:var(--accent)}
-.sb-c4{background:var(--green-d);color:var(--green);font-weight:700}
-.sb-done{background:var(--s2);color:var(--muted)}
-.sb-rej{background:var(--red-d);color:var(--red)}
+.di-label{font-size:10px;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px}
+.di-val{font-size:13px;color:var(--text);font-weight:500}
 
-/* ── TOAST ── */
-.toast-wrap{
-  position:fixed;bottom:72px;right:20px;
-  display:flex;flex-direction:column;gap:8px;
-  z-index:300;
-  pointer-events:none;
+.detail-sec{padding:14px 0;border-bottom:1px solid var(--border)}
+.detail-sec:last-child{border-bottom:none}
+
+.detail-sec-label{
+  font-size:10px;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;
+  margin-bottom:6px;
 }
 
-.toast{
-  background:var(--s2);
-  border:1px solid var(--border2);
-  border-left:3px solid var(--green);
-  padding:10px 16px;
-  border-radius:var(--r);
-  font-size:12px;color:var(--text);
-  animation:tIn .22s ease,tOut .22s ease 2.7s forwards;
-  max-width:260px;line-height:1.5;
-  box-shadow:0 4px 20px rgba(0,0,0,.4);
+.detail-sec-val{font-size:13px;color:var(--text);word-break:break-word;line-height:1.6}
+
+.ratecard-box{
+  background:var(--s2);border-radius:var(--r);
+  padding:10px 12px;
+  font-size:12px;color:var(--text2);
+  line-height:1.7;white-space:pre-wrap;word-break:break-word;
 }
 
-.toast.warn{border-left-color:var(--orange)}
-.toast.info{border-left-color:var(--blue)}
-
-@keyframes tIn{from{opacity:0;transform:translateX(12px)}}
-@keyframes tOut{to{opacity:0;transform:translateX(12px)}}
-
-/* ── PLAYBAR ── */
-.playbar{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 22px;
-  background:var(--s0);
-  border-top:1px solid var(--border);
-  flex-shrink:0;
-  height:52px;
+.after-val{
+  font-size:15px;font-weight:700;
+  color:var(--green);
 }
 
-.pbtn{
-  width:30px;height:30px;
-  border-radius:50%;
-  border:1px solid var(--border2);
-  background:var(--s2);
-  color:var(--text2);
-  cursor:pointer;
-  display:grid;place-items:center;
-  font-size:11px;
-  transition:all .15s;
-  flex-shrink:0;
-  font-family:inherit;
+.detail-link{
+  font-size:12px;color:var(--accent);
+  text-decoration:none;word-break:break-all;line-height:1.5;
+  display:block;
 }
 
-.pbtn:hover{background:var(--accent);border-color:var(--accent);color:#fff}
-.pbtn.active-play{background:var(--accent);border-color:var(--accent);color:#fff}
+.detail-link:hover{text-decoration:underline}
 
-.prog-wrap{flex:1;display:flex;align-items:center;gap:10px}
-
-.prog-track{
-  flex:1;height:3px;
-  background:var(--border2);
-  border-radius:2px;
-  overflow:visible;
-  cursor:pointer;
-  position:relative;
+.metrics-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  margin-top:2px;
 }
 
-.prog-fill{
-  height:100%;background:var(--accent);
-  border-radius:2px;
-  transition:width .5s ease;
+.metric-card{
+  background:var(--s2);border-radius:var(--r);
+  padding:8px 10px;text-align:center;
 }
 
-.prog-handle{
-  position:absolute;
-  right:-5px;top:50%;transform:translateY(-50%);
-  width:10px;height:10px;
-  border-radius:50%;
-  background:var(--accent);
-  box-shadow:0 0 0 2px var(--s0);
-  pointer-events:none;
+.metric-lbl{font-size:9px;color:var(--text2);letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px}
+.metric-val{font-size:15px;font-weight:700;color:var(--text)}
+
+/* ── LOADING / EMPTY ── */
+.center-msg{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:80px 20px;color:var(--text2);text-align:center;
 }
 
-.time-lbl{
-  font-size:11px;color:var(--text2);
-  white-space:nowrap;
-  font-variant-numeric:tabular-nums;
-  flex-shrink:0;
+.spinner{
+  width:28px;height:28px;border:2px solid var(--border2);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin .7s linear infinite;
 }
 
-.step-lbl{
-  font-size:11px;color:var(--text2);
-  background:var(--s2);
-  padding:3px 11px;
-  border-radius:10px;
-  white-space:nowrap;
-  max-width:220px;
-  overflow:hidden;text-overflow:ellipsis;
-  flex-shrink:0;
-}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* row anim */
-@keyframes rowFlash{
-  0%,100%{background:transparent}
-  30%{background:rgba(75,111,238,.18)}
-}
-
-.row-flash{animation:rowFlash .5s ease}
+/* ── SCROLLBARS ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 </style>
 </head>
 <body>
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="brand">
-    <div class="brand-logo">BS</div>
-    <span class="brand-name">BRANDSLAM</span>
+  <div class="logo">
+    <div class="logo-mark">BS</div>
+    <span class="logo-name">BRANDSLAM</span>
   </div>
-  <div class="topbar-sep"></div>
-  <span class="page-title">컨택·협상 자동화</span>
-  <div class="campaign-pill">두피 앰플 캠페인</div>
+  <div style="width:1px;height:18px;background:var(--border);flex-shrink:0"></div>
+  <span class="page-title">인플루언서 협상 관리</span>
+  <span class="campaign-tag">두피 앰플 캠페인</span>
   <div class="spacer"></div>
-  <div class="rec-badge"><div class="rec-dot"></div>DEMO REC</div>
+  <span class="result-count" id="result-count">로드 중...</span>
 </div>
 
 <!-- STATS -->
-<div class="stats-row">
-  <div class="stat-card c-all">
-    <div class="stat-icon">👥</div>
-    <div class="stat-info">
-      <div class="stat-label">후보 전체</div>
-      <div class="stat-value" id="st-all">12</div>
-    </div>
+<div class="stats">
+  <div class="sc all active" id="sc-all" onclick="setFilter('all')">
+    <div class="sc-ico">👥</div>
+    <div class="sc-info"><div class="sc-val" id="st-all">—</div><div class="sc-lbl">후보 전체</div></div>
   </div>
-  <div class="stat-card c-neg">
-    <div class="stat-icon">💬</div>
-    <div class="stat-info">
-      <div class="stat-label">협상 진행</div>
-      <div class="stat-value" id="st-neg">0</div>
-    </div>
+  <div class="sc agree" id="sc-agree" onclick="setFilter('agree')">
+    <div class="sc-ico">✓</div>
+    <div class="sc-info"><div class="sc-val" id="st-agree">—</div><div class="sc-lbl">동의</div></div>
   </div>
-  <div class="stat-card c-stand">
-    <div class="stat-icon">✓</div>
-    <div class="stat-info">
-      <div class="stat-label">스탠바이</div>
-      <div class="stat-value" id="st-stand">0</div>
-    </div>
+  <div class="sc nego" id="sc-nego" onclick="setFilter('nego')">
+    <div class="sc-ico">💬</div>
+    <div class="sc-info"><div class="sc-val" id="st-nego">—</div><div class="sc-lbl">협상중</div></div>
   </div>
-  <div class="stat-card c-done">
-    <div class="stat-icon">📋</div>
-    <div class="stat-info">
-      <div class="stat-label">완료</div>
-      <div class="stat-value" id="st-done">0</div>
-    </div>
+  <div class="sc app" id="sc-app" onclick="setFilter('app')">
+    <div class="sc-ico">📨</div>
+    <div class="sc-info"><div class="sc-val" id="st-app">—</div><div class="sc-lbl">접근</div></div>
   </div>
-  <div class="stat-card c-rej">
-    <div class="stat-icon">✕</div>
-    <div class="stat-info">
-      <div class="stat-label">거절</div>
-      <div class="stat-value" id="st-rej">0</div>
-    </div>
+  <div class="sc fup" id="sc-fup" onclick="setFilter('fup')">
+    <div class="sc-ico">⏰</div>
+    <div class="sc-info"><div class="sc-val" id="st-fup">—</div><div class="sc-lbl">팔로업</div></div>
+  </div>
+  <div class="sc rej" id="sc-rej" onclick="setFilter('rej')">
+    <div class="sc-ico">✕</div>
+    <div class="sc-info"><div class="sc-val" id="st-rej">—</div><div class="sc-lbl">거절/기타</div></div>
   </div>
 </div>
 
 <!-- FILTERS -->
 <div class="filter-row">
-  <span class="filter-label">카테고리</span>
-  <div class="chips">
-    <button class="chip active" id="chip-all"   onclick="setFilter('all')">전체</button>
-    <button class="chip"        id="chip-scalp" onclick="setFilter('두피케어')">두피케어</button>
-    <button class="chip"        id="chip-hair"  onclick="setFilter('헤어케어')">헤어케어</button>
-  </div>
+  <button class="chip active" id="chip-all"    onclick="setChip('all')">전체</button>
+  <button class="chip agree"  id="chip-agree"  onclick="setChip('agree')">동의 (Agree)</button>
+  <button class="chip nego"   id="chip-nego"   onclick="setChip('nego')">협상중 (Nego)</button>
+  <button class="chip fup"    id="chip-fup"    onclick="setChip('fup')">팔로업 (Follow up)</button>
+  <button class="chip app"    id="chip-app"    onclick="setChip('app')">접근 (Approach)</button>
   <div class="vdiv"></div>
-  <button class="sort-btn" id="sort-follow" onclick="setSort('followers')">팔로워 ↓</button>
-  <button class="sort-btn" id="sort-engage" onclick="setSort('engage')">참여율 ↓</button>
-  <div class="filter-spacer"></div>
-  <button class="btn-start" id="btn-start" disabled onclick="startNeg()">+ 협상 시작</button>
-</div>
-
-<!-- TABLE -->
-<div class="table-wrap">
-  <table id="inf-table">
-    <thead>
-      <tr>
-        <th><div class="cb" id="cb-all" onclick="toggleAll()" style="margin:auto"></div></th>
-        <th>인플루언서</th>
-        <th>팔로워</th>
-        <th>참여율</th>
-        <th>협의 단가</th>
-        <th>진행 단계</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-</div>
-
-<!-- TOASTS -->
-<div class="toast-wrap" id="toasts"></div>
-
-<!-- PLAYBAR -->
-<div class="playbar">
-  <button class="pbtn" onclick="prevStep()" title="이전">◀</button>
-  <button class="pbtn" id="play-btn" onclick="togglePlay()">▶</button>
-  <button class="pbtn" onclick="nextStep()" title="다음">▶▶</button>
-  <div class="prog-wrap">
-    <div class="prog-track" onclick="seekDemo(event)">
-      <div class="prog-fill" id="prog-fill"></div>
-      <div class="prog-handle" id="prog-handle" style="display:none"></div>
-    </div>
+  <button class="chip"        id="chip-reply"  onclick="setChip('reply')">회신 (Reply)</button>
+  <button class="chip"        id="chip-rc"     onclick="setChip('rc')">단가 제시</button>
+  <button class="chip rej"    id="chip-rej"    onclick="setChip('rej')">거절/기타</button>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search" type="text" placeholder="핸들 또는 이메일 검색..." oninput="setSearch(this.value)">
   </div>
-  <span class="time-lbl" id="time-lbl">0:00 / 3:00</span>
-  <span class="step-lbl" id="step-lbl">전체 후보 로드</span>
+</div>
+
+<!-- BODY -->
+<div class="body">
+  <div class="table-area" id="table-area">
+    <div class="table-wrap" id="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="sortable" onclick="setSort('handle')">인플루언서</th>
+            <th class="sortable" onclick="setSort('followers')">팔로워</th>
+            <th class="sortable" onclick="setSort('status')">상태</th>
+            <th>단가 (원본)</th>
+            <th>협상 후 단가</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="6">
+            <div class="center-msg"><div class="spinner"></div><div>데이터 로드 중...</div></div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pag-row" id="pag-row"></div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-head">
+      <div>
+        <div class="detail-handle" id="dp-handle">—</div>
+        <div class="detail-platform" id="dp-platform"></div>
+      </div>
+      <button class="close-btn" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="detail-body" id="dp-body"></div>
+  </div>
 </div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────────────────────
-const INF = [
-  {id:1,  handle:'@scalp_unni',   name:'두피언니',     platform:'TikTok',     cat:'두피케어', followers:342000, engage:5.8, fee:'₩ 120만'},
-  {id:2,  handle:'@hairlab_kr',   name:'헤어랩',       platform:'Instagram',  cat:'두피케어', followers:128000, engage:4.2, fee:'₩ 85만'},
-  {id:3,  handle:'@kbeauty_hair', name:'케이뷰티헤어', platform:'TikTok',     cat:'두피케어', followers:287000, engage:5.1, fee:'₩ 105만'},
-  {id:4,  handle:'@dailyhair_j',  name:'데일리헤어',   platform:'Instagram',  cat:'두피케어', followers:52000,  engage:6.1, fee:'₩ 40만'},
-  {id:5,  handle:'@scalp_pro',    name:'두피전문가',   platform:'YouTube',    cat:'두피케어', followers:156000, engage:3.7, fee:'₩ 150만'},
-  {id:6,  handle:'@beauty_farm',  name:'뷰티팜',       platform:'Instagram',  cat:'두피케어', followers:33000,  engage:7.8, fee:'₩ 30만'},
-  {id:7,  handle:'@hair_science', name:'헤어사이언스', platform:'Instagram',  cat:'두피케어', followers:195000, engage:3.9, fee:'₩ 130만'},
-  {id:8,  handle:'@beautymd_hn',  name:'뷰티MD현남',   platform:'YouTube',    cat:'헤어케어', followers:89000,  engage:3.1, fee:'₩ 200만'},
-  {id:9,  handle:'@hair_diary',   name:'헤어다이어리', platform:'Instagram',  cat:'헤어케어', followers:67000,  engage:5.4, fee:'₩ 55만'},
-  {id:10, handle:'@daily_mane',   name:'데일리메인',   platform:'TikTok',     cat:'헤어케어', followers:445000, engage:6.3, fee:'₩ 180만'},
-  {id:11, handle:'@mane_story',   name:'메인스토리',   platform:'YouTube',    cat:'헤어케어', followers:78000,  engage:4.4, fee:'₩ 110만'},
-  {id:12, handle:'@kocbeauty',    name:'코크뷰티',     platform:'TikTok',     cat:'두피케어', followers:210000, engage:4.9, fee:'₩ 95만'},
-];
+// ── CONFIG ──────────────────────────────────────────────────────────
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/10LJ7fHfOzwRQYUf851Vo5ZWI25Dlu_zPk9JJKzMbF7k/export?format=csv&gid=0';
+const PAGE_SIZE = 60;
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
+// ── STATUS MAP ──────────────────────────────────────────────────────
+const SM = {
+  'Agree':            {c:'#18C774', bg:'rgba(24,199,116,.14)', k:'agree', lbl:'동의'},
+  'Nego':             {c:'#F57C35', bg:'rgba(245,124,53,.14)', k:'nego',  lbl:'협상중'},
+  'Follow up':        {c:'#F0A500', bg:'rgba(240,165,0,.14)',  k:'fup',   lbl:'팔로업'},
+  'Reply':            {c:'#36AEFF', bg:'rgba(54,174,255,.14)', k:'reply', lbl:'회신'},
+  'Give Ratecard':    {c:'#36AEFF', bg:'rgba(54,174,255,.14)', k:'rc',    lbl:'단가 제시'},
+  'Question':         {c:'#9B7FFF', bg:'rgba(155,127,255,.14)',k:'q',     lbl:'문의'},
+  'Approach Kbeauty': {c:'#5A7090', bg:'rgba(90,112,144,.12)', k:'app',   lbl:'접근'},
+  'Approach Staff':   {c:'#5A7090', bg:'rgba(90,112,144,.12)', k:'app',   lbl:'접근(스태프)'},
+  'Approach':         {c:'#5A7090', bg:'rgba(90,112,144,.12)', k:'app',   lbl:'접근'},
+  'Reject':           {c:'#F04A5A', bg:'rgba(240,74,90,.12)',  k:'rej',   lbl:'거절'},
+  'Non USA':          {c:'#F04A5A', bg:'rgba(240,74,90,.12)',  k:'rej',   lbl:'비미국'},
+  'Wrong Email':      {c:'#F04A5A', bg:'rgba(240,74,90,.12)',  k:'rej',   lbl:'잘못된 이메일'},
+};
+
+function getSC(s){ return SM[s] || {c:'#3E4A60', bg:'rgba(62,74,96,.08)', k:'', lbl: s || '—'}; }
+
+// ── STATE ────────────────────────────────────────────────────────────
+let allData      = [];
+let filteredData = [];
 let activeFilter = 'all';
-let activeSort   = null;
-let selected     = new Set();
-// stage: 0=idle, 1=1차컨택, 2=조건협의, 3=최종확인, 4=스탠바이, 5=완료, -1=거절
-let stages       = {};
-INF.forEach(r => { stages[r.id] = 0; });
+let searchQ      = '';
+let sortCol      = null;
+let sortDir      = 1;
+let page         = 0;
+let selectedIdx  = -1;
+let ratecardKey  = null;
 
-let demoStep  = 0;
-let playing   = false;
-let autoTimer = null;
+// ── PARSE FOLLOWERS ──────────────────────────────────────────────────
+function parseFollowers(s){
+  if(!s) return 0;
+  s = s.trim();
+  if(/^\d+,\d+K$/i.test(s)) return Math.round(parseFloat(s.replace(',','.').replace(/K/i,''))*1000);
+  s = s.replace(/,/g,'');
+  if(/\d+\.?\d*M$/i.test(s)) return Math.round(parseFloat(s)*1000000);
+  if(/\d+\.?\d*K$/i.test(s)) return Math.round(parseFloat(s)*1000);
+  return parseInt(s)||0;
+}
 
-// ── DEMO SEQUENCE ──────────────────────────────────────────────────────────────
-const STEPS = [
-  {
-    t: 0,
-    label: '전체 후보 로드',
-    action() {}
-  },
-  {
-    t: 18,
-    label: '두피케어 필터 적용',
-    action() {
-      setFilter('두피케어', true);
-      toast('두피케어 카테고리 필터 적용됨', 'info');
-    }
-  },
-  {
-    t: 42,
-    label: '팔로워 기준 정렬',
-    action() {
-      setSort('followers', true);
-      toast('팔로워 수 기준 내림차순 정렬', 'info');
-    }
-  },
-  {
-    t: 66,
-    label: '조건 맞는 인플루언서 선택',
-    action() {
-      selectIds([1, 3, 12, 2], true);
-    }
-  },
-  {
-    t: 95,
-    label: '협상 시작 — 1차 컨택 발송',
-    action() {
-      document.getElementById('btn-start').classList.add('pulse');
-      setTimeout(() => {
-        document.getElementById('btn-start').classList.remove('pulse');
-        startNeg(true);
-      }, 600);
-    }
-  },
-  {
-    t: 120,
-    label: '조건 회신 수신',
-    action() {
-      [1, 3].forEach(id => setStage(id, 2));
-      toast('@scalp_unni, @kbeauty_hair 조건 회신 도착', 'warn');
-    }
-  },
-  {
-    t: 148,
-    label: '최종 확인 진행 중',
-    action() {
-      setStage(1, 3);
-      setStage(12, 2);
-      toast('@scalp_unni 최종 조건 확인 단계', 'info');
-    }
-  },
-  {
-    t: 168,
-    label: '스탠바이 확정',
-    action() {
-      setStage(1,  4);
-      setStage(3,  4);
-      setStage(2,  3);
-      toast('@scalp_unni @kbeauty_hair — 스탠바이 전환 완료 ✓');
+function fmtN(n){
+  if(!n) return '—';
+  if(n>=1000000) return (n/1000000).toFixed(1)+'M';
+  if(n>=1000)    return (n/1000).toFixed(n>=10000?0:1)+'K';
+  return String(n);
+}
+
+function escHTML(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function shortPrice(s){
+  if(!s) return '—';
+  const first = s.split('\n')[0].trim();
+  return first.length > 28 ? first.substring(0,28)+'…' : first || '—';
+}
+
+// ── LOAD DATA ─────────────────────────────────────────────────────────
+function loadData(){
+  Papa.parse(SHEET_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete(res){
+      if(!res.data.length){ showEmpty('데이터가 없습니다'); return; }
+      const keys = Object.keys(res.data[0]);
+      ratecardKey = keys.find(k => k.toLowerCase().includes('ratecard'));
+
+      allData = res.data.map(r => ({
+        handle:      (r['Influencer ID [Please do not add @]']||'').trim(),
+        url:         (r['URL']||'').trim(),
+        followersRaw:(r['Followers']||'').trim(),
+        followers:    parseFollowers(r['Followers']||''),
+        status:      (r['Status']||'').trim(),
+        ratecard:    ratecardKey ? (r[ratecardKey]||'').trim() : '',
+        afterNego:   (r['AFTER NEGO']||'').trim(),
+        contact:     (r['Contact']||'').trim(),
+        contactDM:   (r['Contact DM TT']||'').trim(),
+        outreach:    (r['Outreach Date']||'').trim(),
+        agreement:   (r['Agreement Date']||'').trim(),
+        selection:   (r['Selection']||'').trim(),
+        postingTT:   (r['Posting URL (TT)']||'').trim(),
+        postingIG:   (r['Posting URL (IG)']||'').trim(),
+        views:       (r['Views']||'').trim(),
+        likes:       (r['Likes♥']||r['Likes']||'').trim(),
+        comments:    (r['Comments']||'').trim(),
+        saves:       (r['Saves']||'').trim(),
+      })).filter(r => r.handle);
+
+      applyFilter();
       updateStats();
+    },
+    error(err){
+      showEmpty('로드 실패: ' + err.message);
     }
-  },
-  {
-    t: 180,
-    label: '협상 완료 — 스탠바이 4명 확보',
-    action() {
-      setStage(2,  4);
-      setStage(12, 4);
-      setStage(4, -1);
-      toast('스탠바이 4명 확보 완료. 캠페인 실행 가능 상태', 'info');
-      updateStats();
-    }
-  },
-];
-
-const TOTAL_SEC = 180;
-
-// ── RENDER ────────────────────────────────────────────────────────────────────
-function fmtFollowers(n) {
-  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
-  if (n >= 1000)    return Math.round(n/1000) + 'K';
-  return n;
+  });
 }
 
-function stageInfo(s) {
-  const map = {
-    0:  {cls:'sb-idle', label:'—'},
-    1:  {cls:'sb-c1',   label:'1차 컨택'},
-    2:  {cls:'sb-c2',   label:'조건 협의'},
-    3:  {cls:'sb-c3',   label:'최종 확인'},
-    4:  {cls:'sb-c4',   label:'스탠바이'},
-    5:  {cls:'sb-done', label:'완료'},
-    [-1]:{cls:'sb-rej', label:'거절'},
-  };
-  return map[s] || map[0];
+// ── STATS ─────────────────────────────────────────────────────────────
+function updateStats(){
+  const d = allData;
+  const agree   = d.filter(r => r.status === 'Agree').length;
+  const nego    = d.filter(r => r.status === 'Nego').length;
+  const app     = d.filter(r => r.status.startsWith('Approach')).length;
+  const fup     = d.filter(r => r.status === 'Follow up').length;
+  const rej     = d.filter(r => ['Reject','Non USA','Wrong Email'].includes(r.status)).length;
+
+  set('st-all',   d.length);
+  set('st-agree', agree);
+  set('st-nego',  nego);
+  set('st-app',   app);
+  set('st-fup',   fup);
+  set('st-rej',   rej);
 }
 
-function makeDots(stage) {
-  const total = 4;
-  return Array.from({length: total}, (_, i) => {
-    const stageNum = i + 1;
-    let cls = '';
-    if (stage === -1) cls = 'rejected';
-    else if (stage >= 4) cls = 'done-all';
-    else if (stageNum < stage) cls = 'past';
-    else if (stageNum === stage) cls = 'curr';
-    return `<div class="d ${cls}"></div>`;
-  }).join('');
-}
+function set(id, v){ const el = document.getElementById(id); if(el) el.textContent = v; }
 
-function renderTable() {
-  let list = [...INF];
+// ── FILTER / SORT ─────────────────────────────────────────────────────
+function applyFilter(){
+  let d = [...allData];
 
-  if (activeFilter !== 'all') {
-    list = list.filter(r => r.cat === activeFilter);
+  // status filter
+  switch(activeFilter){
+    case 'agree': d = d.filter(r => r.status === 'Agree'); break;
+    case 'nego':  d = d.filter(r => r.status === 'Nego'); break;
+    case 'fup':   d = d.filter(r => r.status === 'Follow up'); break;
+    case 'app':   d = d.filter(r => r.status.startsWith('Approach')); break;
+    case 'reply': d = d.filter(r => r.status === 'Reply'); break;
+    case 'rc':    d = d.filter(r => r.status === 'Give Ratecard'); break;
+    case 'rej':   d = d.filter(r => ['Reject','Non USA','Wrong Email'].includes(r.status)); break;
   }
 
-  if (activeSort === 'followers') {
-    list.sort((a, b) => b.followers - a.followers);
-  } else if (activeSort === 'engage') {
-    list.sort((a, b) => b.engage - a.engage);
+  // search
+  if(searchQ){
+    const q = searchQ.toLowerCase();
+    d = d.filter(r => r.handle.toLowerCase().includes(q) || r.contact.toLowerCase().includes(q));
   }
 
+  // sort
+  if(sortCol){
+    d.sort((a,b)=>{
+      const av = sortCol==='followers' ? a.followers : (a[sortCol]||'').toLowerCase();
+      const bv = sortCol==='followers' ? b.followers : (b[sortCol]||'').toLowerCase();
+      if(typeof av==='number') return (bv-av)*sortDir;
+      return av<bv ? -sortDir : av>bv ? sortDir : 0;
+    });
+  }
+
+  filteredData = d;
+  page = 0;
+  renderTable();
+  renderPag();
+  set('result-count', filteredData.length.toLocaleString()+'건');
+
+  // update column sort indicators
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+  });
+  if(sortCol){
+    const colMap = {handle:1, followers:2, status:3};
+    const idx = colMap[sortCol];
+    if(idx !== undefined){
+      const th = document.querySelectorAll('thead th')[idx];
+      if(th) th.classList.add(sortDir===1 ? 'sort-asc' : 'sort-desc');
+    }
+  }
+}
+
+// ── RENDER TABLE ──────────────────────────────────────────────────────
+function renderTable(){
+  const start = page * PAGE_SIZE;
+  const rows  = filteredData.slice(start, start + PAGE_SIZE);
   const tbody = document.getElementById('tbody');
-  tbody.innerHTML = list.map((r, ri) => {
-    const isSel = selected.has(r.id);
-    const s     = stages[r.id];
-    const si    = stageInfo(s);
-    const ePct  = Math.round(r.engage / 10 * 100);
-    const isHigh = r.engage >= 5;
 
-    return `<tr id="row-${r.id}" class="${isSel ? 'selected' : ''}" style="animation-delay:${ri*35}ms">
-      <td><div class="cb-wrap"><div class="cb ${isSel?'checked':''}" onclick="toggleRow(${r.id})"></div></div></td>
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="center-msg"><div>검색 결과가 없습니다</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r,i)=>{
+    const sc   = getSC(r.status);
+    const isel = (start+i) === selectedIdx;
+    return `<tr class="${isel?'row-sel':''}" onclick="selectRow(${start+i})">
+      <td>${start+i+1}</td>
       <td>
-        <div class="inf-cell">
-          <div class="inf-handle">${r.handle}</div>
-          <div class="inf-meta">
-            <span class="platform-badge"><span class="pdot ${r.platform}"></span>${r.platform}</span>
-            <span>${r.cat}</span>
-          </div>
+        <div class="handle-line">
+          <span class="handle">@${escHTML(r.handle)}</span>
+          ${r.url ? `<a class="ext-link" href="${escHTML(r.url)}" target="_blank" onclick="event.stopPropagation()">↗</a>` : ''}
         </div>
+        <div class="contact-sub">${escHTML(r.contact)||'—'}</div>
       </td>
-      <td>
-        <div class="num-big">${fmtFollowers(r.followers)}</div>
-      </td>
-      <td>
-        <div class="engage-bar">
-          <div class="num-big">${r.engage}%</div>
-          <div class="engage-track"><div class="engage-fill ${isHigh?'high':''}" style="width:${ePct}%"></div></div>
-        </div>
-      </td>
-      <td><div class="fee-val">${r.fee}</div></td>
-      <td>
-        <div class="stage-cell">
-          <div class="dots">${makeDots(s)}</div>
-          <span class="stage-badge ${si.cls}">${si.label}</span>
-        </div>
-      </td>
+      <td>${r.followersRaw || fmtN(r.followers) || '—'}</td>
+      <td><span class="sbadge" style="color:${sc.c};background:${sc.bg}">${escHTML(sc.lbl)}</span></td>
+      <td class="price-cell">${escHTML(shortPrice(r.ratecard))}</td>
+      <td class="price-cell after">${escHTML(shortPrice(r.afterNego))}</td>
     </tr>`;
   }).join('');
 }
 
-function updateStats() {
-  const vals = Object.values(stages);
-  document.getElementById('st-all').textContent   = INF.length;
-  document.getElementById('st-neg').textContent   = vals.filter(v => v >= 1 && v <= 3).length;
-  document.getElementById('st-stand').textContent = vals.filter(v => v === 4).length;
-  document.getElementById('st-done').textContent  = vals.filter(v => v === 5).length;
-  document.getElementById('st-rej').textContent   = vals.filter(v => v === -1).length;
+// ── PAGINATION ────────────────────────────────────────────────────────
+function renderPag(){
+  const total = Math.ceil(filteredData.length / PAGE_SIZE);
+  const el    = document.getElementById('pag-row');
+  if(total <= 1){ el.innerHTML=''; return; }
+
+  const start = page*PAGE_SIZE+1;
+  const end   = Math.min((page+1)*PAGE_SIZE, filteredData.length);
+
+  // build page buttons (show max 7 page numbers)
+  let pages = '';
+  const WINDOW = 3;
+  for(let p=0; p<total; p++){
+    if(p===0 || p===total-1 || (p>=page-WINDOW && p<=page+WINDOW)){
+      pages += `<button class="pag-num${p===page?' cur':''}" onclick="goPage(${p})">${p+1}</button>`;
+    } else if(p===1 && page-WINDOW>1){
+      pages += `<span class="pag-ellipsis">…</span>`;
+    } else if(p===total-2 && page+WINDOW<total-2){
+      pages += `<span class="pag-ellipsis">…</span>`;
+    }
+  }
+
+  el.innerHTML = `
+    <button class="pag-btn" onclick="goPage(${page-1})" ${page===0?'disabled':''}>← 이전</button>
+    <div class="pag-pages">${pages}</div>
+    <button class="pag-btn" onclick="goPage(${page+1})" ${page>=total-1?'disabled':''}>다음 →</button>
+    <span style="margin-left:auto;color:var(--text2);font-size:11px">${start}–${end} / ${filteredData.length.toLocaleString()}건</span>
+  `;
 }
 
-// ── INTERACTIONS ──────────────────────────────────────────────────────────────
-function setFilter(f, silent) {
+function goPage(p){
+  const total = Math.ceil(filteredData.length / PAGE_SIZE);
+  if(p<0||p>=total) return;
+  page = p;
+  renderTable();
+  renderPag();
+  document.getElementById('table-wrap').scrollTop = 0;
+}
+
+// ── DETAIL PANEL ──────────────────────────────────────────────────────
+function selectRow(idx){
+  selectedIdx = idx;
+  renderTable();
+  const r = filteredData[idx];
+  if(!r) return;
+
+  const sc = getSC(r.status);
+
+  document.getElementById('dp-handle').textContent  = '@' + r.handle;
+  document.getElementById('dp-platform').innerHTML  =
+    `<span class="sbadge" style="color:${sc.c};background:${sc.bg}">${escHTML(sc.lbl)}</span>`;
+
+  const hasMetrics = r.views || r.likes || r.comments || r.saves;
+
+  document.getElementById('dp-body').innerHTML = `
+    <div class="detail-grid">
+      <div>
+        <div class="di-label">팔로워</div>
+        <div class="di-val">${escHTML(r.followersRaw) || fmtN(r.followers) || '—'}</div>
+      </div>
+      <div>
+        <div class="di-label">DM 컨택</div>
+        <div class="di-val">${r.contactDM==='TRUE'?'✓ 완료':'—'}</div>
+      </div>
+      <div>
+        <div class="di-label">컨택 날짜</div>
+        <div class="di-val">${escHTML(r.outreach)||'—'}</div>
+      </div>
+      <div>
+        <div class="di-label">동의 날짜</div>
+        <div class="di-val">${escHTML(r.agreement)||'—'}</div>
+      </div>
+    </div>
+
+    ${r.contact ? `
+    <div class="detail-sec">
+      <div class="detail-sec-label">이메일</div>
+      <div class="detail-sec-val">${escHTML(r.contact)}</div>
+    </div>` : ''}
+
+    ${r.ratecard ? `
+    <div class="detail-sec">
+      <div class="detail-sec-label">단가 카드 (원본)</div>
+      <div class="ratecard-box">${escHTML(r.ratecard)}</div>
+    </div>` : ''}
+
+    ${r.afterNego ? `
+    <div class="detail-sec">
+      <div class="detail-sec-label">협상 후 단가</div>
+      <div class="after-val">${escHTML(r.afterNego).replace(/\n/g,'<br>')}</div>
+    </div>` : ''}
+
+    ${r.url ? `
+    <div class="detail-sec">
+      <div class="detail-sec-label">프로필 링크</div>
+      <a class="detail-link" href="${escHTML(r.url)}" target="_blank">${escHTML(r.url)}</a>
+    </div>` : ''}
+
+    ${r.postingTT ? `
+    <div class="detail-sec">
+      <div class="detail-sec-label">포스팅 URL (TikTok)</div>
+      <a class="detail-link" href="${escHTML(r.postingTT)}" target="_blank">${escHTML(r.postingTT)}</a>
+    </div>` : ''}
+
+    ${r.postingIG ? `
+    <div class="detail-sec">
+      <div class="detail-sec-label">포스팅 URL (Instagram)</div>
+      <a class="detail-link" href="${escHTML(r.postingIG)}" target="_blank">${escHTML(r.postingIG)}</a>
+    </div>` : ''}
+
+    ${hasMetrics ? `
+    <div class="detail-sec">
+      <div class="detail-sec-label">성과 지표</div>
+      <div class="metrics-grid">
+        <div class="metric-card"><div class="metric-lbl">조회수</div><div class="metric-val">${escHTML(r.views)||'—'}</div></div>
+        <div class="metric-card"><div class="metric-lbl">좋아요</div><div class="metric-val">${escHTML(r.likes)||'—'}</div></div>
+        <div class="metric-card"><div class="metric-lbl">댓글</div><div class="metric-val">${escHTML(r.comments)||'—'}</div></div>
+        <div class="metric-card"><div class="metric-lbl">저장</div><div class="metric-val">${escHTML(r.saves)||'—'}</div></div>
+      </div>
+    </div>` : ''}
+  `;
+
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('table-area').classList.add('panel-open');
+}
+
+function closeDetail(){
+  selectedIdx = -1;
+  document.getElementById('detail-panel').classList.remove('open');
+  document.getElementById('table-area').classList.remove('panel-open');
+  renderTable();
+}
+
+// ── FILTER CONTROLS ───────────────────────────────────────────────────
+function setFilter(f){
   activeFilter = f;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  const map = {all:'chip-all', '두피케어':'chip-scalp', '헤어케어':'chip-hair'};
-  document.getElementById(map[f])?.classList.add('active');
-  renderTable();
-  if (!silent) updateStartBtn();
-}
-
-function setSort(key, silent) {
-  activeSort = (activeSort === key) ? null : key;
-  document.getElementById('sort-follow').classList.toggle('active', activeSort === 'followers');
-  document.getElementById('sort-engage').classList.toggle('active',  activeSort === 'engage');
-  renderTable();
-}
-
-function toggleRow(id) {
-  if (selected.has(id)) selected.delete(id);
-  else selected.add(id);
-  renderTable();
-  updateStartBtn();
-}
-
-function toggleAll() {
-  const visible = [...INF].filter(r => activeFilter === 'all' || r.cat === activeFilter);
-  const allSel  = visible.every(r => selected.has(r.id));
-  if (allSel) visible.forEach(r => selected.delete(r.id));
-  else        visible.forEach(r => selected.add(r.id));
-  renderTable();
-  updateStartBtn();
-}
-
-function selectIds(ids, animated) {
-  if (!animated) {
-    ids.forEach(id => selected.add(id));
-    renderTable();
-    updateStartBtn();
-    return;
-  }
-  let i = 0;
-  const go = () => {
-    if (i >= ids.length) { updateStartBtn(); return; }
-    selected.add(ids[i]);
-    const row = document.getElementById(`row-${ids[i]}`);
-    if (row) row.classList.add('row-flash');
-    renderTable();
-    i++;
-    setTimeout(go, 380);
-  };
-  go();
-}
-
-function updateStartBtn() {
-  const btn = document.getElementById('btn-start');
-  btn.disabled = selected.size === 0;
-}
-
-function setStage(id, s) {
-  stages[id] = s;
-  const row = document.getElementById(`row-${id}`);
-  if (row) {
-    row.classList.add('row-flash');
-    const dotsEl  = row.querySelector('.dots');
-    const badgeEl = row.querySelector('.stage-badge');
-    if (dotsEl)  dotsEl.innerHTML  = makeDots(s);
-    if (badgeEl) {
-      const si = stageInfo(s);
-      badgeEl.className = `stage-badge ${si.cls}`;
-      badgeEl.textContent = si.label;
-    }
-    setTimeout(() => row.classList.remove('row-flash'), 600);
-  }
-  updateStats();
-}
-
-function startNeg(silent) {
-  if (selected.size === 0) return;
-  selected.forEach(id => {
-    if (stages[id] === 0) setStage(id, 1);
+  // sync stat cards active state
+  ['all','agree','nego','app','fup','rej'].forEach(k=>{
+    document.getElementById('sc-'+k)?.classList.toggle('active', k===f);
   });
-  if (!silent) toast(`${selected.size}명에게 협상 메시지 발송 완료`);
-  updateStats();
+  // sync chips
+  const chipMap = {all:'all',agree:'agree',nego:'nego',app:'app',fup:'fup',rej:'rej'};
+  if(chipMap[f]) setChip(chipMap[f]);
+  else applyFilter();
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────────────
-function toast(msg, type) {
-  const wrap = document.getElementById('toasts');
-  const el   = document.createElement('div');
-  el.className = `toast${type ? ' ' + type : ''}`;
-  el.textContent = msg;
-  wrap.appendChild(el);
-  setTimeout(() => el.remove(), 3200);
+function setChip(k){
+  activeFilter = k;
+  // deactivate all chips
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('chip-'+k)?.classList.add('active');
+
+  // sync stat cards
+  const statMap = {all:'all',agree:'agree',nego:'nego',app:'app',fup:'fup',rej:'rej'};
+  ['all','agree','nego','app','fup','rej'].forEach(s=>{
+    document.getElementById('sc-'+s)?.classList.toggle('active', statMap[k]===s);
+  });
+
+  closeDetail();
+  applyFilter();
 }
 
-// ── DEMO PLAYBACK ─────────────────────────────────────────────────────────────
-let elapsed   = 0;
-let tickTimer = null;
-
-function applyStep(idx) {
-  demoStep = Math.max(0, Math.min(idx, STEPS.length - 1));
-  const step = STEPS[demoStep];
-  elapsed = step.t;
-  step.action();
-  updatePlayUI();
+function setSearch(q){
+  searchQ = q;
+  page = 0;
+  applyFilter();
 }
 
-function updatePlayUI() {
-  const pct = Math.min(elapsed / TOTAL_SEC * 100, 100);
-  document.getElementById('prog-fill').style.width  = pct + '%';
-  document.getElementById('prog-handle').style.display = 'block';
-  document.getElementById('prog-handle').style.left = `calc(${pct}% - 5px)`;
-
-  const m = Math.floor(elapsed / 60);
-  const s = String(elapsed % 60).padStart(2, '0');
-  document.getElementById('time-lbl').textContent = `${m}:${s} / 3:00`;
-  document.getElementById('step-lbl').textContent = STEPS[demoStep].label;
+function setSort(col){
+  if(sortCol===col) sortDir *= -1;
+  else { sortCol=col; sortDir=1; }
+  applyFilter();
 }
 
-function prevStep() {
-  stopPlay();
-  if (demoStep > 0) applyStep(demoStep - 1);
+function showEmpty(msg){
+  document.getElementById('tbody').innerHTML =
+    `<tr><td colspan="6"><div class="center-msg"><div>${escHTML(msg)}</div></div></td></tr>`;
 }
 
-function nextStep() {
-  stopPlay();
-  if (demoStep < STEPS.length - 1) applyStep(demoStep + 1);
-}
-
-function togglePlay() {
-  playing ? stopPlay() : startPlay();
-}
-
-function startPlay() {
-  playing = true;
-  document.getElementById('play-btn').textContent = '⏸';
-  document.getElementById('play-btn').classList.add('active-play');
-
-  tickTimer = setInterval(() => {
-    elapsed++;
-    if (elapsed > TOTAL_SEC) { stopPlay(); elapsed = TOTAL_SEC; updatePlayUI(); return; }
-
-    // check if next step should fire
-    if (demoStep < STEPS.length - 1) {
-      const next = STEPS[demoStep + 1];
-      if (elapsed >= next.t) {
-        demoStep++;
-        next.action();
-      }
-    }
-    updatePlayUI();
-  }, 1000);
-}
-
-function stopPlay() {
-  playing = false;
-  clearInterval(tickTimer);
-  tickTimer = null;
-  document.getElementById('play-btn').textContent = '▶';
-  document.getElementById('play-btn').classList.remove('active-play');
-}
-
-function seekDemo(e) {
-  const track = e.currentTarget;
-  const rect  = track.getBoundingClientRect();
-  const pct   = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  const target = Math.round(pct * TOTAL_SEC);
-  stopPlay();
-
-  // reset to base state then fast-forward
-  selected.clear();
-  INF.forEach(r => { stages[r.id] = 0; });
-  activeFilter = 'all'; setFilter('all', true);
-  activeSort = null;
-
-  let lastStep = 0;
-  for (let i = 0; i < STEPS.length; i++) {
-    if (STEPS[i].t <= target) { lastStep = i; STEPS[i].action(); }
-    else break;
-  }
-  demoStep = lastStep;
-  elapsed  = target;
-  renderTable();
-  updateStats();
-  updatePlayUI();
-}
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-renderTable();
-updateStats();
-updatePlayUI();
+// ── INIT ──────────────────────────────────────────────────────────────
+loadData();
 </script>
 </body>
 </html>
