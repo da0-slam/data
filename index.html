@@ -165,6 +165,29 @@
   .dl-notice.active { display: flex; }
   .btn-dl { background: none; border: 1px solid rgba(245,158,11,.3); color: #D4A04A; border-radius: 4px; padding: 4px 12px; font-size: 11px; cursor: pointer; white-space: nowrap; margin-left: auto; }
 
+  /* SHOT GUIDE */
+  .shot-guide { border-top: 1px solid var(--border); padding: 14px 16px; }
+  .shot-guide-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+  .shot-frames { display: flex; gap: 8px; }
+  .shot-frame { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .shot-img-wrap { aspect-ratio: 9/16; border-radius: 6px; overflow: hidden; position: relative; background: var(--surface2); border: 1px solid var(--border); }
+  .shot-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .shot-canvas-fallback { position: absolute; inset: 0; }
+  .shot-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 6px; background: linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 55%); }
+  .shot-overlay-label { font-size: 9px; font-weight: 700; color: #fff; letter-spacing: .4px; line-height: 1.3; }
+  .shot-num { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,.6); color: #fff; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+  .shot-caption { font-size: 10px; color: var(--text-3); line-height: 1.3; text-align: center; }
+
+  /* REF STRIP */
+  .ref-strip { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r); padding: 14px 16px; margin-bottom: 20px; }
+  .ref-strip-label { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+  .ref-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .ref-thumb { flex-shrink: 0; width: 64px; cursor: pointer; }
+  .ref-thumb.active .ref-thumb-img { border-color: var(--orange); }
+  .ref-thumb-img { aspect-ratio: 9/16; border-radius: 6px; overflow: hidden; border: 1.5px solid transparent; transition: border-color .15s; }
+  .ref-thumb-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ref-thumb-name { font-size: 9px; color: var(--text-3); margin-top: 3px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
   /* ORIGINAL HOOK BOX */
   .hook-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: var(--r); padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: var(--text-2); line-height: 1.7; font-style: italic; }
 
@@ -182,8 +205,6 @@
   <div class="brand"><div class="brand-dot"></div> BRANDSLAM Suite</div>
   <div class="nav-tabs">
     <button class="nav-tab active">① 성공가이드 생성</button>
-    <button class="nav-tab">② OWM 랭킹보드</button>
-    <button class="nav-tab">③ 인플루언서 마켓플레이스</button>
   </div>
   <span class="nav-badge">DEV PROTOTYPE · live data</span>
 </nav>
@@ -285,15 +306,23 @@
   <div class="page-title">스크립트 추출 + USP 결합</div>
   <div class="page-desc">밈조사에서 선택한 영상의 스크립트를 기반으로, 브랜드 USP를 입력하면 A안·B안·C안 3가지 응용 스크립트를 즉시 생성합니다.</div>
 
-  <div class="section-label">선택된 레퍼런스 영상</div>
+  <div class="section-label">레퍼런스 영상 선택</div>
+  <div class="ref-strip">
+    <div class="ref-strip-label">밈조사 상위 영상 — 클릭해서 선택</div>
+    <div class="ref-thumbs" id="ref-thumbs-row"></div>
+  </div>
+
   <div class="selected-video-mini" id="sel-mini">
-    <div class="mini-thumb"><canvas id="mini-cvs" width="48" height="64"></canvas></div>
+    <div class="mini-thumb">
+      <img id="mini-cover-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;display:none;border-radius:6px">
+      <canvas id="mini-cvs" width="48" height="64" style="border-radius:6px"></canvas>
+    </div>
     <div style="flex:1;min-width:0">
       <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="mini-title">—</div>
       <div style="font-size:12px;color:var(--text-2)" id="mini-creator">—</div>
       <div style="font-size:12px;color:var(--text-3);margin-top:2px" id="mini-metrics">—</div>
     </div>
-    <button class="btn-ghost" onclick="goStep(1)" style="font-size:12px;padding:6px 12px;white-space:nowrap">영상 바꾸기</button>
+    <a id="mini-link" href="#" target="_blank" style="font-size:11px;color:var(--text-3);text-decoration:none;white-space:nowrap;margin-left:8px">TikTok 열기 ↗</a>
   </div>
 
   <div class="section-label">원본 후킹 포인트</div>
@@ -330,16 +359,16 @@
 <script>
 // ══ REAL DATA (US — top 10 by engagement, from Google Sheets) ══
 const US_DATA = [
-  {rank:1,creator:"isabella.fruto01",nickname:"isabella.fruto01",title:"Healthy hair starts with a healthy scalp ✨🫧 I've been loving how fresh and clean my scalp feels...",hook:"Healthy hair starts with a healthy scalp ✨🫧 I've been loving how fresh and clean my scalp feels after using this — 8.2K views, 34.4% engagement",tags:["alivelab","scalpcare","healthyscalp","haircareroutine","kbeauty"],views:"8.2K",plays:8200,diggs:2100,engage:"34.4%",dur:"0:32",url:"https://www.tiktok.com/@isabella.fruto01/video/7660328583067454751",colors:["#0f2027","#203a43","#2c5364"]},
-  {rank:2,creator:"northernfindsandfaves",nickname:"northernfindsandfaves",title:"I've been adding more scalp care into my routine lately, and this one definitely caught my attention ✨",hook:"I've been adding more scalp care into my routine lately, and this one definitely caught my attention. ✨ This P...",tags:["tiktokshopfinds","dealsforyoudays","haircareroutine","hairserum","summerwins"],views:"257",plays:257,diggs:35,engage:"18.3%",dur:"0:17",url:"https://www.tiktok.com/@northernfindsandfaves/video/7652531858109893902",colors:["#1a1a2e","#c94b4b","#4b134f"]},
-  {rank:3,creator:"kimberlycherrell",nickname:"Kimberly Cherrell",title:"Here is my scalp care routine 😊 ~PEPTIDES~ @CÉCRED edge drops OR @VEGAMOUR Growth Serum",hook:"Replying to @Genesis Dezeree$$ Here is my scalp care routine 😊  ~PEPTIDES~ @CÉCRED edge drops OR @VEGAMOUR Gr...",tags:["scalpcare","hairroutine","peptides"],views:"24.6K",plays:24600,diggs:2100,engage:"11.4%",dur:"3:16",url:"https://www.tiktok.com/@kimberlycherrell/video/7660153946786368781",colors:["#2d6a4f","#40916c","#1b4332"]},
-  {rank:4,creator:"sasainseoul",nickname:"sasa",title:"Korean hair care routine — This is my go-to shampoo and real remedies! Partnered with @Dr.FORHAIR",hook:"Korean hair care routine This is my go-to shampoo and my real remedies! This is partnered with @Dr.FORHAIR  [...]",tags:["drforhair","folligenshampoo","folligenserum","hairloss","hairgrowth"],views:"175.2K",plays:175200,diggs:13000,engage:"10%",dur:"2:22",url:"https://www.tiktok.com/@sasainseoul/video/7651642764525899028",colors:["#c94b4b","#4b134f","#2d1b69"]},
-  {rank:5,creator:"abbeyjbenson",nickname:"Abbey 🤍",title:"5 Tips for Scalp Health that will help transform and grow your hair",hook:"5 Tips for Scalp Health that will help transform and grow your hair #scalphealth #hairtransformation #healthyh...",tags:["scalphealth","hairtransformation","healthyhairtips","hairgrowthtips","scalpcare","hairjourney"],views:"2.4M",plays:2400000,diggs:167000,engage:"9.3%",dur:"3:54",url:"https://www.tiktok.com/@abbeyjbenson/video/7476860247278193966",colors:["#134e5e","#71b280","#1a1a2e"]},
-  {rank:6,creator:"sofiahairhealth",nickname:"Sofia Sevilla 💖",title:"4 scalp care tips 💆🏻‍♀️✨ #hairgrowth #hairthinning #hairroutine #hairloss #femalepatternhairloss",hook:"4 scalp care tips 💆🏻‍♀️✨ — hairgrowth, hairthinning, hairroutine, hairloss, femalepatternhairloss",tags:["hairgrowth","hairthinning","hairroutine","hairloss","femalepatternhairloss"],views:"194.9K",plays:194900,diggs:12500,engage:"8.5%",dur:"2:17",url:"https://www.tiktok.com/@sofiahairhealth/video/7582642998106688790",colors:["#8360c3","#2ebf91","#134e5e"]},
-  {rank:7,creator:"allybiochemist",nickname:"Dr Ally | Biochemist",title:"Five things that are worth the money — scalp health edition!",hook:"five things that are worth the money, scalp health edition!  what are your go to haircare products to keep you...",tags:["haircaretips","scalpcare","haircareroutine","scalphealth","hairtips"],views:"4.5K",plays:4500,diggs:284,engage:"8.4%",dur:"0:10",url:"https://www.tiktok.com/@allybiochemist/video/7664679812467887381",colors:["#0f3460","#e94560","#1a1a2e"]},
-  {rank:8,creator:"carolineloves.you",nickname:"caroline",title:"just moisturize your scalp pleaseeeee /ad",hook:"just moisturize your scalp pleaseeeee /ad",tags:["scalpcare","haircare","moisturize"],views:"205.2K",plays:205200,diggs:12700,engage:"8.1%",dur:"0:21",url:"https://www.tiktok.com/@carolineloves.you/video/7468228314403065110",colors:["#fc5c7d","#6a3093","#1a1a2e"]},
-  {rank:9,creator:"ava.roxana",nickname:"Ava 🐆",title:"The one I swear by @epais Scalp Boosting Ampoule #hair #scalpcare #hairtransformation #EPAIS",hook:"The one l swear by @epais Scalp Boosting Ampoule #hair#scalpcare#hairtransformation #EPAIS #ScalpBoostingAmpou...",tags:["hair","scalpcare","hairtransformation","epais","scalpboostingampoule"],views:"182.4K",plays:182400,diggs:10800,engage:"7.9%",dur:"0:39",url:"https://www.tiktok.com/@ava.roxana/video/7657403460542844191",colors:["#f953c6","#b91d73","#2d1b69"]},
-  {rank:10,creator:"abbeyyung",nickname:"Abbey Yung",title:"Top 5 scalp serums — officially adding to The Abbey Yung Method! 8 months of research",hook:"Here are my top 5 recommendations for scalp serums that I am officially adding to The Abbey Yung Method! I've spent the last 8+ months...",tags:["scalpserum","scalphealth","hairloss","hairgrowth","abbeyyungmethod"],views:"90.6K",plays:90600,diggs:5800,engage:"7.7%",dur:"2:55",url:"https://www.tiktok.com/@abbeyyung/video/7655442788594519326",colors:["#1a1a2e","#e94560","#0f3460"]}
+  {rank:1,creator:"isabella.fruto01",nickname:"isabella.fruto01",title:"Healthy hair starts with a healthy scalp ✨🫧 I've been loving how fresh and clean my scalp feels...",hook:"Healthy hair starts with a healthy scalp ✨🫧 I've been loving how fresh and clean my scalp feels after using this",tags:["alivelab","scalpcare","healthyscalp","haircareroutine","kbeauty"],views:"8.2K",plays:8200,diggs:2100,engage:"34.4%",dur:"0:32",url:"https://www.tiktok.com/@isabella.fruto01/video/7660328583067454751",colors:["#0f2027","#203a43","#2c5364"],cover:"https://p16-common-sign.tiktokcdn.com/tos-useast8-p-0068-tx2/oggfQUcGJGAF9efvZ8LIQGpFdRvAIFaOQgeDOI~tplv-tiktokx-origin.image?dr=14575&x-expires=1785031200&x-signature=4N9XJS0YMoOmchfIQ2sO3MiMo3g%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my2"},
+  {rank:2,creator:"northernfindsandfaves",nickname:"northernfindsandfaves",title:"I've been adding more scalp care into my routine lately, and this one definitely caught my attention ✨",hook:"I've been adding more scalp care into my routine lately, and this one definitely caught my attention ✨",tags:["tiktokshopfinds","dealsforyoudays","haircareroutine","hairserum","summerwins"],views:"257",plays:257,diggs:35,engage:"18.3%",dur:"0:17",url:"https://www.tiktok.com/@northernfindsandfaves/video/7652531858109893902",colors:["#1a1a2e","#c94b4b","#4b134f"],cover:"https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/ogAHfJUUAgjRQ9aIXoABaIQMmA7kZApEew8enU~tplv-tiktokx-dmt-logom:tos-useast5-i-0068-tx/oEDbAq0CRaEEE8FRrMQAerAS2ggfE9omABMInD.image?dr=9634&x-expires=1785031200&x-signature=CLsMegnBNmFJ%2F%2F8BjDDjalj%2BUnM%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8"},
+  {rank:3,creator:"kimberlycherrell",nickname:"Kimberly Cherrell",title:"Here is my scalp care routine 😊 ~PEPTIDES~ @CÉCRED edge drops OR @VEGAMOUR Growth Serum",hook:"Here is my scalp care routine 😊  ~PEPTIDES~ @CÉCRED edge drops OR @VEGAMOUR Growth Serum — 3:16 full routine breakdown",tags:["scalpcare","hairroutine","peptides"],views:"24.6K",plays:24600,diggs:2100,engage:"11.4%",dur:"3:16",url:"https://www.tiktok.com/@kimberlycherrell/video/7660153946786368781",colors:["#2d6a4f","#40916c","#1b4332"],cover:"https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/oss2fABT7VBDXiR9qO8eVASEgEDOCb0IAA1lix~tplv-tiktokx-dmt-logom:tos-useast5-i-0068-tx/oUlE7TABGFzqACSAeqy9RJgAVEEtfDzDIOVX1w.image?dr=9634&x-expires=1785031200&x-signature=RHSeoWURyMgNZjmlToHTQGkuWcA%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5"},
+  {rank:4,creator:"sasainseoul",nickname:"sasa",title:"Korean hair care routine — This is my go-to shampoo and real remedies! Partnered with @Dr.FORHAIR",hook:"Korean hair care routine This is my go-to shampoo and my real remedies! Partnered with @Dr.FORHAIR",tags:["drforhair","folligenshampoo","folligenserum","hairloss","hairgrowth"],views:"175.2K",plays:175200,diggs:13000,engage:"10%",dur:"2:22",url:"https://www.tiktok.com/@sasainseoul/video/7651642764525899028",colors:["#c94b4b","#4b134f","#2d1b69"],cover:"https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oYseAwiEBOEzMAIqAYAIRGkFdfAmw6EcBDBCgg~tplv-tiktokx-origin.image?dr=9636&x-expires=1785031200&x-signature=etu%2Bl2ddzh4kqu5Wht4SeMzvYuo%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast5"},
+  {rank:5,creator:"abbeyjbenson",nickname:"Abbey 🤍",title:"5 Tips for Scalp Health that will help transform and grow your hair",hook:"5 Tips for Scalp Health that will help transform and grow your hair — scalphealth hairtransformation healthyhairtips",tags:["scalphealth","hairtransformation","healthyhairtips","hairgrowthtips","scalpcare","hairjourney"],views:"2.4M",plays:2400000,diggs:167000,engage:"9.3%",dur:"3:54",url:"https://www.tiktok.com/@abbeyjbenson/video/7476860247278193966",colors:["#134e5e","#71b280","#1a1a2e"],cover:"https://p16-common-sign.tiktokcdn-us.com/tos-useast5-p-0068-tx/oMJAjBZ8k4A9PiuAkikoDGxE1EDAPBMKSgdDI~tplv-tiktokx-origin.image?dr=9636&x-expires=1785031200&x-signature=22zJ%2FtzOUt3ODmM6VsRMEdW8dLo%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8"},
+  {rank:6,creator:"sofiahairhealth",nickname:"Sofia Sevilla 💖",title:"4 scalp care tips 💆🏻‍♀️✨ — hairgrowth hairthinning hairroutine hairloss femalepatternhairloss",hook:"4 scalp care tips 💆🏻‍♀️✨ — hairgrowth, hairthinning, hairroutine, hairloss, femalepatternhairloss",tags:["hairgrowth","hairthinning","hairroutine","hairloss","femalepatternhairloss"],views:"194.9K",plays:194900,diggs:12500,engage:"8.5%",dur:"2:17",url:"https://www.tiktok.com/@sofiahairhealth/video/7582642998106688790",colors:["#8360c3","#2ebf91","#134e5e"],cover:"https://p16-common-sign.tiktokcdn-us.com/tos-no1a-p-0037-no/o4RCEA6ERkWfBWAa9gAvZIAOEASpfqD90maFFC~tplv-tiktokx-dmt-logom:tos-no1a-i-0068-no/oArtIQQNLGA067AtAeLKWGkABReAgK06Q1ef1I.image?dr=9634&x-expires=1785031200&x-signature=WYRoby%2FCmt532LTsFDL9ETVwPso%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8"},
+  {rank:7,creator:"allybiochemist",nickname:"Dr Ally | Biochemist",title:"Five things that are worth the money — scalp health edition!",hook:"five things that are worth the money, scalp health edition! what are your go to haircare products?",tags:["haircaretips","scalpcare","haircareroutine","scalphealth","hairtips"],views:"4.5K",plays:4500,diggs:284,engage:"8.4%",dur:"0:10",url:"https://www.tiktok.com/@allybiochemist/video/7664679812467887381",colors:["#0f3460","#e94560","#1a1a2e"],cover:"https://p19-common-sign.tiktokcdn.com/tos-alisg-p-0037/oUa7QLIIIQCIAmv0NeeN6ArAjAzVUG4eDA2bEP~tplv-tiktokx-origin.image?dr=14575&x-expires=1785031200&x-signature=sHP2P6Qr21prifVd6LoDND6IVDc%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my2"},
+  {rank:8,creator:"carolineloves.you",nickname:"caroline",title:"just moisturize your scalp pleaseeeee /ad",hook:"just moisturize your scalp pleaseeeee /ad",tags:["scalpcare","haircare","moisturize"],views:"205.2K",plays:205200,diggs:12700,engage:"8.1%",dur:"0:21",url:"https://www.tiktok.com/@carolineloves.you/video/7468228314403065110",colors:["#fc5c7d","#6a3093","#1a1a2e"],cover:"https://p16-common-sign.tiktokcdn.com/tos-no1a-p-0037-no/oIFFoEDKFAYhp9IeARiAACFEK35IQkAfgnHXGE~tplv-tiktokx-origin.image?dr=14575&x-expires=1785031200&x-signature=EWvWgbQb2WPyRw%2F0yg69ZBEKDXc%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my2"},
+  {rank:9,creator:"ava.roxana",nickname:"Ava 🐆",title:"The one I swear by @epais Scalp Boosting Ampoule #hair #scalpcare #hairtransformation",hook:"The one I swear by @epais Scalp Boosting Ampoule #hair #scalpcare #hairtransformation #EPAIS",tags:["hair","scalpcare","hairtransformation","epais","scalpboostingampoule"],views:"182.4K",plays:182400,diggs:10800,engage:"7.9%",dur:"0:39",url:"https://www.tiktok.com/@ava.roxana/video/7657403460542844191",colors:["#f953c6","#b91d73","#2d1b69"],cover:"https://p16-common-sign.tiktokcdn.com/tos-useast8-p-0068-tx2/oMQAQUa8j9jIaARGdHEpfAXfeAeMFCAQA4Y2JJ~tplv-tiktokx-origin.image?dr=14575&x-expires=1785031200&x-signature=wans3s4OOrqOsqTxJMoPvIxGXTA%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=my2"},
+  {rank:10,creator:"abbeyyung",nickname:"Abbey Yung",title:"Top 5 scalp serums — officially adding to The Abbey Yung Method! 8 months of research",hook:"Here are my top 5 recommendations for scalp serums that I am officially adding to The Abbey Yung Method! I've spent the last 8+ months researching...",tags:["scalpserum","scalphealth","hairloss","hairgrowth","abbeyyungmethod"],views:"90.6K",plays:90600,diggs:5800,engage:"7.7%",dur:"2:55",url:"https://www.tiktok.com/@abbeyyung/video/7655442788594519326",colors:["#1a1a2e","#e94560","#0f3460"],cover:"https://p16-common-sign.tiktokcdn-us.com/tos-useast8-p-0068-tx2/o0sW7AffzUDdQIQoJeLeQFAJ7MrhFCIoGYG1RP~tplv-tiktokx-origin.image?dr=9636&x-expires=1785031200&x-signature=3TRUscggHsHTKqdBpm0Gm1isijk%3D&t=4d5b0474&ps=13740610&shp=81f88b70&shcp=43f4a2f9&idc=useast8"}
 ];
 
 const SCRIPTS = {
@@ -431,11 +460,12 @@ function renderCards(data) {
     card.onclick=()=>selectVideo(v,card);
     const avC=AV_COLORS[i%AV_COLORS.length];
     card.innerHTML=`
-      <div class="card-thumb">
-        <canvas width="240" height="360" style="width:100%;height:100%;display:block"></canvas>
-        <span class="card-rank">#${i+1}</span>
-        <span class="card-duration">${v.dur}</span>
-        <span class="card-platform">TikTok</span>
+      <div class="card-thumb" style="position:relative">
+        <canvas width="240" height="360" style="width:100%;height:100%;display:block;position:absolute;top:0;left:0"></canvas>
+        <img src="${v.cover||''}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
+        <span class="card-rank" style="z-index:2">#${i+1}</span>
+        <span class="card-duration" style="z-index:2">${v.dur}</span>
+        <span class="card-platform" style="z-index:2">TikTok</span>
       </div>
       <div class="card-body">
         <div class="card-creator"><span class="creator-av" style="background:${avC}">${v.creator[0].toUpperCase()}</span>@${v.creator}</div>
@@ -522,10 +552,142 @@ function generateScripts(){
   },2800);
 }
 
+// Shot guide definitions per script type
+const SHOT_GUIDES = {
+  A: [
+    {label:"① 공감 오프닝", desc:"얼굴 정면 미디엄샷\n'저도 그랬어요' 표정"},
+    {label:"② 문제 시각화", desc:"두피·모근 클로즈업\n탈모 부위 직접 보여주기"},
+    {label:"③ 제품 솔루션", desc:"제품 적용 루틴\n손+두피 클로즈업"}
+  ],
+  B: [
+    {label:"① 전문가 포즈", desc:"반신샷 + 제품 들고\n설명하는 포즈"},
+    {label:"② 성분 클로즈업", desc:"라벨·패키지 클로즈업\n핵심 성분 텍스트 강조"},
+    {label:"③ 데이터 오버레이", desc:"수치·% 텍스트 삽입\n'임상 결과' 화면컷"}
+  ],
+  C: [
+    {label:"① 비포 클로즈업", desc:"정수리·두피 비포샷\n문제 상태 정직하게"},
+    {label:"② 사용 과정", desc:"제품 도포 장면\n두피 마사지 루틴"},
+    {label:"③ 애프터 비교", desc:"개선 후 두피·볼륨\n'이 정도 변했어요' 컷"}
+  ]
+};
+
+// Canvas shot composition drawings
+function drawShotComp(cvs, type, idx) {
+  const ctx=cvs.getContext('2d'), w=cvs.width, h=cvs.height;
+  ctx.fillStyle='#12121A'; ctx.fillRect(0,0,w,h);
+  // frame border
+  ctx.strokeStyle='rgba(249,115,22,0.3)'; ctx.lineWidth=1;
+  ctx.strokeRect(1,1,w-2,h-2);
+  // rule-of-thirds guides
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=.5;
+  [w/3,w*2/3].forEach(x=>{ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();});
+  [h/3,h*2/3].forEach(y=>{ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();});
+
+  ctx.fillStyle='rgba(249,115,22,0.15)';
+  const drawings = {
+    A: [
+      ()=>{ // face medium shot
+        ctx.fillStyle='#2a2a3e'; ctx.beginPath(); ctx.ellipse(w/2,h*.38,w*.18,h*.14,0,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#1e1e2e'; ctx.beginPath(); ctx.ellipse(w/2,h*.62,w*.22,h*.22,0,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(249,115,22,0.6)'; ctx.fillRect(w*.1,h*.82,w*.8,1.5);
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.1}px system-ui`; ctx.textAlign='center'; ctx.fillText('MEDIUM',w/2,h*.93);
+      },
+      ()=>{ // scalp closeup
+        ctx.fillStyle='#2a1a1a';
+        for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo(w*.2+i*w*.12,h*.25);ctx.bezierCurveTo(w*.18+i*w*.12,h*.5,w*.22+i*w*.12,h*.6,w*.2+i*w*.12,h*.8);ctx.strokeStyle='rgba(180,130,80,0.6)';ctx.lineWidth=2;ctx.stroke();}
+        ctx.fillStyle='rgba(249,115,22,0.6)'; ctx.fillRect(w*.1,h*.82,w*.8,1.5);
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.1}px system-ui`; ctx.textAlign='center'; ctx.fillText('CLOSEUP',w/2,h*.93);
+      },
+      ()=>{ // product apply
+        ctx.fillStyle='#1e2a2e';
+        ctx.beginPath(); ctx.ellipse(w*.35,h*.6,w*.28,h*.12,-.3,0,Math.PI*2); ctx.fillStyle='#2a2a3e'; ctx.fill();
+        ctx.fillStyle='#e97316'; ctx.beginPath(); ctx.roundRect(w*.48,h*.3,w*.18,h*.35,4); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.1}px system-ui`; ctx.textAlign='center'; ctx.fillText('ROUTINE',w/2,h*.93);
+      }
+    ],
+    B: [
+      ()=>{ // expert pose
+        ctx.fillStyle='#1e1e2e'; ctx.beginPath(); ctx.ellipse(w/2,h*.3,w*.15,h*.12,0,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#2a2a3e'; ctx.beginPath(); ctx.moveTo(w*.3,h*.42); ctx.lineTo(w*.7,h*.42); ctx.lineTo(w*.75,h*.85); ctx.lineTo(w*.25,h*.85); ctx.closePath(); ctx.fill();
+        ctx.fillStyle='#e97316'; ctx.beginPath(); ctx.roundRect(w*.55,h*.5,w*.12,h*.22,3); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.1}px system-ui`; ctx.textAlign='center'; ctx.fillText('EXPERT',w/2,h*.93);
+      },
+      ()=>{ // label closeup
+        ctx.fillStyle='#f0f0f0'; ctx.beginPath(); ctx.roundRect(w*.12,h*.2,w*.76,h*.58,6); ctx.fill();
+        ctx.fillStyle='#e97316'; ctx.fillRect(w*.12,h*.2,w*.76,h*.12);
+        ctx.fillStyle='#333'; ['PEPTIDE','BIOTIN','KERATIN'].forEach((t,i)=>{ctx.font=`bold ${w*.09}px system-ui`;ctx.textAlign='center';ctx.fillText(t,w/2,h*.42+i*h*.1);});
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.1}px system-ui`; ctx.textAlign='center'; ctx.fillText('LABEL',w/2,h*.93);
+      },
+      ()=>{ // data overlay
+        ctx.fillStyle='#0a0a14'; ctx.fillRect(0,0,w,h);
+        ctx.fillStyle='rgba(249,115,22,0.12)'; ctx.fillRect(w*.08,h*.18,w*.84,h*.18);
+        ['63%','12주','임상'].forEach((t,i)=>{ctx.fillStyle=i===0?'#e97316':'rgba(255,255,255,0.7)';ctx.font=`bold ${i===0?w*.22:w*.1}px system-ui`;ctx.textAlign='center';ctx.fillText(t,w/2,h*.35+i*(i===0?0:h*.12));});
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.1}px system-ui`; ctx.textAlign='center'; ctx.fillText('DATA',w/2,h*.93);
+      }
+    ],
+    C: [
+      ()=>{ // before
+        ctx.fillStyle='#1a1214';
+        for(let i=0;i<4;i++){ctx.beginPath();ctx.arc(w*.25+i*w*.17,h*.45,w*.06,0,Math.PI*2);ctx.fillStyle=`rgba(180,130,80,${0.2+i*.05})`;ctx.fill();}
+        ctx.fillStyle='rgba(239,68,68,0.7)'; ctx.beginPath(); ctx.arc(w*.45,h*.35,w*.04,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.09}px system-ui`; ctx.textAlign='center'; ctx.fillText('BEFORE',w/2,h*.93);
+      },
+      ()=>{ // apply
+        ctx.fillStyle='#1a1e2a';
+        ctx.beginPath(); ctx.ellipse(w*.38,h*.55,w*.25,h*.1,-.2,0,Math.PI*2); ctx.fillStyle='#2a2a3e'; ctx.fill();
+        ctx.fillStyle='rgba(249,115,22,0.8)'; ctx.beginPath(); ctx.arc(w*.38,h*.45,w*.06,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(249,115,22,0.2)'; for(let r=1;r<=3;r++){ctx.beginPath();ctx.arc(w*.38,h*.45,w*.06+r*w*.04,0,Math.PI*2);ctx.stroke();}
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.09}px system-ui`; ctx.textAlign='center'; ctx.fillText('APPLY',w/2,h*.93);
+      },
+      ()=>{ // after
+        ctx.fillStyle='#121a14';
+        for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(w*.15+i*w*.15,h*.3);ctx.bezierCurveTo(w*.13+i*w*.15,h*.5,w*.17+i*w*.15,h*.58,w*.15+i*w*.15,h*.78);ctx.strokeStyle='rgba(180,160,100,0.8)';ctx.lineWidth=2.5;ctx.stroke();}
+        ctx.fillStyle='rgba(34,197,94,0.7)'; ctx.beginPath(); ctx.arc(w*.72,h*.32,w*.05,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font=`${w*.09}px system-ui`; ctx.textAlign='center'; ctx.fillText('AFTER',w/2,h*.93);
+      }
+    ]
+  };
+  if(drawings[type]&&drawings[type][idx]) drawings[type][idx]();
+}
+
+function buildRefStrip() {
+  const row=document.getElementById('ref-thumbs-row');
+  if(!row) return;
+  row.innerHTML='';
+  const src = extracted ? US_DATA : US_DATA.slice(0,5);
+  src.forEach((v,i)=>{
+    const wrap=document.createElement('div');
+    wrap.className='ref-thumb'+(selectedVideo&&selectedVideo.url===v.url?' active':'');
+    wrap.onclick=()=>{ selectVideoForScript(v); buildRefStrip(); populateMini(); };
+    wrap.innerHTML=`
+      <div class="ref-thumb-img">
+        <img src="${v.cover||''}" alt="@${v.creator}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">
+      </div>
+      <div class="ref-thumb-name">@${v.creator}</div>`;
+    row.appendChild(wrap);
+  });
+}
+
+function selectVideoForScript(v) {
+  selectedVideo=v;
+  document.querySelectorAll('.video-card').forEach(c=>c.classList.remove('selected'));
+}
+
 function renderScripts(usp){
   const grid=document.getElementById('script-grid'); grid.innerHTML='';
+  const ref = selectedVideo || (extracted ? US_DATA[0] : US_DATA[0]);
   ['A','B','C'].forEach((key,i)=>{
     const s=SCRIPTS[key];
+    const shots=SHOT_GUIDES[key];
+    const shotsHtml=shots.map((_,si)=>`
+      <div class="shot-frame">
+        <div class="shot-img-wrap">
+          <canvas class="shot-canvas-fallback" width="80" height="142" data-type="${key}" data-idx="${si}"></canvas>
+          <div class="shot-overlay"><span class="shot-overlay-label">${shots[si].label}</span></div>
+          <span class="shot-num">${si+1}</span>
+        </div>
+        <div class="shot-caption">${shots[si].desc.replace(/\n/g,'<br>')}</div>
+      </div>`).join('');
     const card=document.createElement('div'); card.className='script-card';
     card.innerHTML=`
       <div class="script-card-header"><span class="script-type-badge ${s.badge}">${s.label}</span><span class="script-card-title">${s.title}</span></div>
@@ -534,8 +696,16 @@ function renderScripts(usp){
         <div class="script-body">${s.body(usp).replace(/\n/g,'<br>')}</div>
         <div class="script-cta">🎯 CTA: ${s.cta()}</div>
       </div>
+      <div class="shot-guide">
+        <div class="shot-guide-label">촬영 컷 가이드</div>
+        <div class="shot-frames">${shotsHtml}</div>
+      </div>
       <div class="script-card-footer"><button class="btn-copy" onclick="copyScript('${key}','${usp.replace(/'/g,"\\'")}',this)">📋 복사</button></div>`;
     grid.appendChild(card);
+    // draw shot canvases
+    card.querySelectorAll('canvas[data-type]').forEach(cvs=>{
+      drawShotComp(cvs, cvs.dataset.type, parseInt(cvs.dataset.idx));
+    });
     setTimeout(()=>card.classList.add('revealed'),i*200+60);
   });
 }
@@ -569,16 +739,29 @@ function goStep(n){
     if(sn<n) el.classList.add('done'); else if(sn===n) el.classList.add('active');
   });
   if(n===4){
-    const v=selectedVideo||(extracted&&currentCountry==='US'?US_DATA[0]:null);
-    if(v){
-      document.getElementById('mini-title').textContent=v.title;
-      document.getElementById('mini-creator').textContent='@'+v.creator;
-      document.getElementById('mini-metrics').textContent=`조회수 ${v.views} · 인게이지율 ${v.engage}`;
-      document.getElementById('hook-box').textContent=`"${v.hook}"`;
-      drawMini(document.getElementById('mini-cvs'),v.colors);
-    }
+    if(!selectedVideo && extracted && currentCountry==='US') selectedVideo=US_DATA[0];
+    buildRefStrip();
+    populateMini();
   }
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function populateMini(){
+  const v=selectedVideo;
+  if(!v) return;
+  document.getElementById('mini-title').textContent=v.title;
+  document.getElementById('mini-creator').textContent='@'+v.creator;
+  document.getElementById('mini-metrics').textContent=`조회수 ${v.views} · 인게이지율 ${v.engage}`;
+  document.getElementById('hook-box').textContent=`"${v.hook}"`;
+  const lnk=document.getElementById('mini-link'); if(lnk){lnk.href=v.url;}
+  const img=document.getElementById('mini-cover-img');
+  const cvs=document.getElementById('mini-cvs');
+  if(v.cover){
+    img.src=v.cover; img.style.display='block'; cvs.style.display='none';
+    img.onerror=()=>{img.style.display='none';cvs.style.display='block';drawMini(cvs,v.colors);};
+  } else {
+    img.style.display='none'; cvs.style.display='block'; drawMini(cvs,v.colors);
+  }
 }
 
 function showToast(){
