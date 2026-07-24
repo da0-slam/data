@@ -5,26 +5,26 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0C0C0F;
-    --surface: #17171D;
-    --surface2: #1E1E26;
-    --border: #2C2C38;
+    --bg: #F6F6F9;
+    --surface: #FFFFFF;
+    --surface2: #F0F0F5;
+    --border: #E2E2EC;
     --orange: #F97316;
-    --orange-dim: rgba(249,115,22,0.12);
-    --text: #F0F0F5;
-    --text-2: #A0A0B0;
-    --text-3: #5A5A6E;
-    --green: #22C55E;
-    --amber: #F59E0B;
-    --blue: #3B82F6;
-    --pink: #EC4899;
+    --orange-dim: rgba(249,115,22,0.10);
+    --text: #111118;
+    --text-2: #555566;
+    --text-3: #9090A8;
+    --green: #16A34A;
+    --amber: #D97706;
+    --blue: #2563EB;
+    --pink: #DB2777;
     --r: 10px;
     --r-sm: 6px;
   }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.5; min-height: 100vh; }
 
   /* NAV */
-  .topnav { position: sticky; top: 0; z-index: 100; background: rgba(12,12,15,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 32px; height: 52px; }
+  .topnav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 32px; height: 52px; }
   .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; letter-spacing: -0.3px; }
   .brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 6px var(--orange); }
   .nav-tabs { display: flex; gap: 4px; flex: 1; }
@@ -191,9 +191,33 @@
   /* ORIGINAL HOOK BOX */
   .hook-box { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--orange); border-radius: var(--r); padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: var(--text-2); line-height: 1.7; font-style: italic; }
 
+  /* VIDEO MODAL */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.82); z-index: 500; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(6px); }
+  .modal-bg.open { display: flex; }
+  .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 860px; max-height: 90vh; display: flex; gap: 0; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.18); }
+  .modal-embed { flex-shrink: 0; width: 340px; background: #000; position: relative; }
+  .modal-embed iframe { width: 100%; height: 100%; border: none; display: block; min-height: 600px; }
+  .modal-side { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+  .modal-close { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,.6); border: none; color: #fff; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; z-index: 10; }
+  .modal-creator { display: flex; align-items: center; gap: 8px; }
+  .modal-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .modal-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.5; }
+  .modal-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .modal-metrics { display: flex; gap: 14px; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .modal-metric-val { font-weight: 700; color: var(--text); }
+  .modal-hook { background: var(--surface2); border-left: 3px solid var(--orange); border-radius: 0 var(--r-sm) var(--r-sm) 0; padding: 10px 14px; font-size: 13px; color: var(--text-2); line-height: 1.6; font-style: italic; }
+  .modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+  .btn-tiktok { display: flex; align-items: center; justify-content: center; gap: 7px; background: none; border: 1.5px solid var(--border); color: var(--text-2); border-radius: var(--r-sm); padding: 9px 14px; font-size: 13px; cursor: pointer; text-decoration: none; transition: all .15s; }
+  .btn-tiktok:hover { border-color: var(--orange); color: var(--orange); }
+  .btn-use-ref { background: var(--orange); color: #fff; border: none; border-radius: var(--r-sm); padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity .15s; }
+  .btn-use-ref:hover { opacity: .9; }
+  @media (max-width: 700px) { .modal-box { flex-direction: column; } .modal-embed { width: 100%; } .modal-embed iframe { min-height: 420px; } }
+
   /* TOAST */
   #toast { position: fixed; bottom: 28px; right: 28px; background: #1E2830; border: 1px solid rgba(34,197,94,.3); border-radius: var(--r-sm); padding: 12px 18px; color: var(--green); font-size: 13px; opacity: 0; transform: translateY(8px); transition: opacity .25s, transform .25s; pointer-events: none; z-index: 999; }
   #toast.show { opacity: 1; transform: none; }
+
+  .card-thumb:hover .play-hover { opacity: 1 !important; }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
@@ -354,6 +378,36 @@
 <div class="main screen" id="screen-6"><div class="page-eyebrow">STEP 6</div><div class="page-title">계약서 생성</div></div>
 <div class="main screen" id="screen-7"><div class="page-eyebrow">STEP 7</div><div class="page-title">실행계획 전달</div></div>
 
+<!-- VIDEO MODAL -->
+<div class="modal-bg" id="video-modal" onclick="closeModal(event)">
+  <div class="modal-box">
+    <div class="modal-embed" id="modal-embed">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <iframe id="modal-iframe" src="" allowfullscreen allow="autoplay"></iframe>
+    </div>
+    <div class="modal-side">
+      <div class="modal-creator">
+        <div class="modal-av" id="modal-av"></div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text)" id="modal-creator-name"></div>
+          <div style="font-size:12px;color:var(--text-3)" id="modal-creator-handle"></div>
+        </div>
+      </div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-tags" id="modal-tags"></div>
+      <div class="modal-metrics" id="modal-metrics"></div>
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-3);margin-bottom:6px">캡션 / 후킹포인트</div>
+        <div class="modal-hook" id="modal-hook"></div>
+      </div>
+      <div class="modal-actions">
+        <a class="btn-tiktok" id="modal-tiktok-link" href="#" target="_blank">↗ TikTok에서 원본 보기</a>
+        <button class="btn-use-ref" onclick="useAsRef()">✦ 이 영상을 레퍼런스로 선택</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast">✓ 클립보드에 복사되었습니다</div>
 
 <script>
@@ -460,12 +514,15 @@ function renderCards(data) {
     card.onclick=()=>selectVideo(v,card);
     const avC=AV_COLORS[i%AV_COLORS.length];
     card.innerHTML=`
-      <div class="card-thumb" style="position:relative">
+      <div class="card-thumb" style="position:relative;cursor:pointer" onclick="event.stopPropagation();openModal(${i})">
         <canvas width="240" height="360" style="width:100%;height:100%;display:block;position:absolute;top:0;left:0"></canvas>
         <img src="${v.cover||''}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1" onerror="this.style.display='none'">
-        <span class="card-rank" style="z-index:2">#${i+1}</span>
-        <span class="card-duration" style="z-index:2">${v.dur}</span>
-        <span class="card-platform" style="z-index:2">TikTok</span>
+        <div style="position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;background:rgba(0,0,0,.35)" class="play-hover">
+          <div style="width:44px;height:44px;border-radius:50%;background:rgba(249,115,22,.9);display:flex;align-items:center;justify-content:center;font-size:18px">▶</div>
+        </div>
+        <span class="card-rank" style="z-index:3">#${i+1}</span>
+        <span class="card-duration" style="z-index:3">${v.dur}</span>
+        <span class="card-platform" style="z-index:3">TikTok</span>
       </div>
       <div class="card-body">
         <div class="card-creator"><span class="creator-av" style="background:${avC}">${v.creator[0].toUpperCase()}</span>@${v.creator}</div>
@@ -763,6 +820,70 @@ function populateMini(){
     img.style.display='none'; cvs.style.display='block'; drawMini(cvs,v.colors);
   }
 }
+
+// ══ MODAL ══
+let modalVideoIdx = null;
+
+function tiktokVideoId(url) {
+  const m = url.match(/\/video\/(\d+)/);
+  return m ? m[1] : null;
+}
+
+function openModal(idx) {
+  const data = getUS();
+  const v = data[idx] || US_DATA[idx];
+  if (!v) return;
+  modalVideoIdx = idx;
+
+  const vid = tiktokVideoId(v.url);
+  const iframe = document.getElementById('modal-iframe');
+  iframe.src = vid ? `https://www.tiktok.com/embed/v2/${vid}?autoplay=1` : '';
+
+  const avC = AV_COLORS[idx % AV_COLORS.length];
+  const av = document.getElementById('modal-av');
+  av.style.background = avC;
+  av.style.color = '#fff';
+  av.textContent = v.creator[0].toUpperCase();
+
+  document.getElementById('modal-creator-name').textContent = v.nickname;
+  document.getElementById('modal-creator-handle').textContent = '@' + v.creator;
+  document.getElementById('modal-title').textContent = v.title;
+  document.getElementById('modal-hook').textContent = v.hook;
+  document.getElementById('modal-tiktok-link').href = v.url;
+  document.getElementById('modal-metrics').innerHTML =
+    `<span>👁️ <span class="modal-metric-val">${v.views}</span></span>` +
+    `<span>💫 <span class="modal-metric-val">${v.engage}</span></span>` +
+    `<span>⏱ <span class="modal-metric-val">${v.dur}</span></span>`;
+  document.getElementById('modal-tags').innerHTML =
+    v.tags.slice(0, 5).map(t => `<span class="tag">#${t}</span>`).join('');
+
+  document.getElementById('video-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('video-modal')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('video-modal').classList.remove('open');
+  document.getElementById('modal-iframe').src = '';
+  document.body.style.overflow = '';
+}
+
+function useAsRef() {
+  const data = getUS();
+  const v = data[modalVideoIdx] || US_DATA[modalVideoIdx];
+  if (v) {
+    selectedVideo = v;
+    document.querySelectorAll('.video-card').forEach((c, i) => {
+      c.classList.toggle('selected', i === modalVideoIdx);
+    });
+  }
+  closeModalDirect();
+  goStep(4);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
 
 function showToast(){
   const t=document.getElementById('toast'); t.classList.add('show');
