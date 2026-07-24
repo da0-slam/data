@@ -153,6 +153,8 @@ body{
 .chip.app.active  {border-color:var(--blue);background:var(--blue-d);color:var(--blue)}
 .chip.fup.active  {border-color:var(--amber);background:var(--amber-d);color:var(--amber)}
 .chip.rej.active  {border-color:var(--red);background:var(--red-d);color:var(--red)}
+.chip.fast.active {border-color:#A855F7;background:rgba(168,85,247,.10);color:#A855F7}
+.chip.cat.active  {border-color:#0EA5A0;background:rgba(14,165,160,.10);color:#0EA5A0}
 
 .vdiv{width:1px;height:20px;background:var(--border);flex-shrink:0}
 
@@ -279,6 +281,12 @@ tbody td:first-child{
 
 .price-cell{font-size:12px;color:var(--text);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .price-cell.after{color:var(--green);font-weight:700}
+
+.engage-cell{display:flex;flex-direction:column;gap:3px}
+.engage-views{font-size:12px;font-weight:600;color:var(--text)}
+.engage-sub{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.engage-dot{width:4px;height:4px;border-radius:50%;background:var(--border2);flex-shrink:0}
+.engage-none{font-size:12px;color:var(--text3)}
 
 /* ── PAGINATION ── */
 .pag-row{
@@ -479,6 +487,13 @@ tbody td:first-child{
   <button class="chip"        id="chip-reply" onclick="setChip('reply')">회신</button>
   <button class="chip"        id="chip-rc"    onclick="setChip('rc')">단가 제시</button>
   <button class="chip rej"    id="chip-rej"   onclick="setChip('rej')">거절/기타</button>
+  <div class="vdiv"></div>
+  <button class="chip fast"   id="chip-fast"  onclick="setChip('fast')">⚡ 빠르게 진행가능</button>
+  <div class="vdiv"></div>
+  <button class="chip cat"    id="chip-skin"  onclick="setChip('skin')">스킨케어</button>
+  <button class="chip cat"    id="chip-beauty"onclick="setChip('beauty')">뷰티</button>
+  <button class="chip cat"    id="chip-hair"  onclick="setChip('hair')">헤어</button>
+  <button class="chip cat"    id="chip-life"  onclick="setChip('life')">라이프스타일</button>
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
     <input class="search-input" id="search" type="text" placeholder="핸들 또는 이메일 검색..." oninput="setSearch(this.value)">
@@ -496,6 +511,7 @@ tbody td:first-child{
             <th class="sortable" onclick="setSort('handle')">인플루언서</th>
             <th class="sortable" onclick="setSort('followers')">팔로워</th>
             <th class="sortable" onclick="setSort('status')">상태</th>
+            <th class="sortable" onclick="setSort('views')">인게이지먼트</th>
             <th>단가 (원본)</th>
             <th>협상 후 단가</th>
           </tr>
@@ -547,6 +563,20 @@ const SM = {
 };
 
 function getSC(s){ return SM[s] || {c:'#8A96AD', bg:'rgba(138,150,173,.09)', k:'', lbl: s||'—'}; }
+
+// 카테고리 키워드 매핑 (handle 기반 추정)
+const CAT_KW = {
+  skin:   ['skin','skincare','glow','toner','serum','acne','pore','complexion','면','스킨','피부','미백','각질'],
+  beauty: ['beauty','makeup','cosmetic','lipstick','foundation','blush','eye','뷰티','메이크업','화장','립'],
+  hair:   ['hair','scalp','두피','모발','헤어','탈모','샴푸','mane','tress','curl','braid'],
+  life:   ['life','lifestyle','daily','vlog','routine','home','travel','food','cook','라이프','일상','브이로그'],
+};
+
+function catMatch(r, cat){
+  const h = (r.handle||'').toLowerCase();
+  const kws = CAT_KW[cat]||[];
+  return kws.some(k => h.includes(k));
+}
 
 // ── AVATAR HELPERS ────────────────────────────────────────────────────────────
 function avColor(handle){
@@ -601,10 +631,44 @@ function fmtN(n){
 
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+function engCell(r){
+  const e = fmtEngage(r);
+  if(!e) return '<span class="engage-none">—</span>';
+  let html = '<div class="engage-cell">';
+  if(e.viewStr) html += `<div class="engage-views">${e.viewStr} 조회</div>`;
+  const parts = [];
+  if(e.engStr) parts.push(e.engStr);
+  if(e.rate)   parts.push(`ER ${e.rate}`);
+  if(parts.length) html += `<div class="engage-sub">${parts.join('<span class="engage-dot"></span>')}</div>`;
+  html += '</div>';
+  return html;
+}
+
 function shortPrice(s){
   if(!s) return '—';
   const f = s.split('\n')[0].trim();
   return f.length>30 ? f.substring(0,30)+'…' : f||'—';
+}
+
+function parseNum(s){
+  if(!s) return 0;
+  s = String(s).replace(/,/g,'').trim();
+  if(/\d+\.?\d*M$/i.test(s)) return Math.round(parseFloat(s)*1000000);
+  if(/\d+\.?\d*K$/i.test(s)) return Math.round(parseFloat(s)*1000);
+  return parseInt(s)||0;
+}
+
+function fmtEngage(r){
+  const v = parseNum(r.views);
+  const l = parseNum(r.likes);
+  const c = parseNum(r.comments);
+  const s = parseNum(r.saves);
+  const total = l + c + s;
+  if(!v && !total) return null;
+  const viewStr = v ? fmtN(v)+'회' : null;
+  const engStr  = total ? fmtN(total)+'회 참여' : null;
+  const rate    = (v && total) ? ((total/v)*100).toFixed(1)+'%' : null;
+  return {viewStr, engStr, rate, total, v};
 }
 
 // ── LOAD DATA ─────────────────────────────────────────────────────────────────
@@ -667,6 +731,11 @@ function applyFilter(){
     case 'reply': d=d.filter(r=>r.status==='Reply'); break;
     case 'rc':    d=d.filter(r=>r.status==='Give Ratecard'); break;
     case 'rej':   d=d.filter(r=>['Reject','Non USA','Wrong Email'].includes(r.status)); break;
+    case 'fast':  d=d.filter(r=>['Agree','Nego','Reply','Give Ratecard'].includes(r.status)); break;
+    case 'skin':  d=d.filter(r=>catMatch(r,'skin')); break;
+    case 'beauty':d=d.filter(r=>catMatch(r,'beauty')); break;
+    case 'hair':  d=d.filter(r=>catMatch(r,'hair')); break;
+    case 'life':  d=d.filter(r=>catMatch(r,'life')); break;
   }
   if(searchQ){
     const q=searchQ.toLowerCase();
@@ -674,8 +743,8 @@ function applyFilter(){
   }
   if(sortCol){
     d.sort((a,b)=>{
-      const av=sortCol==='followers'?a.followers:(a[sortCol]||'').toLowerCase();
-      const bv=sortCol==='followers'?b.followers:(b[sortCol]||'').toLowerCase();
+      const av=sortCol==='followers'?a.followers:sortCol==='views'?parseNum(a.views):(a[sortCol]||'').toLowerCase();
+      const bv=sortCol==='followers'?b.followers:sortCol==='views'?parseNum(b.views):(b[sortCol]||'').toLowerCase();
       if(typeof av==='number') return (bv-av)*sortDir;
       return av<bv?-sortDir:av>bv?sortDir:0;
     });
@@ -730,6 +799,7 @@ function renderTable(){
       </td>
       <td>${esc(r.followersRaw)||fmtN(r.followers)||'—'}</td>
       <td><span class="sbadge" style="color:${sc.c};background:${sc.bg}">${esc(sc.lbl)}</span></td>
+      <td>${engCell(r)}</td>
       <td class="price-cell">${esc(shortPrice(r.ratecard))}</td>
       <td class="price-cell after">${esc(shortPrice(r.afterNego))}</td>
     </tr>`;
@@ -854,6 +924,7 @@ function setChip(k){
   activeFilter=k;
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   document.getElementById('chip-'+k)?.classList.add('active');
+  // stat cards: only highlight if it maps directly
   const statMap={all:'all',agree:'agree',nego:'nego',app:'app',fup:'fup',rej:'rej'};
   ['all','agree','nego','app','fup','rej'].forEach(s=>{
     document.getElementById('sc-'+s)?.classList.toggle('active',statMap[k]===s);
