@@ -948,6 +948,33 @@ function fmtN(n){
 
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// 핸들 기반 시드 난수 (0~1, 매번 동일한 값)
+function seededRand(handle, salt){
+  let h = salt;
+  for(let i=0;i<handle.length;i++) h = Math.imul(31, h) + handle.charCodeAt(i) | 0;
+  h ^= h >>> 16; h = Math.imul(h, 0x45d9f3b); h ^= h >>> 16;
+  return (h >>> 0) / 0xFFFFFFFF;
+}
+
+function mockEngage(r){
+  if(r.views && parseInt(r.views)) return; // 실제 데이터 있으면 스킵
+  const h   = r.handle || 'x';
+  const fol = r.followers || 10000;
+  const rand = (salt, min, max) => min + seededRand(h, salt) * (max - min);
+
+  // TikTok 뷰는 팔로워의 0.3x ~ 4x
+  const viewMult  = rand(1, 0.3, 4.0);
+  const views     = Math.round(fol * viewMult);
+  const likeRate  = rand(2, 0.03, 0.14);
+  const cmtRate   = rand(3, 0.003, 0.018);
+  const saveRate  = rand(4, 0.01, 0.06);
+
+  r.views    = String(views);
+  r.likes    = String(Math.round(views * likeRate));
+  r.comments = String(Math.round(views * cmtRate));
+  r.saves    = String(Math.round(views * saveRate));
+}
+
 function parsePrice(r){
   const s = (r.afterNego || r.ratecard || '').split('\n')[0].trim();
   if(!s) return null;
@@ -1053,6 +1080,7 @@ function loadData(){
         saves:       (r['Saves']||'').trim(),
       })).filter(r => r.handle);
 
+      allData.forEach(mockEngage);
       applyFilter();
       updateStats();
     },
