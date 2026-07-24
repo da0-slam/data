@@ -277,11 +277,11 @@
   </div>
 
   <div class="filter-row" id="country-row">
-    <button class="country-chip" onclick="setCountry(this,'US')">🇺🇸 미국</button>
+    <button class="country-chip active" onclick="setCountry(this,'US')">🇺🇸 미국</button>
     <button class="country-chip" onclick="setCountry(this,'JP')">🇯🇵 일본</button>
     <button class="country-chip" onclick="setCountry(this,'AE')">🇦🇪 중동</button>
     <button class="country-chip" onclick="setCountry(this,'CN')">🇨🇳 중국</button>
-    <button class="country-chip active" onclick="setCountry(this,'KR')">🇰🇷 한국</button>
+    <button class="country-chip" onclick="setCountry(this,'KR')">🇰🇷 한국</button>
   </div>
 
   <div class="filter-row" id="cat-row">
@@ -445,7 +445,7 @@ function secondUsp(u){ const p=u.split(/[·,]/); return (p[1]||'').trim(); }
 function thirdUsp(u){ const p=u.split(/[·,]/); return (p[2]||'').trim(); }
 
 // ══ STATE ══
-let currentCountry = 'KR';
+let currentCountry = 'US';
 let currentCat = 'all';
 let selectedVideo = null;
 let extracted = false;
@@ -890,6 +890,6 @@ function showToast(){
   setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-// init — KR default: show coming soon after first click, or just show empty
+// init — US default
 document.getElementById('empty-state').style.display='block';
 </script>
