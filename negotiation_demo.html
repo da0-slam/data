@@ -288,6 +288,55 @@ tbody td:first-child{
 .engage-dot{width:4px;height:4px;border-radius:50%;background:var(--border2);flex-shrink:0}
 .engage-none{font-size:12px;color:var(--text3)}
 
+/* ── RANGE FILTER ROW ── */
+.range-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 22px;
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;font-size:12px;flex-wrap:wrap;
+}
+
+.range-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
+
+.range-label{
+  font-size:11px;font-weight:600;color:var(--text2);
+  letter-spacing:.03em;white-space:nowrap;
+}
+
+.range-input{
+  width:88px;padding:5px 9px;
+  background:var(--s0);
+  border:1.5px solid var(--border);
+  border-radius:var(--r);
+  color:var(--text);font-size:12px;font-family:inherit;
+  outline:none;transition:border-color .14s;
+  -moz-appearance:textfield;
+}
+
+.range-input::-webkit-inner-spin-button,.range-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.range-input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-t)}
+.range-input::placeholder{color:var(--text3)}
+
+.range-sep{color:var(--text3);font-size:12px}
+
+.range-unit{font-size:11px;color:var(--text3);white-space:nowrap}
+
+.range-clear{
+  padding:5px 12px;border-radius:var(--r);
+  border:1.5px solid var(--border);background:transparent;
+  color:var(--text2);cursor:pointer;font-size:11px;font-family:inherit;
+  transition:all .14s;margin-left:4px;
+}
+.range-clear:hover{border-color:var(--red);color:var(--red);background:var(--red-d)}
+
+.range-active-tag{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:10px;
+  background:var(--accent-d);border:1px solid var(--accent);
+  color:var(--accent);font-size:11px;font-weight:600;
+}
+
 /* ── PAGINATION ── */
 .pag-row{
   display:flex;align-items:center;gap:8px;
@@ -500,6 +549,26 @@ tbody td:first-child{
   </div>
 </div>
 
+<!-- RANGE FILTERS -->
+<div class="range-row" id="range-row">
+  <div class="range-group">
+    <span class="range-label">팔로워</span>
+    <input class="range-input" id="fl-min" type="number" min="0" placeholder="최소" oninput="applyFilter()">
+    <span class="range-sep">~</span>
+    <input class="range-input" id="fl-max" type="number" min="0" placeholder="최대" oninput="applyFilter()">
+    <span class="range-unit">K</span>
+  </div>
+  <div style="width:1px;height:18px;background:var(--border);flex-shrink:0"></div>
+  <div class="range-group">
+    <span class="range-label">단가 ($)</span>
+    <input class="range-input" id="pr-min" type="number" min="0" placeholder="최소" oninput="applyFilter()">
+    <span class="range-sep">~</span>
+    <input class="range-input" id="pr-max" type="number" min="0" placeholder="최대" oninput="applyFilter()">
+  </div>
+  <button class="range-clear" onclick="clearRanges()">초기화</button>
+  <span id="range-tags" style="display:flex;gap:6px;flex-wrap:wrap"></span>
+</div>
+
 <!-- BODY -->
 <div class="body">
   <div class="table-area" id="table-area">
@@ -631,6 +700,41 @@ function fmtN(n){
 
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+function parsePrice(r){
+  const s = (r.afterNego || r.ratecard || '').split('\n')[0].trim();
+  if(!s) return null;
+  // strip currency symbols, commas, text suffixes
+  const m = s.replace(/[,]/g,'').match(/\$?\s*([\d]+)/);
+  return m ? parseInt(m[1]) : null;
+}
+
+function getRanges(){
+  const flMin = parseFloat(document.getElementById('fl-min')?.value)||0;
+  const flMax = parseFloat(document.getElementById('fl-max')?.value)||Infinity;
+  const prMin = parseFloat(document.getElementById('pr-min')?.value)||0;
+  const prMax = parseFloat(document.getElementById('pr-max')?.value)||Infinity;
+  return {flMin:flMin*1000, flMax:flMax*1000, prMin, prMax};
+}
+
+function clearRanges(){
+  ['fl-min','fl-max','pr-min','pr-max'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  applyFilter();
+}
+
+function updateRangeTags(){
+  const flMin=document.getElementById('fl-min')?.value;
+  const flMax=document.getElementById('fl-max')?.value;
+  const prMin=document.getElementById('pr-min')?.value;
+  const prMax=document.getElementById('pr-max')?.value;
+  const tags=[];
+  if(flMin||flMax) tags.push(`팔로워 ${flMin||'0'}K ~ ${flMax||'∞'}K`);
+  if(prMin||prMax) tags.push(`단가 $${prMin||'0'} ~ $${prMax||'∞'}`);
+  const el=document.getElementById('range-tags');
+  if(el) el.innerHTML=tags.map(t=>`<span class="range-active-tag">${t}</span>`).join('');
+}
+
 function engCell(r){
   const e = fmtEngage(r);
   if(!e) return '<span class="engage-none">—</span>';
@@ -741,6 +845,18 @@ function applyFilter(){
     const q=searchQ.toLowerCase();
     d=d.filter(r=>r.handle.toLowerCase().includes(q)||r.contact.toLowerCase().includes(q));
   }
+
+  // range filters
+  const {flMin,flMax,prMin,prMax}=getRanges();
+  if(flMin>0||flMax<Infinity) d=d.filter(r=>r.followers>=flMin&&r.followers<=flMax);
+  if(prMin>0||prMax<Infinity){
+    d=d.filter(r=>{
+      const p=parsePrice(r);
+      if(p===null) return false;
+      return p>=prMin&&p<=prMax;
+    });
+  }
+  updateRangeTags();
   if(sortCol){
     d.sort((a,b)=>{
       const av=sortCol==='followers'?a.followers:sortCol==='views'?parseNum(a.views):(a[sortCol]||'').toLowerCase();
