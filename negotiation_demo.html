@@ -337,6 +337,131 @@ tbody td:first-child{
   color:var(--accent);font-size:11px;font-weight:600;
 }
 
+/* ── MAIL MODAL ── */
+.mail-backdrop{
+  display:none;position:fixed;inset:0;
+  background:rgba(15,20,35,.45);
+  backdrop-filter:blur(4px);
+  z-index:100;align-items:center;justify-content:center;
+}
+.mail-backdrop.open{display:flex}
+
+.mail-modal{
+  background:#fff;border-radius:14px;
+  width:100%;max-width:580px;
+  box-shadow:0 24px 60px rgba(0,0,0,.18);
+  display:flex;flex-direction:column;
+  max-height:90vh;overflow:hidden;
+  animation:modalIn .2s cubic-bezier(.34,1.3,.64,1);
+}
+
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.97)}}
+
+.mail-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 22px 16px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+
+.mail-head-left{display:flex;flex-direction:column;gap:3px}
+.mail-title{font-size:15px;font-weight:700;color:var(--text)}
+.mail-subtitle{font-size:11px;color:var(--text2)}
+
+.mail-close{
+  width:28px;height:28px;border-radius:50%;
+  border:1.5px solid var(--border);background:var(--s2);
+  color:var(--text2);cursor:pointer;font-size:12px;
+  display:grid;place-items:center;transition:all .13s;font-family:inherit;
+}
+.mail-close:hover{background:var(--red-d);border-color:var(--red);color:var(--red)}
+
+.mail-body{padding:18px 22px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;flex:1}
+
+.mail-field{display:flex;flex-direction:column;gap:5px}
+.mail-field-label{font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.04em;text-transform:uppercase}
+
+.mail-input{
+  padding:9px 12px;
+  border:1.5px solid var(--border);border-radius:var(--r);
+  font-size:13px;color:var(--text);font-family:inherit;
+  outline:none;transition:border-color .14s;background:var(--s1);
+}
+.mail-input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-t)}
+
+.mail-textarea{
+  padding:12px;
+  border:1.5px solid var(--border);border-radius:var(--r);
+  font-size:13px;color:var(--text);font-family:inherit;line-height:1.7;
+  outline:none;transition:border-color .14s;background:var(--s1);
+  resize:vertical;min-height:220px;
+}
+.mail-textarea:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-t)}
+
+.mail-ai-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;border-radius:var(--r);
+  background:var(--accent-t);border:1px solid rgba(74,108,240,.2);
+  font-size:12px;color:var(--accent);
+}
+
+.btn-regen{
+  margin-left:auto;display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:var(--r);
+  border:1px solid var(--accent);background:var(--s0);
+  color:var(--accent);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .14s;font-family:inherit;
+}
+.btn-regen:hover{background:var(--accent);color:#fff}
+.btn-regen.spinning svg{animation:spin .6s linear infinite}
+
+.mail-foot{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 22px 18px;
+  border-top:1px solid var(--border);flex-shrink:0;
+}
+
+.btn-send{
+  flex:1;padding:11px;border-radius:var(--r);
+  border:none;background:var(--accent);color:#fff;
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .16s;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-send:hover{background:#3a5ee0;transform:translateY(-1px);box-shadow:0 4px 16px rgba(74,108,240,.3)}
+.btn-send.sending{opacity:.7;pointer-events:none}
+
+.btn-cancel{
+  padding:11px 20px;border-radius:var(--r);
+  border:1.5px solid var(--border);background:transparent;
+  color:var(--text2);font-size:13px;font-weight:500;
+  cursor:pointer;transition:all .14s;font-family:inherit;
+}
+.btn-cancel:hover{border-color:var(--border2);color:var(--text)}
+
+/* success toast */
+.send-toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:#0FA65C;color:#fff;
+  padding:12px 24px;border-radius:10px;
+  font-size:13px;font-weight:600;
+  box-shadow:0 8px 24px rgba(15,166,92,.35);
+  opacity:0;transition:all .3s cubic-bezier(.34,1.3,.64,1);
+  pointer-events:none;white-space:nowrap;z-index:200;
+}
+.send-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* mail btn in detail panel */
+.btn-mail{
+  display:flex;align-items:center;gap:7px;
+  width:100%;padding:11px;border-radius:var(--r);
+  border:1.5px solid var(--accent);background:var(--accent-t);
+  color:var(--accent);font-size:13px;font-weight:700;
+  cursor:pointer;transition:all .15s;font-family:inherit;
+  justify-content:center;margin-top:4px;
+}
+.btn-mail:hover{background:var(--accent);color:#fff}
+
 /* ── PAGINATION ── */
 .pag-row{
   display:flex;align-items:center;gap:8px;
@@ -476,6 +601,71 @@ tbody td:first-child{
 
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* ── NOTIFICATION ── */
+.notif-wrap{position:relative;flex-shrink:0}
+
+.notif-btn{
+  width:34px;height:34px;border-radius:50%;
+  border:1.5px solid var(--border);background:var(--s1);
+  color:var(--text2);cursor:pointer;font-size:16px;
+  display:grid;place-items:center;transition:all .14s;
+  position:relative;
+}
+.notif-btn:hover{background:var(--s2);border-color:var(--border2)}
+
+.notif-badge{
+  position:absolute;top:-3px;right:-3px;
+  background:#D63045;color:#fff;
+  font-size:9px;font-weight:800;
+  min-width:16px;height:16px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 3px;border:2px solid #fff;
+  animation:badgePop .3s cubic-bezier(.34,1.5,.64,1);
+}
+@keyframes badgePop{from{transform:scale(0)}}
+
+.notif-dropdown{
+  display:none;position:absolute;top:calc(100% + 8px);right:0;
+  width:320px;background:#fff;border-radius:12px;
+  border:1px solid var(--border);
+  box-shadow:0 12px 40px rgba(0,0,0,.14);
+  z-index:200;overflow:hidden;
+  animation:dropIn .18s ease;
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px)}}
+
+.notif-dropdown.open{display:block}
+
+.notif-dd-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px 12px;border-bottom:1px solid var(--border);
+}
+.notif-dd-title{font-size:13px;font-weight:700;color:var(--text)}
+.notif-mark-all{font-size:11px;color:var(--accent);cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.notif-mark-all:hover{text-decoration:underline}
+
+.notif-list{max-height:340px;overflow-y:auto}
+
+.notif-item{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:12px 16px;border-bottom:1px solid var(--border);
+  cursor:pointer;transition:background .12s;
+}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:var(--s1)}
+.notif-item.unread{background:rgba(74,108,240,.04)}
+
+.notif-icon{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:grid;place-items:center;font-size:14px;margin-top:1px;
+}
+
+.notif-content{flex:1;min-width:0}
+.notif-msg{font-size:12px;color:var(--text);line-height:1.5}
+.notif-msg strong{font-weight:700}
+.notif-time{font-size:11px;color:var(--text3);margin-top:3px}
+.notif-unread-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px}
+
 /* ── SCROLLBARS ── */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -495,6 +685,21 @@ tbody td:first-child{
   <span class="page-title">인플루언서 협상 관리</span>
   <div class="spacer"></div>
   <span class="result-lbl" id="result-lbl">로드 중...</span>
+
+  <!-- NOTIFICATION BELL -->
+  <div class="notif-wrap">
+    <button class="notif-btn" onclick="toggleNotif(event)" title="알림">
+      🔔
+      <span class="notif-badge" id="notif-badge">24</span>
+    </button>
+    <div class="notif-dropdown" id="notif-dropdown">
+      <div class="notif-dd-head">
+        <span class="notif-dd-title">알림 <span style="color:var(--accent);font-size:12px">24</span></span>
+        <button class="notif-mark-all" onclick="markAllRead()">모두 읽음 처리</button>
+      </div>
+      <div class="notif-list" id="notif-list"></div>
+    </div>
+  </div>
 </div>
 
 <!-- STATS -->
@@ -568,6 +773,49 @@ tbody td:first-child{
   <button class="range-clear" onclick="clearRanges()">초기화</button>
   <span id="range-tags" style="display:flex;gap:6px;flex-wrap:wrap"></span>
 </div>
+
+<!-- MAIL MODAL -->
+<div class="mail-backdrop" id="mail-backdrop" onclick="handleBackdropClick(event)">
+  <div class="mail-modal">
+    <div class="mail-head">
+      <div class="mail-head-left">
+        <div class="mail-title">✉ AI 제안 메일 발송</div>
+        <div class="mail-subtitle" id="mail-to-lbl">수신자: —</div>
+      </div>
+      <button class="mail-close" onclick="closeMailModal()">✕</button>
+    </div>
+    <div class="mail-body">
+      <div class="mail-ai-bar">
+        <span>✦ AI가 인플루언서 정보를 바탕으로 메시지를 구성했습니다</span>
+        <button class="btn-regen" onclick="regenMail()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          재생성
+        </button>
+      </div>
+      <div class="mail-field">
+        <label class="mail-field-label">수신 이메일</label>
+        <input class="mail-input" id="mail-email" type="text" readonly>
+      </div>
+      <div class="mail-field">
+        <label class="mail-field-label">제목 (Subject)</label>
+        <input class="mail-input" id="mail-subject" type="text">
+      </div>
+      <div class="mail-field">
+        <label class="mail-field-label">메시지 본문</label>
+        <textarea class="mail-textarea" id="mail-body-text"></textarea>
+      </div>
+    </div>
+    <div class="mail-foot">
+      <button class="btn-cancel" onclick="closeMailModal()">취소</button>
+      <button class="btn-send" id="btn-send" onclick="sendMail()">
+        ✉ 발송하기
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SEND TOAST -->
+<div class="send-toast" id="send-toast">✓ 메일이 성공적으로 발송되었습니다</div>
 
 <!-- BODY -->
 <div class="body">
@@ -976,6 +1224,9 @@ function selectRow(idx){
   const hasMetrics = r.views||r.likes||r.comments||r.saves;
 
   document.getElementById('dp-body').innerHTML=`
+    <div style="padding:14px 0 0">
+      <button class="btn-mail" onclick="openMailModal()">✉ AI 제안 메일 발송하기</button>
+    </div>
     <div class="dp-grid">
       <div><div class="dg-label">팔로워</div><div class="dg-val">${esc(r.followersRaw)||fmtN(r.followers)||'—'}</div></div>
       <div><div class="dg-label">DM 컨택</div><div class="dg-val">${r.contactDM==='TRUE'?'✓ 완료':'—'}</div></div>
@@ -1058,7 +1309,184 @@ function showMsg(msg){
   document.getElementById('tbody').innerHTML=`<tr><td colspan="6"><div class="center-msg"><div>${esc(msg)}</div></div></td></tr>`;
 }
 
+// ── MAIL MODAL ────────────────────────────────────────────────────────────────
+const MAIL_TEMPLATES = [
+  (h,f) => `Hi ${h},
+
+I hope this message finds you well! My name is Sarah, and I'm reaching out on behalf of the BRANDSLAM team.
+
+We've been following your content and absolutely love the authentic way you connect with your audience${f?` (${f} followers is impressive!)`:''}.
+
+We'd love to invite you to join our upcoming influencer campaign. Here's what we're offering:
+
+🎯 What we're looking for:
+• 1–2 short-form videos (TikTok / Instagram Reel)
+• Authentic, lifestyle-integrated content
+• Flexible posting schedule
+
+💰 What we offer:
+• Competitive paid collaboration
+• Full creative freedom
+• Usage rights negotiable
+
+If this sounds like something you'd be interested in, I'd love to hop on a quick call or continue the conversation over email.
+
+Looking forward to potentially working together!
+
+Warm regards,
+Sarah Kim
+Partnership Manager, BRANDSLAM
+partnerships@slam-global.com`,
+
+  (h,f) => `Hey ${h}! 👋
+
+We're BRANDSLAM — a K-beauty & lifestyle brand platform — and we've been obsessed with your content lately.
+
+We're putting together an exclusive creator campaign and think you'd be a perfect fit. No scripts, no rigid briefs — just you, your audience, and a product we know they'll love.
+
+Here's the quick version:
+✅ Paid partnership (competitive rate)
+✅ Free product + styling support
+✅ You keep full creative control
+
+Interested? Just reply with a quick "yes" and we'll send over the full brief + compensation details.
+
+Can't wait to work with you! 🙌
+
+— The BRANDSLAM Creator Team`,
+];
+
+let _mailRow = null;
+let _tmplIdx = 0;
+
+function openMailModal(){
+  const r = _mailRow = filteredData[selectedIdx];
+  if(!r) return;
+  _tmplIdx = 0;
+  fillMailModal(r);
+  document.getElementById('mail-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function fillMailModal(r){
+  const handle = '@' + r.handle;
+  const fStr   = r.followersRaw || (r.followers ? fmtN(r.followers) : '');
+  document.getElementById('mail-to-lbl').textContent  = '수신자: ' + (r.contact || handle);
+  document.getElementById('mail-email').value          = r.contact || '(이메일 미등록)';
+  document.getElementById('mail-subject').value        = `Partnership Opportunity — BRANDSLAM Creator Campaign 🌟`;
+  document.getElementById('mail-body-text').value      = MAIL_TEMPLATES[_tmplIdx](handle, fStr);
+}
+
+function regenMail(){
+  if(!_mailRow) return;
+  _tmplIdx = (_tmplIdx + 1) % MAIL_TEMPLATES.length;
+  const btn = document.querySelector('.btn-regen');
+  if(btn) btn.classList.add('spinning');
+  setTimeout(()=>{
+    fillMailModal(_mailRow);
+    if(btn) btn.classList.remove('spinning');
+  }, 600);
+}
+
+function sendMail(){
+  const btn = document.getElementById('btn-send');
+  btn.classList.add('sending');
+  btn.textContent = '발송 중...';
+  setTimeout(()=>{
+    closeMailModal();
+    btn.classList.remove('sending');
+    btn.innerHTML = '✉ 발송하기';
+    // show toast
+    const t = document.getElementById('send-toast');
+    const h = _mailRow?.handle || '';
+    t.textContent = `✓ @${h} 에게 메일을 성공적으로 발송했습니다`;
+    t.classList.add('show');
+    // add notification
+    addNotif(`<strong>@${h}</strong>에게 AI 제안 메일을 발송했습니다`, '✉', '방금');
+    setTimeout(()=>t.classList.remove('show'), 3000);
+  }, 1200);
+}
+
+function closeMailModal(){
+  document.getElementById('mail-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleBackdropClick(e){
+  if(e.target === document.getElementById('mail-backdrop')) closeMailModal();
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+const NOTIFS = [
+  {icon:'💬', msg:'<strong>@beautybyella</strong> replied to your outreach email — "Yes, I\'m interested! Can you share more details?"', time:'2분 전', unread:true},
+  {icon:'✓',  msg:'<strong>@skincare.with.mia</strong> agreed to the campaign terms', time:'8분 전', unread:true},
+  {icon:'💬', msg:'<strong>@dailyglowroutine</strong> asked about usage rights and exclusivity', time:'15분 전', unread:true},
+  {icon:'📩', msg:'<strong>@hairgoals.usa</strong> opened your proposal email', time:'22분 전', unread:true},
+  {icon:'💬', msg:'<strong>@kbeauty.faves</strong> replied — "What\'s the posting timeline?"', time:'31분 전', unread:true},
+  {icon:'✓',  msg:'<strong>@glowwithgrace</strong> accepted the negotiated rate ($650/video)', time:'45분 전', unread:true},
+  {icon:'💬', msg:'<strong>@thetrendytan</strong> asked for a rate increase. Current offer: $400', time:'1시간 전', unread:true},
+  {icon:'📩', msg:'<strong>@lifewithlauren</strong> opened your follow-up email', time:'1시간 전', unread:false},
+  {icon:'💬', msg:'<strong>@curlsandcream</strong> replied — "I work with a talent manager, cc\'ing them now"', time:'2시간 전', unread:false},
+  {icon:'✓',  msg:'<strong>@minimal.morning</strong> signed the contract and confirmed posting date', time:'2시간 전', unread:false},
+  {icon:'💬', msg:'<strong>@theskindiary</strong> asked if exclusivity applies to competitor brands', time:'3시간 전', unread:false},
+  {icon:'📩', msg:'<strong>@rosegoldglow</strong> opened your initial outreach (first open)', time:'3시간 전', unread:false},
+];
+
+let notifData = [...NOTIFS];
+
+function renderNotifs(){
+  const list = document.getElementById('notif-list');
+  if(!list) return;
+  list.innerHTML = notifData.map((n,i)=>`
+    <div class="notif-item${n.unread?' unread':''}" onclick="readNotif(${i})">
+      <div class="notif-icon" style="background:${n.unread?'var(--accent-t)':'var(--s2)'}">${n.icon}</div>
+      <div class="notif-content">
+        <div class="notif-msg">${n.msg}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+      ${n.unread?'<div class="notif-unread-dot"></div>':''}
+    </div>`).join('');
+}
+
+function addNotif(msg, icon, time){
+  notifData.unshift({icon, msg, time, unread:true});
+  const badge = document.getElementById('notif-badge');
+  const unread = notifData.filter(n=>n.unread).length;
+  if(badge) badge.textContent = unread;
+  renderNotifs();
+}
+
+function readNotif(i){
+  notifData[i].unread = false;
+  const unread = notifData.filter(n=>n.unread).length;
+  const badge = document.getElementById('notif-badge');
+  if(badge) badge.textContent = unread || '';
+  renderNotifs();
+}
+
+function markAllRead(){
+  notifData.forEach(n=>n.unread=false);
+  const badge = document.getElementById('notif-badge');
+  if(badge) badge.textContent = '';
+  renderNotifs();
+}
+
+function toggleNotif(e){
+  e.stopPropagation();
+  const dd = document.getElementById('notif-dropdown');
+  dd.classList.toggle('open');
+}
+
+// close notif on outside click
+document.addEventListener('click', e=>{
+  const wrap = document.querySelector('.notif-wrap');
+  if(wrap && !wrap.contains(e.target)){
+    document.getElementById('notif-dropdown')?.classList.remove('open');
+  }
+});
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
+renderNotifs();
 loadData();
 </script>
 </body>
