@@ -978,28 +978,18 @@ async function _loadAvDiv(div){
   const postUrl    = div.dataset.p || '';
   if(!handle || AV_CACHE.has(handle)) return;
 
-  // 1. Supabase koc_contents — real profile photo or video thumbnail
+  // 1. Supabase thumbnail (Supabase Storage — 만료 없음, 가장 신뢰)
   const koc = kocMap[handle];
   if(koc){
-    if(koc.avatar && await _imgOk(koc.avatar, 6000)){
+    if(koc.avatar && !_isExpired(koc.avatar) && await _imgOk(koc.avatar, 5000)){
       AV_CACHE.set(handle, koc.avatar); _injectAvImg(div, koc.avatar); return;
     }
-    if(koc.thumb && await _imgOk(koc.thumb, 6000)){
+    if(koc.thumb && await _imgOk(koc.thumb, 5000)){
       AV_CACHE.set(handle, koc.thumb); _injectAvImg(div, koc.thumb); return;
     }
   }
 
-  // 2. unavatar.io
-  const h = encodeURIComponent(handle);
-  const u = profileUrl.toLowerCase();
-  const tries = u.includes('instagram.com')
-    ? [`https://unavatar.io/instagram/${h}`, `https://unavatar.io/tiktok/${h}`]
-    : [`https://unavatar.io/tiktok/${h}`,    `https://unavatar.io/instagram/${h}`];
-  for(const src of tries){
-    if(await _imgOk(src, 5000)){ AV_CACHE.set(handle, src); _injectAvImg(div, src); return; }
-  }
-
-  // 3. TikTok oEmbed thumbnail (video frame from posting URL)
+  // 2. TikTok oEmbed thumbnail (posting URL 있는 경우)
   if(postUrl && postUrl.includes('/video/')){
     try{
       const res = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(postUrl)}`);
@@ -1010,48 +1000,22 @@ async function _loadAvDiv(div){
     } catch(e){}
   }
 
-  // 4. CORS proxy — scrape TikTok profile OG image
-  const scraped = await _scrapeAvatar(handle);
-  if(scraped && await _imgOk(scraped, 5000)){
-    AV_CACHE.set(handle, scraped); _injectAvImg(div, scraped); return;
+  // 3. unavatar.io (마지막 수단)
+  const h = encodeURIComponent(handle);
+  const u = profileUrl.toLowerCase();
+  const tries = u.includes('instagram.com')
+    ? [`https://unavatar.io/instagram/${h}`, `https://unavatar.io/tiktok/${h}`]
+    : [`https://unavatar.io/tiktok/${h}`,    `https://unavatar.io/instagram/${h}`];
+  for(const src of tries){
+    if(await _imgOk(src, 4000)){ AV_CACHE.set(handle, src); _injectAvImg(div, src); return; }
   }
 
   AV_CACHE.set(handle, null);
 }
 
-// Concurrency guard for scraping (max 2 at once to avoid rate limits)
-let _scrapeActive = 0;
-const _scrapeQueue = [];
-function _scrapeSlot(fn){
-  return new Promise((res,rej)=>{
-    const run = ()=>{ _scrapeActive++; fn().then(res,rej).finally(()=>{ _scrapeActive--; if(_scrapeQueue.length) _scrapeQueue.shift()(); }); };
-    _scrapeActive < 2 ? run() : _scrapeQueue.push(run);
-  });
-}
-
-async function _scrapeAvatar(handle){
-  return _scrapeSlot(async ()=>{
-    const target = encodeURIComponent(`https://www.tiktok.com/@${handle}`);
-    const PROXIES = [
-      `https://api.allorigins.win/raw?url=${target}`,
-      `https://corsproxy.io/?${target}`,
-    ];
-    for(const url of PROXIES){
-      try{
-        const res = await fetch(url, {signal: AbortSignal.timeout(9000)});
-        if(!res.ok) continue;
-        const html = await res.text();
-        // OG image = profile picture
-        const og = html.match(/property="og:image"\s+content="([^"]+)"/i)
-                || html.match(/content="([^"]+)"\s+property="og:image"/i);
-        if(og && og[1].includes('tiktok')) return og[1];
-        // Fallback: avatarLarger in embedded JSON
-        const jm = html.match(/"avatarLarger":"(https[^"]+)"/);
-        if(jm) return jm[1].replace(/\\u002F/g,'/').replace(/\\u003A/g,':').replace(/\\/g,'');
-      } catch(e){}
-    }
-    return null;
-  });
+function _isExpired(url){
+  const m = (url||'').match(/x-expires=(\d+)/);
+  return m ? parseInt(m[1]) < Date.now()/1000 : false;
 }
 
 function _imgOk(src, ms){
