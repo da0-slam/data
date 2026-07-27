@@ -1560,12 +1560,17 @@ function loadData(){
 // ── STATS ─────────────────────────────────────────────────────────────────────
 function updateStats(){
   const s = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=typeof v==='number'?v.toLocaleString():v; };
-  s('st-all',   76964);
-  s('st-agree',  9284);
-  s('st-nego',   6847);
-  s('st-app',   38276);
-  s('st-fup',   13238);
-  s('st-rej',    9319);
+  const agree = allData.filter(r=>r.status==='Agree').length;
+  const nego  = allData.filter(r=>r.status==='Nego').length;
+  const app   = allData.filter(r=>(r.status||'').startsWith('Approach')).length;
+  const rej   = allData.filter(r=>['Reject','Non USA','Wrong Email'].includes(r.status)).length;
+  const fup   = allData.length - agree - nego - app - rej;
+  s('st-all',   allData.length);
+  s('st-agree', agree);
+  s('st-nego',  nego);
+  s('st-app',   app);
+  s('st-fup',   Math.max(0,fup));
+  s('st-rej',   rej);
 }
 
 // ── FILTER / SORT ─────────────────────────────────────────────────────────────
@@ -1574,7 +1579,7 @@ function applyFilter(){
   switch(activeFilter){
     case 'agree': d=d.filter(r=>r.status==='Agree'); break;
     case 'nego':  d=d.filter(r=>r.status==='Nego'); break;
-    case 'fup':   d=d.filter(r=>r.status==='Follow up'); break;
+    case 'fup':   d=d.filter(r=>{ const st=r.status||''; return st!=='Agree'&&st!=='Nego'&&!st.startsWith('Approach')&&!['Reject','Non USA','Wrong Email'].includes(st); }); break;
     case 'app':   d=d.filter(r=>r.status.startsWith('Approach')); break;
     case 'reply': d=d.filter(r=>r.status==='Reply'); break;
     case 'rc':    d=d.filter(r=>r.status==='Give Ratecard'); break;
@@ -1999,9 +2004,12 @@ document.addEventListener('click', e=>{
 // ── PIPELINE STUB (fallback if pipeline script fails) ─────────────────────────
 function openPipeline(){
   try {
-    if(typeof _plOpen === 'function'){ _plOpen(); return; }
-    // pipeline script not loaded yet – show overlay anyway using DOM
-    alert('파이프라인 로딩 중 오류가 발생했습니다. 새로고침 후 다시 시도해주세요.');
+    if(typeof window._plOpen === 'function'){ window._plOpen(); return; }
+    // Diagnostic: show what went wrong
+    const started  = window._plScriptStarted  ? 'Y' : 'N';
+    const finished = window._plScriptFinished ? 'Y' : 'N';
+    const err      = window._plInitErr || '(없음)';
+    alert('파이프라인 초기화 실패\n스크립트 시작:' + started + ' / 완료:' + finished + '\n오류: ' + err);
   } catch(e) {
     alert('파이프라인 오류: ' + e.message);
     console.error(e);
@@ -2022,9 +2030,12 @@ loadData();
 // ════════════════════════════════════════════════════════════════════
 // PIPELINE
 // ════════════════════════════════════════════════════════════════════
+window._plScriptStarted  = true;
+window._plScriptFinished = false;
+window._plInitErr        = null;
 
 // ── Sample data (mid-tier sheet style) ──────────────────────────────
-const PL_INFLUENCERS = [
+var PL_INFLUENCERS = [
   {handle:'@beautybylivia',name:'Livia Kang',followers:'284K',email:'livia@example.com',status:'Agree',price:'$120',shipped:false,shipped_date:null,tracking:'',courier:'',posted_tt:'',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0},
   {handle:'@skincaremia',name:'Mia Johnson',followers:'157K',email:'mia@example.com',status:'Agree',price:'$80',shipped:true,shipped_date:'2026-07-18',tracking:'1Z999AA10123456784',courier:'UPS',posted_tt:'https://tiktok.com/@skincaremia/video/123',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:42100,likes:3800,comments:214,er:4.2},
   {handle:'@glowwithsara',name:'Sara Chen',followers:'93K',email:'sara@example.com',status:'Agree',price:'$60',shipped:true,shipped_date:'2026-07-19',tracking:'9400111899223477990500',courier:'USPS',posted_tt:'',posted_ig:'',replied:false,opened:true,sent:true,push_sent:true,views:0,likes:0,comments:0,er:0},
@@ -2035,7 +2046,7 @@ const PL_INFLUENCERS = [
   {handle:'@softglowjess',name:'Jess Park',followers:'76K',email:'jess@example.com',status:'Agree',price:'$55',shipped:true,shipped_date:'2026-07-22',tracking:'',courier:'',posted_tt:'',posted_ig:'',replied:true,opened:true,sent:true,push_sent:true,views:0,likes:0,comments:0,er:0},
 ];
 
-const PL_TEMPLATES = [
+var PL_TEMPLATES = [
   {id:'t1',name:'최초 협업 제안',tag:'콜드아웃리치',desc:'처음 컨택하는 인플루언서에게 보내는 초대 이메일',
    subject:'[SLAM Beauty] {{handle}}님과의 협업 제안',
    body:`안녕하세요 {{handle}}님,\n\nSLAM Beauty를 운영하고 있는 팀입니다.\n\n{{followers}} 팔로워를 보유하신 {{handle}}님의 콘텐츠를 정말 인상 깊게 봐왔습니다. 저희 {{product}} 제품과 잘 어울릴 것 같아 협업을 제안드리고 싶었어요.\n\n관심이 있으시다면, 아래 내용을 확인해 주세요:\n• 협업 형태: TikTok 영상 1편 + Instagram Reels 1편\n• 제품 무료 제공 + 협찬비 USD {{price}}\n• 업로드 기간: 제품 수령 후 2주 이내\n\n관심 있으시면 답장 주시면 세부 내용 공유드리겠습니다!\n\n감사합니다,\nSLAM Beauty 팀`},
@@ -2050,10 +2061,10 @@ const PL_TEMPLATES = [
    body:`안녕하세요 {{handle}}님,\n\n협업을 진행하게 되어 정말 기쁩니다! 🎉\n\n최종 협찬 조건을 안내해 드립니다:\n• 협찬비: USD {{price}}\n• 콘텐츠: TikTok 영상 1편\n• 업로드 기간: 제품 수령 후 2주 이내\n\n제품 발송을 위해 수령 주소를 아래 양식으로 회신 부탁드립니다:\n• 이름:\n• 주소 (상세):\n• 도시, 주, 우편번호:\n• 국가:\n• 연락처:\n\n확인되는 대로 바로 발송 준비하겠습니다!\n\n감사합니다,\nSLAM Beauty 팀`},
 ];
 
-let PL_SELECTED_TMPL = PL_TEMPLATES[0];
-let PL_SELECTED_IDS = new Set();
-let PL_STAGE = 1;
-let PL_SENDING = false;
+var PL_SELECTED_TMPL = PL_TEMPLATES[0];
+var PL_SELECTED_IDS = new Set();
+var PL_STAGE = 1;
+var PL_SENDING = false;
 
 function _plOpen(){
   let ov = document.getElementById('pl-overlay');
@@ -2472,10 +2483,20 @@ function fmtNum(n){
   return n.toString();
 }
 
-const PL_PALETTE = ['#4A6CF0','#0FA65C','#E06820','#7052CC','#0888D0','#C28800'];
+var PL_PALETTE = ['#4A6CF0','#0FA65C','#E06820','#7052CC','#0888D0','#C28800'];
 function plColor(handle){
-  let h=0; for(const c of handle) h=(h*31+c.charCodeAt(0))%PL_PALETTE.length;
+  var h=0; for(var c of handle) h=(h*31+c.charCodeAt(0))%PL_PALETTE.length;
   return PL_PALETTE[Math.abs(h)%PL_PALETTE.length];
+}
+
+// ── 진단 완료 플래그 + 글로벌 등록 ─────────────────────────────────
+window._plScriptFinished = true;
+try {
+  window._plOpen = _plOpen;
+  console.log('[Pipeline] OK — _plOpen registered');
+} catch(regErr) {
+  window._plInitErr = 'register: ' + regErr.message;
+  console.error('[Pipeline] Register error:', regErr);
 }
 </script>
 </body>
