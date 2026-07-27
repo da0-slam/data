@@ -997,7 +997,8 @@ async function _loadAvDiv(div){
   const handle = div.dataset.h;
   const profileUrl = div.dataset.u || '';
   const postUrl    = div.dataset.p || '';
-  if(!handle || AV_CACHE.has(handle)) return;
+  if(!handle) return;
+  if(AV_CACHE.has(handle)){ const s=AV_CACHE.get(handle); if(s) _injectAvImg(div,s); return; }
 
   // 1. Supabase Storage (만료 없음) — cover_url > thumbnail_url
   const koc = kocMap[handle];
