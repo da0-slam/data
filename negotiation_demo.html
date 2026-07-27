@@ -940,35 +940,56 @@ function observeAvatars(){
   });
 }
 
-// Fetch all koc_contents avatar/thumbnail data from Supabase
+// Fetch avatar data from Supabase (influencer_master + koc_contents)
 async function loadKocAvatars(){
-  const PAGE = 1000;
-  let offset = 0;
-  for(let i=0; i<30; i++){
-    try{
+  const hdrs = { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` };
+
+  // 1순위: influencer_master.cover_url (Supabase Storage, 만료 없음)
+  try{
+    const PAGE = 1000; let offset = 0;
+    for(let i=0; i<50; i++){
       const res = await fetch(
-        `${SB_URL}/rest/v1/koc_contents?select=influencer_id,avatar_url,thumbnail_url&or=(avatar_url.neq.,thumbnail_url.neq.)&limit=${PAGE}&offset=${offset}`,
-        { headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` } }
+        `${SB_URL}/rest/v1/influencer_master?select=influencer_id,cover_url&cover_url=not.is.null&limit=${PAGE}&offset=${offset}`,
+        { headers: hdrs }
       );
       if(!res.ok) break;
       const rows = await res.json();
       if(!rows.length) break;
       for(const r of rows){
-        const h = r.influencer_id; if(!h) continue;
-        if(!kocMap[h]) kocMap[h] = { avatar: r.avatar_url||'', thumb: r.thumbnail_url||'' };
-        else {
-          if(r.avatar_url && !kocMap[h].avatar) kocMap[h].avatar = r.avatar_url;
-          if(r.thumbnail_url && !kocMap[h].thumb) kocMap[h].thumb = r.thumbnail_url;
-        }
+        const h = r.influencer_id; if(!h || !r.cover_url) continue;
+        if(!kocMap[h]) kocMap[h] = { cover: r.cover_url, thumb: '' };
+        else kocMap[h].cover = r.cover_url;
       }
       if(rows.length < PAGE) break;
       offset += PAGE;
-    } catch(e){ break; }
-  }
-  // Re-trigger avatar display for any already-observed divs
+    }
+  } catch(e){}
+
+  // 2순위: koc_contents.thumbnail_url (Supabase Storage)
+  try{
+    const PAGE = 1000; let offset = 0;
+    for(let i=0; i<30; i++){
+      const res = await fetch(
+        `${SB_URL}/rest/v1/koc_contents?select=influencer_id,thumbnail_url&thumbnail_url=neq.&limit=${PAGE}&offset=${offset}`,
+        { headers: hdrs }
+      );
+      if(!res.ok) break;
+      const rows = await res.json();
+      if(!rows.length) break;
+      for(const r of rows){
+        const h = r.influencer_id; if(!h || !r.thumbnail_url) continue;
+        if(!kocMap[h]) kocMap[h] = { cover: '', thumb: r.thumbnail_url };
+        else if(!kocMap[h].thumb) kocMap[h].thumb = r.thumbnail_url;
+      }
+      if(rows.length < PAGE) break;
+      offset += PAGE;
+    }
+  } catch(e){}
+
+  // 로드 완료 → 이미 렌더된 아바타 재시도
   document.querySelectorAll('.av[data-h]').forEach(div => {
     const h = div.dataset.h;
-    if(kocMap[h] && !AV_CACHE.has(h)) _avObs && _avObs.unobserve(div), _loadAvDiv(div);
+    if(kocMap[h] && !AV_CACHE.has(h)){ _avObs && _avObs.unobserve(div); _loadAvDiv(div); }
   });
 }
 
@@ -978,11 +999,11 @@ async function _loadAvDiv(div){
   const postUrl    = div.dataset.p || '';
   if(!handle || AV_CACHE.has(handle)) return;
 
-  // 1. Supabase thumbnail (Supabase Storage — 만료 없음, 가장 신뢰)
+  // 1. Supabase Storage (만료 없음) — cover_url > thumbnail_url
   const koc = kocMap[handle];
   if(koc){
-    if(koc.avatar && !_isExpired(koc.avatar) && await _imgOk(koc.avatar, 5000)){
-      AV_CACHE.set(handle, koc.avatar); _injectAvImg(div, koc.avatar); return;
+    if(koc.cover && await _imgOk(koc.cover, 5000)){
+      AV_CACHE.set(handle, koc.cover); _injectAvImg(div, koc.cover); return;
     }
     if(koc.thumb && await _imgOk(koc.thumb, 5000)){
       AV_CACHE.set(handle, koc.thumb); _injectAvImg(div, koc.thumb); return;
