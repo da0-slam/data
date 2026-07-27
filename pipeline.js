@@ -93,16 +93,43 @@ function plLoadCampaignPosts(onDone) {
     headers: { 'apikey': PL_SB_KEY, 'Authorization': 'Bearer ' + PL_SB_KEY }
   }).then(function(r){ return r.json(); })
     .then(function(data){
-      PL_CP_DATA   = data || [];
-      PL_CP_LOADED = true;
+      PL_CP_DATA = data || [];
       plMergeCampaignPosts();
       if (onDone) onDone();
     })
     .catch(function(e){
       console.warn('[Pipeline] SB fetch failed:', e);
-      PL_CP_LOADED = true;
       if (onDone) onDone();
     });
+}
+
+// TikTok oEmbed / Instagram oEmbed로 누락된 썸네일 보완
+function plFetchMissingThumbs(onDone) {
+  var toFetch = PL_INFLUENCERS.filter(function(r){
+    return (r.complete || r.posted_tt || r.posted_ig) && !r.thumbnail_url && (r.posted_tt || r.posted_ig);
+  });
+  if (!toFetch.length) { if (onDone) onDone(); return; }
+  var pending = toFetch.length;
+  function done(){ if (--pending === 0 && onDone) onDone(); }
+  toFetch.forEach(function(inf){
+    var url = inf.posted_tt || inf.posted_ig;
+    var isTT = url.indexOf('tiktok') > -1;
+    var isIG = url.indexOf('instagram') > -1;
+    if (isTT) {
+      // TikTok oEmbed — public, CORS-enabled
+      fetch('https://www.tiktok.com/oembed?url=' + encodeURIComponent(url))
+        .then(function(r){ return r.json(); })
+        .then(function(d){ if (d && d.thumbnail_url) inf.thumbnail_url = d.thumbnail_url; done(); })
+        .catch(done);
+    } else if (isIG) {
+      // Instagram Graph oEmbed — requires access_token; not available client-side
+      // Try fetching the page and extracting og:image via a CORS proxy isn't reliable either
+      // So we just skip IG and let the no-thumb card show
+      done();
+    } else {
+      done();
+    }
+  });
 }
 
 function plNormUrl(u){
@@ -179,12 +206,14 @@ function plMergeCampaignPosts(){
 // ── Open / Close ─────────────────────────────────────────────────────
 function _plOpen(){
   if (PL_CP_LOADED) { _plOpenUI(); return; }
-  // Fetch Supabase data first, show brief loading on button
   var btn = document.querySelector('.pipeline-btn');
   if (btn) { btn._origText = btn.innerHTML; btn.innerHTML = '⏳ 로딩 중...'; btn.disabled = true; }
   plLoadCampaignPosts(function(){
-    if (btn) { btn.innerHTML = btn._origText || '⚡ 협업 파이프라인'; btn.disabled = false; }
-    _plOpenUI();
+    plFetchMissingThumbs(function(){
+      PL_CP_LOADED = true;
+      if (btn) { btn.innerHTML = btn._origText || '⚡ 협업 파이프라인'; btn.disabled = false; }
+      _plOpenUI();
+    });
   });
 }
 
@@ -456,13 +485,15 @@ function buildStage5(){
       ? '<span class="track-plat-tag tt">TikTok</span>'
       : '<span class="track-plat-tag ig">Instagram</span>';
     var postUrl = r.posted_tt || r.posted_ig || '';
-    // Thumbnail — clickable if URL exists
-    var thumbImgHTML = thumb
-      ? '<img class="track-thumb" src="' + thumb + '" onerror="this.parentNode.innerHTML=\'<div class=track-thumb-placeholder>&#x1F3AC;</div>\'" loading="lazy">'
-      : '<div class="track-thumb-placeholder">&#x1F3AC;</div>';
-    var thumbHTML = postUrl
-      ? '<a href="' + postUrl + '" target="_blank" rel="noopener" class="track-thumb-link">' + thumbImgHTML + '<div class="track-thumb-play">&#x25B6;</div></a>'
-      : thumbImgHTML;
+    // 썸네일: 있으면 클릭 가능 링크, 없으면 영역 자체 안 렌더링
+    var thumbHTML = '';
+    if (thumb) {
+      var tImg = '<img class="track-thumb" src="' + thumb
+        + '" onerror="var el=this.closest(\'.track-thumb-link\');if(el)el.style.display=\'none\'" loading="lazy">';
+      thumbHTML = postUrl
+        ? '<a href="' + postUrl + '" target="_blank" rel="noopener" class="track-thumb-link">' + tImg + '<div class="track-thumb-play">&#x25B6;</div></a>'
+        : tImg;
+    }
     var viewLink = postUrl
       ? '<a class="track-view-btn" href="' + postUrl + '" target="_blank" rel="noopener">' + (r.posted_tt ? 'TikTok' : 'Instagram') + ' 보기 &rarr;</a>'
       : '<button class="add-url-card-btn" onclick="plOpenUrlFor(\'' + r.handle + '\')">+ URL 추가</button>';
@@ -479,7 +510,7 @@ function buildStage5(){
     var editBtn = hasUrl
       ? '<button class="track-url-edit-btn" onclick="plOpenUrlFor(\'' + r.handle + '\')" title="URL 수정">&#x270E;</button>'
       : '';
-    cards += '<div class="track-card" data-handle="' + r.handle + '" data-platform="' + (r.platform || '').toLowerCase() + '">'
+    cards += '<div class="track-card' + (thumb ? '' : ' no-thumb') + '" data-handle="' + r.handle + '" data-platform="' + (r.platform || '').toLowerCase() + '">'
       + thumbHTML
       + '<div class="track-card-body">'
       + '<div class="track-card-header">'
