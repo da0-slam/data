@@ -998,7 +998,6 @@ tbody td:first-child{
   <div class="topbar-sep"></div>
   <span class="page-title">인플루언서 협상 관리</span>
   <div class="spacer"></div>
-  <span class="result-lbl" id="result-lbl">로드 중...</span>
   <button class="pipeline-btn" onclick="openPipeline()">⚡ 협업 파이프라인</button>
 
   <!-- NOTIFICATION BELL -->
@@ -1172,13 +1171,7 @@ tbody td:first-child{
 </div>
 
 <script>
-window.onerror = function(msg,src,line,col,err){
-  const lbl = document.getElementById('result-lbl');
-  if(lbl) lbl.textContent = '⚠ JS오류: '+msg+' (line '+line+')';
-  const tb = document.getElementById('tbody');
-  if(tb) tb.innerHTML = '<tr><td colspan="7"><div class="center-msg" style="color:#D63045">JS 오류: '+msg+'<br>line '+line+'</div></td></tr>';
-  return false;
-};
+window.onerror = function(msg,src,line){ console.warn('JS Error:', msg, 'line:', line); return false; };
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/10LJ7fHfOzwRQYUf851Vo5ZWI25Dlu_zPk9JJKzMbF7k/export?format=csv&gid=0';
 const PAGE_SIZE = 60;
@@ -1524,8 +1517,6 @@ function fmtEngage(r){
 // ── LOAD DATA ─────────────────────────────────────────────────────────────────
 function loadData(){
   const loadTimer = setTimeout(()=>{
-    const lbl = document.getElementById('result-lbl');
-    if(lbl && lbl.textContent === '로드 중...') lbl.textContent = '⚠ 데이터 로드 타임아웃 — 시트 접근 오류';
     showMsg('Google Sheets 데이터를 불러올 수 없습니다.<br>시트 공유 설정을 확인해 주세요.');
   }, 15000);
   Papa.parse(SHEET_URL, {
@@ -1632,8 +1623,6 @@ function applyFilter(){
   filteredData=d; page=0;
   renderTable(); renderPag();
 
-  const lbl = document.getElementById('result-lbl');
-  if(lbl) lbl.textContent = filteredData.length.toLocaleString()+'건';
 
   document.querySelectorAll('thead th').forEach(th=>th.classList.remove('sort-asc','sort-desc'));
   if(sortCol){
@@ -2106,26 +2095,11 @@ function buildPipelineOverlay(){
     </div>
 
     <div class="pl-body">
-      <!-- STAGE 1 -->
-      <div class="pl-stage-content active" id="pl-sc-1">
-        ${buildStage1()}
-      </div>
-      <!-- STAGE 2 -->
-      <div class="pl-stage-content" id="pl-sc-2">
-        ${buildStage2()}
-      </div>
-      <!-- STAGE 3 -->
-      <div class="pl-stage-content" id="pl-sc-3">
-        ${buildStage3()}
-      </div>
-      <!-- STAGE 4 -->
-      <div class="pl-stage-content" id="pl-sc-4">
-        ${buildStage4()}
-      </div>
-      <!-- STAGE 5 -->
-      <div class="pl-stage-content" id="pl-sc-5">
-        ${buildStage5()}
-      </div>
+      <div class="pl-stage-content active" id="pl-sc-1">${buildStage1()}</div>
+      <div class="pl-stage-content" id="pl-sc-2">${buildStage2()}</div>
+      <div class="pl-stage-content" id="pl-sc-3">${buildStage3()}</div>
+      <div class="pl-stage-content" id="pl-sc-4">${buildStage4()}</div>
+      <div class="pl-stage-content" id="pl-sc-5">${buildStage5()}</div>
     </div>
   `;
   return ov;
