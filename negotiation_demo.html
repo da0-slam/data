@@ -916,6 +916,22 @@ function avHtml(handle, size){
   return `style="background:${bg};color:${fg}">${init}<img src="${THUMB_BASE}${encodeURIComponent(handle)}" alt="" loading="lazy" onerror="this.style.display='none'">`;
 }
 
+// platform-aware avatar: TikTok first, Instagram fallback (or vice versa)
+function avImgTag(r, lazy){
+  const u = (r.url||'').toLowerCase();
+  const h = encodeURIComponent(r.handle);
+  const tt = `https://unavatar.io/tiktok/${h}`;
+  const ig = `https://unavatar.io/instagram/${h}`;
+  const tw = `https://unavatar.io/twitter/${h}`;
+  let primary, fb;
+  if(u.includes('instagram.com')){ primary=ig; fb=tt; }
+  else if(u.includes('x.com')||u.includes('twitter.com')){ primary=tw; fb=ig; }
+  else { primary=tt; fb=ig; }
+  const la = lazy ? ' loading="lazy"' : '';
+  // data-fb = fallback URL; on second error just hide
+  return `<img src="${primary}"${la} alt="" data-fb="${fb}" onerror="var f=this.getAttribute('data-fb');if(f){this.removeAttribute('data-fb');this.src=f}else{this.style.display='none'}">`;
+}
+
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let allData      = [];
 let filteredData = [];
@@ -1196,7 +1212,7 @@ function renderTable(){
       <td>
         <div class="av-cell">
           <div class="av" style="background:${bg};color:${fg}">
-            ${init}<img src="${THUMB_BASE}${encodeURIComponent(r.handle)}" alt="" loading="lazy" onerror="this.style.display='none'">
+            ${init}${avImgTag(r, true)}
           </div>
           <div class="av-info">
             <div class="handle">
@@ -1263,7 +1279,7 @@ function selectRow(idx){
 
   const avEl=document.getElementById('dp-av');
   avEl.style.background=bg; avEl.style.color=fg;
-  avEl.innerHTML=`${init}<img src="${THUMB_BASE}${encodeURIComponent(r.handle)}" alt="" onerror="this.style.display='none'">`;
+  avEl.innerHTML=`${init}${avImgTag(r, false)}`;
 
   document.getElementById('dp-handle').textContent='@'+r.handle;
   document.getElementById('dp-sub').innerHTML=`<span class="sbadge" style="color:${sc.c};background:${sc.bg}">${esc(sc.lbl)}</span>`;
