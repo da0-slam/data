@@ -1147,6 +1147,17 @@ function applyFilter(){
       if(typeof av==='number') return (bv-av)*sortDir;
       return av<bv?-sortDir:av>bv?sortDir:0;
     });
+  } else {
+    // Default: 실제 단가 있는 인플루언서 우선 → 그 다음 협상진행도 순
+    const STATUS_PRI = {Agree:0,Nego:1,'Give Ratecard':2,Reply:3,'Follow up':4,'Approach Kbeauty':5,'Approach Staff':6,Approach:7,Reject:8,'Non USA':9,'Wrong Email':10};
+    d.sort((a,b)=>{
+      const ap = parsePrice(a)!==null ? 0 : 1;
+      const bp = parsePrice(b)!==null ? 0 : 1;
+      if(ap!==bp) return ap-bp;
+      const as2 = STATUS_PRI[a.status]??99;
+      const bs2 = STATUS_PRI[b.status]??99;
+      return as2-bs2;
+    });
   }
   filteredData=d; page=0;
   renderTable(); renderPag();
