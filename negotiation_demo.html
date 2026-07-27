@@ -985,6 +985,107 @@ tbody td:first-child{
   font-size:11px;font-weight:700;padding:2px 7px;border-radius:8px;
   background:var(--green-d);color:var(--green);
 }
+.track-er-empty{font-size:11px;color:var(--text2);padding:2px 4px}
+.track-card-header{display:flex;align-items:flex-start;justify-content:space-between}
+.track-plat-tag{
+  font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;
+  vertical-align:middle;margin-left:4px;letter-spacing:.3px;
+}
+.track-plat-tag.tt{background:#000;color:#fff}
+.track-plat-tag.ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff}
+.track-metrics-empty{
+  display:flex;align-items:center;margin-top:10px;min-height:28px;
+}
+.apify-small-btn{
+  font-size:11px;padding:4px 10px;border:1px solid var(--accent);
+  border-radius:6px;color:var(--accent);background:none;cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+}
+.apify-small-btn:hover{background:rgba(74,108,240,.08)}
+.track-url-edit-btn{
+  background:none;border:none;cursor:pointer;color:var(--text2);
+  font-size:12px;padding:0 4px;margin-left:4px;vertical-align:middle;
+}
+.track-url-edit-btn:hover{color:var(--accent)}
+.add-url-card-btn{
+  font-size:11px;padding:4px 10px;border:1px dashed var(--border);
+  border-radius:6px;color:var(--text2);background:none;cursor:pointer;
+}
+.add-url-card-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* URL Add panel */
+.add-url-btn{
+  display:flex;align-items:center;gap:5px;padding:7px 14px;
+  border:1px solid var(--accent);border-radius:7px;font-size:12px;
+  cursor:pointer;background:#fff;color:var(--accent);font-weight:600;
+  transition:all .12s;white-space:nowrap;
+}
+.add-url-btn:hover,.add-url-btn.active{background:var(--accent);color:#fff}
+.url-panel{
+  background:linear-gradient(135deg,rgba(74,108,240,.04),rgba(15,166,92,.03));
+  border-bottom:1px solid var(--border);overflow:hidden;
+  max-height:0;transition:max-height .28s ease,padding .28s ease;
+}
+.url-panel.open{max-height:240px;padding:0}
+.url-panel-inner{padding:14px 20px;display:flex;flex-direction:column;gap:12px}
+.url-panel-title{
+  font-size:13px;font-weight:700;color:var(--text);
+  display:flex;align-items:center;gap:6px;
+}
+.url-panel-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.url-handle-sel{
+  border:1px solid var(--border);border-radius:7px;padding:8px 10px;
+  font-size:12px;background:#fff;outline:none;cursor:pointer;min-width:180px;
+}
+.url-handle-sel:focus{border-color:var(--accent)}
+.url-input{
+  flex:1;min-width:260px;border:1px solid var(--border);border-radius:7px;
+  padding:8px 12px;font-size:12px;background:#fff;outline:none;
+}
+.url-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(74,108,240,.12)}
+.url-fetch-btn{
+  padding:8px 18px;border-radius:7px;border:none;
+  background:var(--s2);color:var(--text2);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.url-fetch-btn.ready{background:var(--accent);color:#fff}
+.url-fetch-btn.ready:hover{background:#3a5ad0}
+.url-cancel-btn{
+  background:none;border:none;cursor:pointer;color:var(--text2);
+  font-size:16px;padding:4px 8px;border-radius:5px;
+}
+.url-cancel-btn:hover{background:var(--s2)}
+
+/* Apify progress */
+.apify-progress{margin-top:8px}
+.apify-progress-bar{
+  height:4px;background:var(--s2);border-radius:4px;overflow:hidden;margin-bottom:8px;
+}
+.apify-progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--accent),var(--green));
+  border-radius:4px;transition:width .35s ease;width:0%;
+}
+.apify-steps-list{
+  display:flex;flex-direction:column;gap:4px;max-height:100px;overflow-y:auto;
+}
+.apify-step{
+  font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px;
+  animation:fadeInUp .2s ease;
+}
+.apify-step.done{color:var(--green)}
+.apify-step-spin{display:inline-block;animation:spin .6s linear infinite}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Platform filter active */
+.track-plat-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.r-platform-badge{
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;margin-right:4px;
+}
+.r-platform-badge.tt{background:#000;color:#fff}
+.r-platform-badge.ig{background:linear-gradient(135deg,#f09433,#bc1888);color:#fff}
+
+/* Apify refresh spinning */
+.apify-icon.spinning{display:inline-block;animation:spin .8s linear infinite}
 </style>
 </head>
 <body>
