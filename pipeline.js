@@ -8,12 +8,12 @@ window._plInitErr        = null;
 // ── Real influencer data (미드티어 sheet rows 1-85) ─────────────────
 var PL_INFLUENCERS = [
   // ── Stage 5: Posted / Complete (with URL) ──────────────────────
-  {handle:'@xannacho',name:'Anna Cho',followers:'6K',email:'anna@vybemgmt.com',status:'Agree',price:'$300',platform:'TikTok',shipped:true,shipped_date:'2026-07-03',tracking:'Y260209302K',courier:'GOFO',posted_tt:'https://www.tiktok.com/@xannacho/video/7665125710364773663',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:24500,likes:2100,comments:183,er:4.1,complete:true},
-  {handle:'@saleenakshetri',name:'Salina Khatri',followers:'3.4K',email:'khatrisaleena90@gmail.com',status:'Agree',price:'$100',platform:'TikTok',shipped:true,shipped_date:'2026-07-03',tracking:'EG049701030KR',courier:'KoreaPost',posted_tt:'https://www.tiktok.com/@saleenakshetri/video/7665111360275090708',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:31200,likes:2800,comments:247,er:5.0,complete:true},
-  {handle:'@Olgabeez',name:'Olga Pogulyaeva',followers:'5K',email:'olgabeez1@gmail.com',status:'Agree',price:'$300',platform:'Instagram',shipped:true,shipped_date:'2026-07-14',tracking:'GFUS01062034315648',courier:'GOFO',posted_tt:'https://www.tiktok.com/@olga_beez/video/7667042971371506958',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:18700,likes:1650,comments:142,er:4.5,complete:true},
-  {handle:'@taisa.ugc',name:'Taisa',followers:'4.4K',email:'taisis.ugc@gmail.com',status:'Agree',price:'$350',platform:'Instagram',shipped:true,shipped_date:'2026-07-10',tracking:'GFUS01062034200123',courier:'GOFO',posted_tt:'https://www.tiktok.com/@taisa.ugc/video/7665864717088394527',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:12300,likes:980,comments:87,er:3.8,complete:true},
-  {handle:'@priscillathach',name:'Priscilla Thach',followers:'65K',email:'priscillathachh@gmail.com',status:'Agree',price:'$900',platform:'Instagram',shipped:true,shipped_date:'2026-07-14',tracking:'GFUS01062033890045',courier:'GOFO',posted_tt:'https://www.tiktok.com/t/ZP8tjgT7r/',posted_ig:'https://www.instagram.com/reel/DbBPZEjxW9G/',replied:true,opened:true,sent:true,push_sent:false,views:89400,likes:8200,comments:520,er:6.2,complete:true},
-  {handle:'@spoiledglamhunii',name:'Huneza Iqbal',followers:'18.7K',email:'huneza.artist@gmail.com',status:'Agree',price:'$150',platform:'TikTok',shipped:true,shipped_date:'2026-07-03',tracking:'Y260209317K',courier:'GOFO',posted_tt:'',posted_ig:'https://www.instagram.com/reel/DbLhPsVyNMI/',replied:true,opened:true,sent:true,push_sent:false,views:22800,likes:1900,comments:168,er:4.3,complete:true},
+  {handle:'@xannacho',name:'Anna Cho',followers:'6K',email:'anna@vybemgmt.com',status:'Agree',price:'$300',platform:'TikTok',shipped:true,shipped_date:'2026-07-03',tracking:'Y260209302K',courier:'GOFO',posted_tt:'https://www.tiktok.com/@xannacho/video/7665125710364773663',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0,complete:true},
+  {handle:'@saleenakshetri',name:'Salina Khatri',followers:'3.4K',email:'khatrisaleena90@gmail.com',status:'Agree',price:'$100',platform:'TikTok',shipped:true,shipped_date:'2026-07-03',tracking:'EG049701030KR',courier:'KoreaPost',posted_tt:'https://www.tiktok.com/@saleenakshetri/video/7665111360275090708',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0,complete:true},
+  {handle:'@Olgabeez',name:'Olga Pogulyaeva',followers:'5K',email:'olgabeez1@gmail.com',status:'Agree',price:'$300',platform:'Instagram',shipped:true,shipped_date:'2026-07-14',tracking:'GFUS01062034315648',courier:'GOFO',posted_tt:'https://www.tiktok.com/@olga_beez/video/7667042971371506958',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0,complete:true},
+  {handle:'@taisa.ugc',name:'Taisa',followers:'4.4K',email:'taisis.ugc@gmail.com',status:'Agree',price:'$350',platform:'Instagram',shipped:true,shipped_date:'2026-07-10',tracking:'GFUS01062034200123',courier:'GOFO',posted_tt:'https://www.tiktok.com/@taisa.ugc/video/7665864717088394527',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0,complete:true},
+  {handle:'@priscillathach',name:'Priscilla Thach',followers:'65K',email:'priscillathachh@gmail.com',status:'Agree',price:'$900',platform:'Instagram',shipped:true,shipped_date:'2026-07-14',tracking:'GFUS01062033890045',courier:'GOFO',posted_tt:'https://www.tiktok.com/t/ZP8tjgT7r/',posted_ig:'https://www.instagram.com/reel/DbBPZEjxW9G/',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0,complete:true},
+  {handle:'@spoiledglamhunii',name:'Huneza Iqbal',followers:'18.7K',email:'huneza.artist@gmail.com',status:'Agree',price:'$150',platform:'TikTok',shipped:true,shipped_date:'2026-07-03',tracking:'Y260209317K',courier:'GOFO',posted_tt:'',posted_ig:'https://www.instagram.com/reel/DbLhPsVyNMI/',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0,complete:true},
   // ── Stage 5: Complete (no URL yet — user adds via Apify) ────────
   {handle:'@nahrochs',name:'Nathalia Rocha',followers:'220K',email:'ugcnahrochs@gmail.com',status:'Agree',price:'$150',platform:'TikTok',shipped:true,shipped_date:'2026-07-14',tracking:'GFUS01062034339137',courier:'GOFO',posted_tt:'',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0,complete:true},
   {handle:'@nirishbeauty',name:'Shirin Khasanova',followers:'9.8K',email:'nirishxcollabs@gmail.com',status:'Agree',price:'$170',platform:'Instagram',shipped:true,shipped_date:'2026-07-14',tracking:'GFUS01062033711491',courier:'GOFO',posted_tt:'',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0,complete:true},
@@ -171,13 +171,12 @@ function plMergeCampaignPosts(){
         if (cp.platform === 'tiktok' && !inf.posted_tt) inf.posted_tt = cp.post_url;
         else if (cp.platform === 'instagram' && !inf.posted_ig) inf.posted_ig = cp.post_url;
       }
-      if (cp.views > 0 && inf.views === 0) inf.views = cp.views;
-      if (cp.likes > 0 && inf.likes === 0) inf.likes = cp.likes;
-      if (cp.comments > 0 && inf.comments === 0) inf.comments = cp.comments;
-      if (cp.views > 0 || cp.likes > 0) {
-        inf.er      = inf.likes > 0 ? parseFloat((inf.likes / Math.max(plFollowerInt(inf.followers), 1) * 100).toFixed(1)) : 0;
-        inf.complete = true;
-      }
+      // 항상 Supabase 실데이터로 덮어쓰기
+      if (cp.views    !== undefined) inf.views    = cp.views;
+      if (cp.likes    !== undefined) inf.likes    = cp.likes;
+      if (cp.comments !== undefined) inf.comments = cp.comments;
+      inf.er      = inf.likes > 0 ? parseFloat((inf.likes / Math.max(plFollowerInt(inf.followers), 1) * 100).toFixed(1)) : 0;
+      inf.complete = true;
     } else if (cp.post_url && cp.influencer_name && !existingUrls.has(normCp)) {
       // Add new entry from Supabase not in local list
       var handle = '@' + cp.influencer_name.replace(/\s+/g, '').toLowerCase();
