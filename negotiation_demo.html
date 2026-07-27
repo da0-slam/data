@@ -966,6 +966,19 @@ tbody td:first-child{
   display:flex;align-items:center;justify-content:center;
   font-size:28px;
 }
+.track-thumb-link{
+  display:block;position:relative;overflow:hidden;
+}
+.track-thumb-link .track-thumb{
+  transition:transform .2s;display:block;
+}
+.track-thumb-link:hover .track-thumb{transform:scale(1.03)}
+.track-thumb-play{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0);transition:background .18s;
+  color:#fff;font-size:32px;opacity:0;
+}
+.track-thumb-link:hover .track-thumb-play{background:rgba(0,0,0,.35);opacity:1}
 .track-card-body{padding:12px}
 .track-card-handle{font-size:13px;font-weight:700;color:var(--text)}
 .track-card-cap{font-size:11px;color:var(--text2);margin-top:2px;

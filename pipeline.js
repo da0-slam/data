@@ -59,6 +59,13 @@ var PL_STAGE         = 1;
 var PL_SENDING       = false;
 var PL_PALETTE       = ['#4A6CF0','#0FA65C','#E06820','#7052CC','#0888D0','#C28800'];
 
+// ── Supabase campaign_posts ──────────────────────────────────────────
+var PL_SB_URL      = 'https://wjvgvydywweqsdwbumxr.supabase.co';
+var PL_SB_KEY      = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqdmd2eWR5d3dlcXNkd2J1bXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1MzYzMDgsImV4cCI6MjA4MjExMjMwOH0.yvt2EjeguV14vVMqEyhEkF-9BmEVObA0HbwMVAqn8-o';
+var PL_CAMPAIGN_ID = '70c72745-232c-4368-a8db-42b0f4f8eb32';
+var PL_CP_DATA     = [];
+var PL_CP_LOADED   = false;
+
 // ── Helpers ──────────────────────────────────────────────────────────
 function plColor(handle){
   var h = 0;
@@ -77,15 +84,122 @@ function plFollowerInt(s){
   return parseInt(m) || 10000;
 }
 
+// ── Campaign posts fetch & merge ──────────────────────────────────────
+function plLoadCampaignPosts(onDone) {
+  var endpoint = PL_SB_URL + '/rest/v1/campaign_posts'
+    + '?select=influencer_name,post_url,thumbnail_url,views,likes,comments,platform'
+    + '&campaign_id=eq.' + PL_CAMPAIGN_ID + '&limit=200';
+  fetch(endpoint, {
+    headers: { 'apikey': PL_SB_KEY, 'Authorization': 'Bearer ' + PL_SB_KEY }
+  }).then(function(r){ return r.json(); })
+    .then(function(data){
+      PL_CP_DATA   = data || [];
+      PL_CP_LOADED = true;
+      plMergeCampaignPosts();
+      if (onDone) onDone();
+    })
+    .catch(function(e){
+      console.warn('[Pipeline] SB fetch failed:', e);
+      PL_CP_LOADED = true;
+      if (onDone) onDone();
+    });
+}
+
+function plNormUrl(u){
+  return (u || '').replace(/^https?:\/\//, '').replace(/\?.*$/, '').replace(/\/$/, '').toLowerCase();
+}
+
+function plMergeCampaignPosts(){
+  var existingUrls = new Set();
+  PL_INFLUENCERS.forEach(function(r){
+    if (r.posted_tt) existingUrls.add(plNormUrl(r.posted_tt));
+    if (r.posted_ig) existingUrls.add(plNormUrl(r.posted_ig));
+  });
+
+  PL_CP_DATA.forEach(function(cp){
+    var inf = null;
+    var normCp = plNormUrl(cp.post_url);
+
+    // 1) Match by post URL
+    for (var i = 0; i < PL_INFLUENCERS.length; i++) {
+      var r = PL_INFLUENCERS[i];
+      if ((r.posted_tt && plNormUrl(r.posted_tt) === normCp) ||
+          (r.posted_ig && plNormUrl(r.posted_ig) === normCp)) {
+        inf = r; break;
+      }
+    }
+    // 2) Match by name
+    if (!inf && cp.influencer_name) {
+      var nameL = cp.influencer_name.toLowerCase();
+      for (var j = 0; j < PL_INFLUENCERS.length; j++) {
+        if ((PL_INFLUENCERS[j].name || '').toLowerCase() === nameL) {
+          inf = PL_INFLUENCERS[j]; break;
+        }
+      }
+    }
+
+    if (inf) {
+      if (cp.thumbnail_url && !inf.thumbnail_url) inf.thumbnail_url = cp.thumbnail_url;
+      if (cp.post_url) {
+        if (cp.platform === 'tiktok' && !inf.posted_tt) inf.posted_tt = cp.post_url;
+        else if (cp.platform === 'instagram' && !inf.posted_ig) inf.posted_ig = cp.post_url;
+      }
+      if (cp.views > 0 && inf.views === 0) inf.views = cp.views;
+      if (cp.likes > 0 && inf.likes === 0) inf.likes = cp.likes;
+      if (cp.comments > 0 && inf.comments === 0) inf.comments = cp.comments;
+      if (cp.views > 0 || cp.likes > 0) {
+        inf.er      = inf.likes > 0 ? parseFloat((inf.likes / Math.max(plFollowerInt(inf.followers), 1) * 100).toFixed(1)) : 0;
+        inf.complete = true;
+      }
+    } else if (cp.post_url && cp.influencer_name && !existingUrls.has(normCp)) {
+      // Add new entry from Supabase not in local list
+      var handle = '@' + cp.influencer_name.replace(/\s+/g, '').toLowerCase();
+      var ttM = cp.post_url.match(/tiktok\.com\/@([^\/\?]+)/);
+      if (ttM) handle = '@' + ttM[1];
+      var alreadyIn = false;
+      for (var k = 0; k < PL_INFLUENCERS.length; k++) if (PL_INFLUENCERS[k].handle === handle) { alreadyIn = true; break; }
+      if (!alreadyIn) {
+        PL_INFLUENCERS.push({
+          handle: handle, name: cp.influencer_name, followers: '—', email: '',
+          status: 'Agree', price: '—',
+          platform: cp.platform === 'tiktok' ? 'TikTok' : 'Instagram',
+          shipped: true, shipped_date: null, tracking: '', courier: '',
+          posted_tt: cp.platform === 'tiktok'     ? cp.post_url : '',
+          posted_ig: cp.platform === 'instagram'  ? cp.post_url : '',
+          replied: true, opened: true, sent: true, push_sent: false,
+          views: cp.views || 0, likes: cp.likes || 0, comments: cp.comments || 0, er: 0,
+          complete: true, thumbnail_url: cp.thumbnail_url || ''
+        });
+        existingUrls.add(normCp);
+      }
+    }
+  });
+}
+
 // ── Open / Close ─────────────────────────────────────────────────────
 function _plOpen(){
+  if (PL_CP_LOADED) { _plOpenUI(); return; }
+  // Fetch Supabase data first, show brief loading on button
+  var btn = document.querySelector('.pipeline-btn');
+  if (btn) { btn._origText = btn.innerHTML; btn.innerHTML = '⏳ 로딩 중...'; btn.disabled = true; }
+  plLoadCampaignPosts(function(){
+    if (btn) { btn.innerHTML = btn._origText || '⚡ 협업 파이프라인'; btn.disabled = false; }
+    _plOpenUI();
+  });
+}
+
+function _plOpenUI(){
   var ov = document.getElementById('pl-overlay');
-  if (!ov) {
-    ov = buildPipelineOverlay();
-    document.body.appendChild(ov);
-  }
+  if (ov) { ov.remove(); }
+  ov = buildPipelineOverlay();
+  document.body.appendChild(ov);
   requestAnimationFrame(function(){ ov.classList.add('open'); });
-  plGoStage(1);
+  plGoStage(PL_STAGE || 1);
+}
+
+function plRebuildStage5(){
+  var sc5 = document.getElementById('pl-sc-5');
+  plRebuildStage5();
 }
 
 // ── Overlay builder ───────────────────────────────────────────────────
@@ -331,18 +445,27 @@ function buildStage5(){
   var cards = '';
   for (var i = 0; i < posted.length; i++) {
     var r = posted[i];
-    var kocEntry = (typeof kocMap !== 'undefined' ? kocMap[r.handle.replace('@','')] : null) || {};
-    var thumb = kocEntry.thumb || '';
-    var thumbHTML = (thumb && typeof _isExpired === 'function' && !_isExpired(thumb))
-      ? '<img class="track-thumb" src="' + thumb + '" onerror="this.style.display=\'none\'" loading="lazy">'
-      : '<div class="track-thumb-placeholder">&#x1F3AC;</div>';
+    // Thumbnail: prefer Supabase thumbnail_url, fallback to kocMap, then placeholder
+    var thumb = r.thumbnail_url || '';
+    if (!thumb && typeof kocMap !== 'undefined') {
+      var kocEntry = kocMap[r.handle.replace('@','')] || {};
+      if (kocEntry.thumb && typeof _isExpired === 'function' && !_isExpired(kocEntry.thumb)) thumb = kocEntry.thumb;
+    }
     var hasUrl = r.posted_tt || r.posted_ig;
     var platTag = r.platform === 'TikTok'
       ? '<span class="track-plat-tag tt">TikTok</span>'
       : '<span class="track-plat-tag ig">Instagram</span>';
-    var viewLink = r.posted_tt
-      ? '<a class="track-view-btn" href="' + r.posted_tt + '" target="_blank">TikTok 보기 &rarr;</a>'
-      : (r.posted_ig ? '<a class="track-view-btn" href="' + r.posted_ig + '" target="_blank">Instagram 보기 &rarr;</a>' : '<button class="add-url-card-btn" onclick="plOpenUrlFor(\'' + r.handle + '\')">+ URL 추가</button>');
+    var postUrl = r.posted_tt || r.posted_ig || '';
+    // Thumbnail — clickable if URL exists
+    var thumbImgHTML = thumb
+      ? '<img class="track-thumb" src="' + thumb + '" onerror="this.parentNode.innerHTML=\'<div class=track-thumb-placeholder>&#x1F3AC;</div>\'" loading="lazy">'
+      : '<div class="track-thumb-placeholder">&#x1F3AC;</div>';
+    var thumbHTML = postUrl
+      ? '<a href="' + postUrl + '" target="_blank" rel="noopener" class="track-thumb-link">' + thumbImgHTML + '<div class="track-thumb-play">&#x25B6;</div></a>'
+      : thumbImgHTML;
+    var viewLink = postUrl
+      ? '<a class="track-view-btn" href="' + postUrl + '" target="_blank" rel="noopener">' + (r.posted_tt ? 'TikTok' : 'Instagram') + ' 보기 &rarr;</a>'
+      : '<button class="add-url-card-btn" onclick="plOpenUrlFor(\'' + r.handle + '\')">+ URL 추가</button>';
     var metricsHTML = r.views > 0
       ? '<div class="track-metrics">'
         + '<div class="track-metric"><span>&#x25B6;</span><span class="track-metric-val">' + plFmtNum(r.views) + '</span></div>'
@@ -597,7 +720,7 @@ function plFetchUrl(){
       if (uInp) uInp.value = '';
       // rebuild stage 5
       var sc5 = document.getElementById('pl-sc-5');
-      if (sc5) sc5.innerHTML = buildStage5();
+      plRebuildStage5();
     }, 600);
   });
 }
@@ -618,7 +741,7 @@ function plFetchSingle(handle, btn){
     }
     setTimeout(function(){
       var sc5 = document.getElementById('pl-sc-5');
-      if (sc5) sc5.innerHTML = buildStage5();
+      plRebuildStage5();
     }, 300);
   });
 }
@@ -684,28 +807,41 @@ function plTrackPlat(plat, btn){
 function plApifyRefreshAll(btn){
   btn.classList.add('loading');
   btn.innerHTML = '<span class="apify-icon spinning">&#x27F3;</span> 새로고침 중...';
-  var toRefresh = PL_INFLUENCERS.filter(function(r){ return (r.complete || r.posted_tt || r.posted_ig) && r.views > 0; });
-  var done = 0;
-  function refreshNext(){
-    if (done >= toRefresh.length) {
+  // Re-fetch from Supabase for real data update
+  var endpoint = PL_SB_URL + '/rest/v1/campaign_posts'
+    + '?select=influencer_name,post_url,thumbnail_url,views,likes,comments,platform'
+    + '&campaign_id=eq.' + PL_CAMPAIGN_ID + '&limit=200';
+  fetch(endpoint, {
+    headers: { 'apikey': PL_SB_KEY, 'Authorization': 'Bearer ' + PL_SB_KEY }
+  }).then(function(r){ return r.json(); })
+    .then(function(data){
+      PL_CP_DATA = data || [];
+      // Update metrics on existing influencers from fresh SB data
+      PL_CP_DATA.forEach(function(cp){
+        var normCp = plNormUrl(cp.post_url);
+        for (var i = 0; i < PL_INFLUENCERS.length; i++) {
+          var inf = PL_INFLUENCERS[i];
+          var match = (inf.posted_tt && plNormUrl(inf.posted_tt) === normCp) ||
+                      (inf.posted_ig && plNormUrl(inf.posted_ig) === normCp);
+          if (match) {
+            if (cp.views !== undefined)    inf.views    = cp.views;
+            if (cp.likes !== undefined)    inf.likes    = cp.likes;
+            if (cp.comments !== undefined) inf.comments = cp.comments;
+            if (cp.thumbnail_url)          inf.thumbnail_url = cp.thumbnail_url;
+            inf.er = inf.likes > 0 ? parseFloat((inf.likes / Math.max(plFollowerInt(inf.followers), 1) * 100).toFixed(1)) : 0;
+            break;
+          }
+        }
+      });
       btn.classList.remove('loading');
       btn.innerHTML = '<span class="apify-icon">&#x27F3;</span> Apify 새로고침';
-      var sc5 = document.getElementById('pl-sc-5');
-      if (sc5) sc5.innerHTML = buildStage5();
-      return;
-    }
-    var r = toRefresh[done];
-    var baseFollowers = plFollowerInt(r.followers);
-    // Simulate small fluctuation in metrics
-    var delta = 0.97 + Math.random() * 0.08;
-    r.views    = Math.round(r.views * delta + Math.random() * 500);
-    r.likes    = Math.round(r.likes * delta + Math.random() * 50);
-    r.comments = Math.round(r.comments * delta + Math.random() * 10);
-    r.er       = parseFloat((r.likes / baseFollowers * 100).toFixed(1));
-    done++;
-    setTimeout(refreshNext, 120);
-  }
-  setTimeout(refreshNext, 400);
+      plRebuildStage5();
+    })
+    .catch(function(){
+      btn.classList.remove('loading');
+      btn.innerHTML = '<span class="apify-icon">&#x27F3;</span> Apify 새로고침';
+      plRebuildStage5();
+    });
 }
 
 // ── 완료 플래그 + 전역 등록 ──────────────────────────────────────────
