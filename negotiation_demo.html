@@ -989,7 +989,7 @@ async function _loadAvDiv(div){
     }
   }
 
-  // 2. unavatar.io (platform-specific)
+  // 2. unavatar.io
   const h = encodeURIComponent(handle);
   const u = profileUrl.toLowerCase();
   const tries = u.includes('instagram.com')
@@ -999,7 +999,7 @@ async function _loadAvDiv(div){
     if(await _imgOk(src, 5000)){ AV_CACHE.set(handle, src); _injectAvImg(div, src); return; }
   }
 
-  // 3. TikTok oEmbed thumbnail (video frame)
+  // 3. TikTok oEmbed thumbnail (video frame from posting URL)
   if(postUrl && postUrl.includes('/video/')){
     try{
       const res = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(postUrl)}`);
@@ -1009,7 +1009,49 @@ async function _loadAvDiv(div){
       }
     } catch(e){}
   }
+
+  // 4. CORS proxy — scrape TikTok profile OG image
+  const scraped = await _scrapeAvatar(handle);
+  if(scraped && await _imgOk(scraped, 5000)){
+    AV_CACHE.set(handle, scraped); _injectAvImg(div, scraped); return;
+  }
+
   AV_CACHE.set(handle, null);
+}
+
+// Concurrency guard for scraping (max 2 at once to avoid rate limits)
+let _scrapeActive = 0;
+const _scrapeQueue = [];
+function _scrapeSlot(fn){
+  return new Promise((res,rej)=>{
+    const run = ()=>{ _scrapeActive++; fn().then(res,rej).finally(()=>{ _scrapeActive--; if(_scrapeQueue.length) _scrapeQueue.shift()(); }); };
+    _scrapeActive < 2 ? run() : _scrapeQueue.push(run);
+  });
+}
+
+async function _scrapeAvatar(handle){
+  return _scrapeSlot(async ()=>{
+    const target = encodeURIComponent(`https://www.tiktok.com/@${handle}`);
+    const PROXIES = [
+      `https://api.allorigins.win/raw?url=${target}`,
+      `https://corsproxy.io/?${target}`,
+    ];
+    for(const url of PROXIES){
+      try{
+        const res = await fetch(url, {signal: AbortSignal.timeout(9000)});
+        if(!res.ok) continue;
+        const html = await res.text();
+        // OG image = profile picture
+        const og = html.match(/property="og:image"\s+content="([^"]+)"/i)
+                || html.match(/content="([^"]+)"\s+property="og:image"/i);
+        if(og && og[1].includes('tiktok')) return og[1];
+        // Fallback: avatarLarger in embedded JSON
+        const jm = html.match(/"avatarLarger":"(https[^"]+)"/);
+        if(jm) return jm[1].replace(/\\u002F/g,'/').replace(/\\u003A/g,':').replace(/\\/g,'');
+      } catch(e){}
+    }
+    return null;
+  });
 }
 
 function _imgOk(src, ms){
