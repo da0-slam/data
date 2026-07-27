@@ -241,7 +241,7 @@ function buildPipelineOverlay(){
   var s2 = PL_INFLUENCERS.filter(function(r){ return r.sent; }).length;
   var s3 = PL_INFLUENCERS.filter(function(r){ return r.replied; }).length;
   var s4 = PL_INFLUENCERS.filter(function(r){ return r.shipped && !r.posted_tt && !r.posted_ig && !r.complete; }).length;
-  var s5 = PL_INFLUENCERS.filter(function(r){ return r.complete || r.posted_tt || r.posted_ig; }).length;
+  var s5 = PL_INFLUENCERS.filter(function(r){ return r.posted_tt || r.posted_ig; }).length;
 
   var topbar = '<div class="pl-topbar">'
     + '<span class="pl-logo">SLAM</span>'
@@ -415,7 +415,7 @@ function buildStage4(){
 
 // ── Stage 5: 완료 / 트래킹 ───────────────────────────────────────────
 function buildStage5(){
-  var posted       = PL_INFLUENCERS.filter(function(r){ return r.complete || r.posted_tt || r.posted_ig; });
+  var posted       = PL_INFLUENCERS.filter(function(r){ return r.posted_tt || r.posted_ig; });
   var withMetrics  = posted.filter(function(r){ return r.views > 0; });
   var totalViews   = withMetrics.reduce(function(s,r){ return s + r.views; }, 0);
   var totalLikes   = withMetrics.reduce(function(s,r){ return s + r.likes; }, 0);
