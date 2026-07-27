@@ -18,18 +18,18 @@ var PL_INFLUENCERS = [
 ];
 
 var PL_TEMPLATES = [
-  {id:'t1',name:'최초 협업 제안',tag:'콜드아웃리치',desc:'처음 컨택하는 인플루언서에게 보내는 초대 이메일',
-   subject:'[SLAM Beauty] {{handle}}님과의 협업 제안',
-   body:'안녕하세요 {{handle}}님,\n\nSLAM Beauty를 운영하고 있는 팀입니다.\n\n{{followers}} 팔로워를 보유하신 {{handle}}님의 콘텐츠를 정말 인상 깊게 봐왔습니다. 저희 {{product}} 제품과 잘 어울릴 것 같아 협업을 제안드리고 싶었어요.\n\n관심이 있으시다면, 아래 내용을 확인해 주세요:\n- 협업 형태: TikTok 영상 1편 + Instagram Reels 1편\n- 제품 무료 제공 + 협찬비 USD {{price}}\n- 업로드 기간: 제품 수령 후 2주 이내\n\n관심 있으시면 답장 주시면 세부 내용 공유드리겠습니다!\n\n감사합니다,\nSLAM Beauty 팀'},
-  {id:'t2',name:'제품 발송 안내',tag:'발송알림',desc:'제품을 발송한 후 트래킹 정보와 함께 보내는 이메일',
-   subject:'[SLAM Beauty] {{handle}}님께 제품이 발송되었습니다',
-   body:'안녕하세요 {{handle}}님,\n\n약속드린 {{product}} 제품을 발송했습니다!\n\n[배송 정보]\n- 택배사: {{courier}}\n- 운송장 번호: {{tracking}}\n- 발송일: {{ship_date}}\n\n보통 2-5 영업일 내에 도착합니다. 제품 수령 후 2주 이내에 TikTok 영상 업로드 부탁드립니다.\n\n영상 업로드 시 @slambeauty 태그 및 #SLAMBeauty 해시태그를 꼭 포함해주세요!\n\n감사합니다,\nSLAM Beauty 팀'},
-  {id:'t3',name:'업로드 독촉',tag:'리마인더',desc:'제품 발송 후 2주가 지났는데 업로드가 없을 때',
-   subject:'[SLAM Beauty] 혹시 {{handle}}님 제품 잘 받으셨나요?',
-   body:'안녕하세요 {{handle}}님,\n\n지난번에 {{product}} 제품을 발송드렸는데 잘 받으셨는지 확인차 연락드립니다.\n\n혹시 궁금하신 점이 있거나 제품에 문제가 있으시면 바로 알려주세요!\n\n업로드 기간이 곧 마감되는데, 편하신 시간에 진행해 주시면 감사하겠습니다.\n\n- 업로드 후: 영상 링크를 이 이메일로 회신 부탁드립니다\n- TikTok: @slambeauty 태그 + #SLAMBeauty\n- Instagram: @slambeauty 태그\n\n감사합니다,\nSLAM Beauty 팀'},
-  {id:'t4',name:'계약 확정 안내',tag:'계약',desc:'협상 완료 후 계약 확정 및 주소 수집',
-   subject:'[SLAM Beauty] 협업 확정 - 주소 공유 부탁드립니다',
-   body:'안녕하세요 {{handle}}님,\n\n협업을 진행하게 되어 정말 기쁩니다!\n\n최종 협찬 조건을 안내해 드립니다:\n- 협찬비: USD {{price}}\n- 콘텐츠: TikTok 영상 1편\n- 업로드 기간: 제품 수령 후 2주 이내\n\n제품 발송을 위해 수령 주소를 아래 양식으로 회신 부탁드립니다:\n- 이름:\n- 주소 (상세):\n- 도시, 주, 우편번호:\n- 국가:\n- 연락처:\n\n확인되는 대로 바로 발송 준비하겠습니다!\n\n감사합니다,\nSLAM Beauty 팀'},
+  {id:'t1',name:'Cold Outreach',tag:'Cold Outreach',desc:'First contact — introducing the collaboration to a new creator',
+   subject:'[SLAM Beauty] Collaboration Opportunity with {{handle}}',
+   body:'Hi {{handle}},\n\nI\'m reaching out from SLAM Beauty — we\'re a K-beauty brand with a growing presence on TikTok and Instagram.\n\nWe\'ve been following your content and absolutely love your style! With {{followers}} engaged followers, we think {{handle}} would be a perfect fit for our {{product}} campaign.\n\nHere\'s what we\'re offering:\n- Content: 1x TikTok video + 1x Instagram Reel\n- Free product + collaboration fee: USD {{price}}\n- Timeline: post within 2 weeks of receiving the product\n\nIf this sounds interesting, just reply to this email and we\'ll send over the full brief!\n\nLooking forward to working together,\nSLAM Beauty Team'},
+  {id:'t2',name:'Product Shipped',tag:'Shipping Notice',desc:'Sent after the product is dispatched — includes tracking info',
+   subject:'[SLAM Beauty] Your package is on the way, {{handle}}!',
+   body:'Hi {{handle}},\n\nGreat news — your {{product}} has been shipped!\n\nTracking Details:\n- Carrier: {{courier}}\n- Tracking Number: {{tracking}}\n- Ship Date: {{ship_date}}\n\nEstimated delivery: 3–7 business days.\n\nOnce you receive it, please post within 2 weeks. A few reminders:\n- Tag @slambeauty in your video\n- Include #SLAMBeauty in the caption\n- Reply to this email with the link once it\'s live!\n\nExcited to see your content!\n\nBest,\nSLAM Beauty Team'},
+  {id:'t3',name:'Upload Reminder',tag:'Reminder',desc:'Follow-up when no post is detected 2+ weeks after shipping',
+   subject:'[SLAM Beauty] Quick check-in — did your package arrive, {{handle}}?',
+   body:'Hi {{handle}},\n\nHope you\'re doing well! We sent your {{product}} a little while back and just wanted to check in — did everything arrive okay?\n\nIf there were any issues with the delivery or the product, please let us know and we\'ll sort it out right away.\n\nWhen you\'re ready to post, here\'s a quick reminder:\n- Tag @slambeauty in the video\n- Use #SLAMBeauty in the caption\n- Reply with your post link so we can boost it!\n\nNo rush — just let us know if you need anything.\n\nThanks so much,\nSLAM Beauty Team'},
+  {id:'t4',name:'Deal Confirmed',tag:'Contract',desc:'Sent after negotiation — confirms terms and collects shipping address',
+   subject:'[SLAM Beauty] Collaboration Confirmed — Please share your address',
+   body:'Hi {{handle}},\n\nWe\'re so excited to officially partner with you!\n\nHere\'s a quick summary of the agreed terms:\n- Collaboration fee: USD {{price}}\n- Deliverable: 1x TikTok video\n- Posting deadline: within 2 weeks of receiving the product\n\nTo get your package out ASAP, could you reply with your shipping details?\n- Full name:\n- Address line 1:\n- Address line 2 (apt/suite):\n- City, State, ZIP:\n- Country:\n- Phone number:\n\nWe\'ll get it shipped as soon as we hear back!\n\nCan\'t wait to see your content,\nSLAM Beauty Team'},
 ];
 
 var PL_SELECTED_TMPL = PL_TEMPLATES[0];
