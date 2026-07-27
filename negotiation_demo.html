@@ -671,6 +671,320 @@ tbody td:first-child{
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+
+/* ── PIPELINE BUTTON ── */
+.pipeline-btn{
+  display:flex;align-items:center;gap:6px;padding:7px 14px;
+  background:var(--accent);color:#fff;border:none;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+  transition:opacity .15s;
+}
+.pipeline-btn:hover{opacity:.88}
+
+/* ── PIPELINE OVERLAY ── */
+.pl-overlay{
+  position:fixed;inset:0;z-index:2000;background:#F2F4F8;
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.pl-overlay.open{transform:translateY(0)}
+
+.pl-topbar{
+  display:flex;align-items:center;gap:12px;padding:0 24px;
+  height:56px;background:#fff;border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.pl-logo{font-size:13px;font-weight:700;color:var(--text);opacity:.5}
+.pl-title{font-size:15px;font-weight:700;color:var(--text)}
+.pl-spacer{flex:1}
+.pl-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--text2);padding:6px;border-radius:6px}
+.pl-close:hover{background:var(--s2)}
+
+/* Stage tabs */
+.pl-stages{
+  display:flex;align-items:center;padding:0 24px;gap:0;
+  background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;
+  overflow-x:auto;
+}
+.pl-stage{
+  display:flex;align-items:center;gap:8px;padding:14px 20px;
+  border:none;background:none;cursor:pointer;position:relative;
+  color:var(--text2);font-size:13px;font-weight:500;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:all .15s;
+}
+.pl-stage:hover{color:var(--text)}
+.pl-stage.active{color:var(--accent);border-bottom-color:var(--accent)}
+.pl-stage-num{
+  width:22px;height:22px;border-radius:50%;background:var(--s2);
+  color:var(--text2);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.pl-stage.active .pl-stage-num{background:var(--accent);color:#fff}
+.pl-stage-done .pl-stage-num{background:var(--green);color:#fff}
+.pl-stage-arrow{color:var(--border2);font-size:14px;padding:0 4px;flex-shrink:0}
+.pl-stage-count{
+  font-size:11px;padding:1px 6px;border-radius:10px;
+  background:var(--accent-d);color:var(--accent);font-weight:600;
+}
+.pl-stage.active .pl-stage-count{background:var(--accent);color:#fff}
+
+/* Stage content */
+.pl-body{flex:1;overflow:hidden;display:flex}
+.pl-stage-content{display:none;flex:1;overflow:hidden}
+.pl-stage-content.active{display:flex}
+
+/* ── STAGE 1: EMAIL ── */
+.email-stage{display:flex;flex:1;gap:0;overflow:hidden}
+
+.tmpl-lib{
+  width:240px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.tmpl-lib-head{
+  padding:16px;border-bottom:1px solid var(--border);
+  font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;
+}
+.tmpl-list{flex:1;overflow-y:auto;padding:8px}
+.tmpl-card{
+  padding:12px;border-radius:8px;cursor:pointer;
+  border:1px solid transparent;margin-bottom:4px;transition:all .15s;
+}
+.tmpl-card:hover{background:var(--s1)}
+.tmpl-card.sel{background:var(--accent-t);border-color:var(--accent)}
+.tmpl-card-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.tmpl-card-tag{
+  font-size:11px;color:var(--accent);background:var(--accent-d);
+  padding:2px 7px;border-radius:10px;display:inline-block;
+}
+.tmpl-card-desc{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.4}
+.tmpl-vars{padding:12px 16px;border-top:1px solid var(--border)}
+.tmpl-vars-title{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase}
+.var-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;background:var(--s2);border-radius:6px;
+  font-size:11px;font-family:monospace;color:var(--accent);
+  cursor:pointer;margin:2px;border:1px solid var(--border);
+  transition:all .12s;
+}
+.var-chip:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.email-center{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  background:#fff;border-right:1px solid var(--border);
+}
+.email-center-head{
+  padding:14px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.email-center-head-title{font-size:13px;font-weight:700;color:var(--text)}
+.recipient-search{
+  flex:1;border:1px solid var(--border);border-radius:7px;
+  padding:6px 10px;font-size:12px;outline:none;background:var(--s1);
+}
+.recipient-search:focus{border-color:var(--accent)}
+.sel-count-lbl{font-size:12px;color:var(--text2);white-space:nowrap}
+.recipient-list{flex:1;overflow-y:auto}
+.r-row{
+  display:flex;align-items:center;gap:10px;padding:10px 16px;
+  border-bottom:1px solid var(--s2);cursor:pointer;transition:background .1s;
+}
+.r-row:hover{background:var(--s1)}
+.r-row.sel{background:var(--accent-t)}
+.r-check{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.r-av{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;overflow:hidden;position:relative;
+}
+.r-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.r-info{flex:1;min-width:0}
+.r-handle{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r-sub{font-size:11px;color:var(--text2)}
+.r-status-badge{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap}
+
+.email-preview{
+  width:360px;flex-shrink:0;display:flex;flex-direction:column;
+  background:var(--s1);overflow:hidden;
+}
+.email-preview-head{
+  padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);
+}
+.email-preview-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:10px}
+.email-field{margin-bottom:8px}
+.email-field label{font-size:11px;color:var(--text2);display:block;margin-bottom:3px}
+.email-field input,.email-field textarea{
+  width:100%;border:1px solid var(--border);border-radius:6px;
+  padding:7px 9px;font-size:12px;background:#fff;outline:none;
+  font-family:inherit;
+}
+.email-field input:focus,.email-field textarea:focus{border-color:var(--accent)}
+.email-field textarea{height:200px;resize:none;line-height:1.5}
+.email-preview-footer{
+  padding:14px 16px;background:#fff;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;
+}
+.send-all-btn{
+  width:100%;padding:11px;background:var(--accent);color:#fff;
+  border:none;border-radius:8px;font-size:14px;font-weight:700;
+  cursor:pointer;transition:opacity .15s;
+}
+.send-all-btn:hover{opacity:.88}
+.send-all-btn:disabled{opacity:.4;cursor:not-allowed}
+.send-progress{display:none;flex-direction:column;gap:6px}
+.send-progress.show{display:flex}
+.progress-bar-wrap{height:6px;background:var(--s2);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+.progress-lbl{font-size:11px;color:var(--text2)}
+
+/* ── STAGE 2: REPLY ── */
+.reply-stage{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px}
+.reply-section-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:8px}
+.reply-card{
+  background:#fff;border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px;
+}
+.reply-card-info{flex:1}
+.reply-card-handle{font-size:13px;font-weight:600;color:var(--text)}
+.reply-card-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.reply-status{font-size:11px;padding:3px 9px;border-radius:8px;font-weight:600}
+.reply-status.sent{background:#FFF3CC;color:#A07000}
+.reply-status.opened{background:#E3F0FF;color:#0666C8}
+.reply-status.replied{background:#E6F7EE;color:#0B8A47}
+.reply-actions{display:flex;gap:6px}
+.reply-btn{
+  padding:6px 12px;border-radius:7px;border:1px solid var(--border);
+  background:#fff;font-size:12px;cursor:pointer;color:var(--text);
+  transition:all .12s;
+}
+.reply-btn:hover{border-color:var(--accent);color:var(--accent)}
+.reply-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.reply-btn.primary:hover{opacity:.88}
+
+/* ── STAGE 3: SHIPPING ── */
+.ship-stage{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.ship-head{
+  padding:16px 24px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.ship-list{flex:1;overflow-y:auto;padding:16px 24px;display:flex;flex-direction:column;gap:8px}
+.ship-card{
+  background:#fff;border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;display:grid;
+  grid-template-columns:32px 1fr 140px 120px 120px auto;
+  align-items:center;gap:12px;
+}
+.ship-av{
+  width:32px;height:32px;border-radius:50%;overflow:hidden;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+}
+.ship-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ship-info-handle{font-size:13px;font-weight:600;color:var(--text)}
+.ship-info-sub{font-size:11px;color:var(--text2)}
+.ship-input{
+  border:1px solid var(--border);border-radius:7px;padding:7px 9px;
+  font-size:12px;outline:none;width:100%;
+}
+.ship-input:focus{border-color:var(--accent)}
+.ship-select{
+  border:1px solid var(--border);border-radius:7px;padding:7px;
+  font-size:12px;outline:none;background:#fff;width:100%;
+}
+.ship-confirm-btn{
+  padding:7px 14px;background:var(--green);color:#fff;border:none;
+  border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;
+  white-space:nowrap;transition:opacity .15s;
+}
+.ship-confirm-btn:hover{opacity:.85}
+.ship-confirm-btn.done{background:var(--s2);color:var(--text2);cursor:default}
+.ship-state-badge{font-size:10px;padding:3px 8px;border-radius:8px;font-weight:600}
+.ship-state-badge.pending{background:#FFF3CC;color:#A07000}
+.ship-state-badge.shipped{background:#E6F7EE;color:#0B8A47}
+
+/* ── STAGE 4: UPLOAD PUSH ── */
+.push-stage{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:8px}
+.push-card{
+  background:#fff;border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;display:grid;
+  grid-template-columns:32px 1fr 1fr auto auto;
+  align-items:center;gap:12px;
+}
+.push-days{font-size:12px;color:var(--text2)}
+.push-days.urgent{color:var(--orange);font-weight:600}
+.push-btn{
+  padding:7px 14px;background:var(--accent);color:#fff;border:none;
+  border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;
+  transition:opacity .15s;white-space:nowrap;
+}
+.push-btn:hover{opacity:.85}
+.push-btn.done{background:var(--s2);color:var(--text2);cursor:default}
+
+/* ── STAGE 5: TRACKING ── */
+.track-stage{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.track-summary{
+  display:flex;gap:0;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.track-stat{
+  flex:1;padding:16px 20px;text-align:center;border-right:1px solid var(--border);
+}
+.track-stat:last-child{border-right:none}
+.track-stat-val{font-size:22px;font-weight:800;color:var(--text)}
+.track-stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}
+.track-toolbar{
+  padding:12px 20px;background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.track-toolbar input{
+  border:1px solid var(--border);border-radius:7px;padding:7px 10px;
+  font-size:12px;outline:none;background:var(--s1);width:220px;
+}
+.track-toolbar input:focus{border-color:var(--accent)}
+.apify-btn{
+  display:flex;align-items:center;gap:6px;padding:7px 14px;
+  border:1px solid var(--border);border-radius:7px;font-size:12px;
+  cursor:pointer;background:#fff;color:var(--text);transition:all .12s;
+  margin-left:auto;
+}
+.apify-btn:hover{border-color:var(--accent);color:var(--accent)}
+.apify-btn.loading .apify-icon{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.track-grid{
+  flex:1;overflow-y:auto;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:12px;padding:16px 20px;align-content:start;
+}
+.track-card{
+  background:#fff;border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;transition:box-shadow .15s;
+}
+.track-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.track-thumb{
+  width:100%;aspect-ratio:9/16;object-fit:cover;background:var(--s2);
+  display:block;max-height:180px;object-position:top;
+}
+.track-thumb-placeholder{
+  width:100%;height:140px;background:var(--s2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+}
+.track-card-body{padding:12px}
+.track-card-handle{font-size:13px;font-weight:700;color:var(--text)}
+.track-card-cap{font-size:11px;color:var(--text2);margin-top:2px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.track-metrics{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.track-metric{display:flex;align-items:center;gap:3px;font-size:11px;color:var(--text2)}
+.track-metric-val{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.track-card-footer{
+  padding:8px 12px;border-top:1px solid var(--s2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.track-view-btn{
+  font-size:11px;color:var(--accent);text-decoration:none;
+  font-weight:600;
+}
+.track-er{
+  font-size:11px;font-weight:700;padding:2px 7px;border-radius:8px;
+  background:var(--green-d);color:var(--green);
+}
 </style>
 </head>
 <body>
@@ -685,6 +999,7 @@ tbody td:first-child{
   <span class="page-title">인플루언서 협상 관리</span>
   <div class="spacer"></div>
   <span class="result-lbl" id="result-lbl">로드 중...</span>
+  <button class="pipeline-btn" onclick="openPipeline()">⚡ 협업 파이프라인</button>
 
   <!-- NOTIFICATION BELL -->
   <div class="notif-wrap">
@@ -1682,6 +1997,485 @@ document.addEventListener('click', e=>{
 // ── INIT ──────────────────────────────────────────────────────────────────────
 renderNotifs();
 loadData();
+
+// ════════════════════════════════════════════════════════════════════
+// PIPELINE
+// ════════════════════════════════════════════════════════════════════
+
+// ── Sample data (mid-tier sheet style) ──────────────────────────────
+const PL_INFLUENCERS = [
+  {handle:'@beautybylivia',name:'Livia Kang',followers:'284K',email:'livia@example.com',status:'Agree',price:'$120',shipped:false,shipped_date:null,tracking:'',courier:'',posted_tt:'',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0},
+  {handle:'@skincaremia',name:'Mia Johnson',followers:'157K',email:'mia@example.com',status:'Agree',price:'$80',shipped:true,shipped_date:'2026-07-18',tracking:'1Z999AA10123456784',courier:'UPS',posted_tt:'https://tiktok.com/@skincaremia/video/123',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:42100,likes:3800,comments:214,er:4.2},
+  {handle:'@glowwithsara',name:'Sara Chen',followers:'93K',email:'sara@example.com',status:'Agree',price:'$60',shipped:true,shipped_date:'2026-07-19',tracking:'9400111899223477990500',courier:'USPS',posted_tt:'',posted_ig:'',replied:false,opened:true,sent:true,push_sent:true,views:0,likes:0,comments:0,er:0},
+  {handle:'@heyitsluna',name:'Luna Park',followers:'521K',email:'luna@example.com',status:'Nego',price:'$200',shipped:false,shipped_date:null,tracking:'',courier:'',posted_tt:'',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0},
+  {handle:'@dailywithamy',name:'Amy Torres',followers:'68K',email:'amy@example.com',status:'Agree',price:'$50',shipped:true,shipped_date:'2026-07-20',tracking:'773849201234',courier:'FedEx',posted_tt:'https://tiktok.com/@dailywithamy/video/456',posted_ig:'https://instagram.com/p/abc123',replied:true,opened:true,sent:true,push_sent:false,views:88400,likes:7120,comments:430,er:5.1},
+  {handle:'@kbeautynik',name:'Nik Williams',followers:'312K',email:'nik@example.com',status:'Agree',price:'$150',shipped:false,shipped_date:null,tracking:'',courier:'',posted_tt:'',posted_ig:'',replied:false,opened:false,sent:true,push_sent:false,views:0,likes:0,comments:0,er:0},
+  {handle:'@rosyradiance',name:'Rose Kim',followers:'445K',email:'rose@example.com',status:'Agree',price:'$180',shipped:true,shipped_date:'2026-07-21',tracking:'928349123456',courier:'FedEx',posted_tt:'https://tiktok.com/@rosyradiance/video/789',posted_ig:'',replied:true,opened:true,sent:true,push_sent:false,views:134200,likes:11000,comments:892,er:6.3},
+  {handle:'@softglowjess',name:'Jess Park',followers:'76K',email:'jess@example.com',status:'Agree',price:'$55',shipped:true,shipped_date:'2026-07-22',tracking:'',courier:'',posted_tt:'',posted_ig:'',replied:true,opened:true,sent:true,push_sent:true,views:0,likes:0,comments:0,er:0},
+];
+
+const PL_TEMPLATES = [
+  {id:'t1',name:'최초 협업 제안',tag:'콜드아웃리치',desc:'처음 컨택하는 인플루언서에게 보내는 초대 이메일',
+   subject:'[SLAM Beauty] {{handle}}님과의 협업 제안',
+   body:`안녕하세요 {{handle}}님,\n\nSLAM Beauty를 운영하고 있는 팀입니다.\n\n{{followers}} 팔로워를 보유하신 {{handle}}님의 콘텐츠를 정말 인상 깊게 봐왔습니다. 저희 {{product}} 제품과 잘 어울릴 것 같아 협업을 제안드리고 싶었어요.\n\n관심이 있으시다면, 아래 내용을 확인해 주세요:\n• 협업 형태: TikTok 영상 1편 + Instagram Reels 1편\n• 제품 무료 제공 + 협찬비 ${{price}}\n• 업로드 기간: 제품 수령 후 2주 이내\n\n관심 있으시면 답장 주시면 세부 내용 공유드리겠습니다!\n\n감사합니다,\nSLAM Beauty 팀`},
+  {id:'t2',name:'제품 발송 안내',tag:'발송알림',desc:'제품을 발송한 후 트래킹 정보와 함께 보내는 이메일',
+   subject:'[SLAM Beauty] {{handle}}님께 제품이 발송되었습니다 📦',
+   body:`안녕하세요 {{handle}}님,\n\n약속드린 {{product}} 제품을 발송했습니다!\n\n📦 배송 정보\n• 택배사: {{courier}}\n• 운송장 번호: {{tracking}}\n• 발송일: {{ship_date}}\n\n보통 2-5 영업일 내에 도착합니다. 제품 수령 후 2주 이내에 TikTok 영상 업로드 부탁드립니다.\n\n영상 업로드 시 @slambeauty 태그 및 #SLAMBeauty 해시태그를 꼭 포함해주세요!\n\n궁금한 점이 있으시면 언제든지 연락해주세요.\n\n감사합니다,\nSLAM Beauty 팀`},
+  {id:'t3',name:'업로드 독촉',tag:'리마인더',desc:'제품 발송 후 2주가 지났는데 업로드가 없을 때',
+   subject:'[SLAM Beauty] 혹시 {{handle}}님 제품 잘 받으셨나요?',
+   body:`안녕하세요 {{handle}}님,\n\n지난번에 {{product}} 제품을 발송드렸는데 잘 받으셨는지 확인차 연락드립니다.\n\n혹시 궁금하신 점이 있거나 제품에 문제가 있으시면 바로 알려주세요!\n\n업로드 기간이 곧 마감되는데, 편하신 시간에 진행해 주시면 감사하겠습니다. 😊\n\n• 업로드 후: 영상 링크를 이 이메일로 회신 부탁드립니다\n• TikTok: @slambeauty 태그 + #SLAMBeauty\n• Instagram: @slambeauty 태그\n\n감사합니다,\nSLAM Beauty 팀`},
+  {id:'t4',name:'계약 확정 안내',tag:'계약',desc:'협상 완료 후 계약 확정 및 주소 수집',
+   subject:'[SLAM Beauty] 협업 확정 — 주소 공유 부탁드립니다',
+   body:`안녕하세요 {{handle}}님,\n\n협업을 진행하게 되어 정말 기쁩니다! 🎉\n\n최종 협찬 조건을 안내해 드립니다:\n• 협찬비: ${{price}}\n• 콘텐츠: TikTok 영상 1편\n• 업로드 기간: 제품 수령 후 2주 이내\n\n제품 발송을 위해 수령 주소를 아래 양식으로 회신 부탁드립니다:\n• 이름:\n• 주소 (상세):\n• 도시, 주, 우편번호:\n• 국가:\n• 연락처:\n\n확인되는 대로 바로 발송 준비하겠습니다!\n\n감사합니다,\nSLAM Beauty 팀`},
+];
+
+let PL_SELECTED_TMPL = PL_TEMPLATES[0];
+let PL_SELECTED_IDS = new Set();
+let PL_STAGE = 1;
+let PL_SENDING = false;
+
+function openPipeline(){
+  let ov = document.getElementById('pl-overlay');
+  if(!ov){
+    ov = buildPipelineOverlay();
+    document.body.appendChild(ov);
+  }
+  requestAnimationFrame(()=>ov.classList.add('open'));
+  plGoStage(1);
+}
+
+function closePipeline(){
+  const ov = document.getElementById('pl-overlay');
+  if(ov){ ov.classList.remove('open'); }
+}
+
+function buildPipelineOverlay(){
+  const ov = document.createElement('div');
+  ov.id = 'pl-overlay';
+  ov.className = 'pl-overlay';
+  ov.innerHTML = `
+    <div class="pl-topbar">
+      <span class="pl-logo">SLAM</span>
+      <span style="color:var(--border2);font-size:13px">›</span>
+      <span class="pl-title">협업 파이프라인</span>
+      <span class="pl-spacer"></span>
+      <button class="pl-close" onclick="closePipeline()" title="닫기">✕</button>
+    </div>
+
+    <div class="pl-stages" id="pl-stages">
+      <button class="pl-stage active" id="pl-stab-1" onclick="plGoStage(1)">
+        <span class="pl-stage-num">1</span> 이메일 발송
+        <span class="pl-stage-count" id="pl-cnt-1">8</span>
+      </button>
+      <span class="pl-stage-arrow">›</span>
+      <button class="pl-stage" id="pl-stab-2" onclick="plGoStage(2)">
+        <span class="pl-stage-num">2</span> 답변 대기
+        <span class="pl-stage-count" id="pl-cnt-2">6</span>
+      </button>
+      <span class="pl-stage-arrow">›</span>
+      <button class="pl-stage" id="pl-stab-3" onclick="plGoStage(3)">
+        <span class="pl-stage-num">3</span> 제품 발송
+        <span class="pl-stage-count" id="pl-cnt-3">6</span>
+      </button>
+      <span class="pl-stage-arrow">›</span>
+      <button class="pl-stage" id="pl-stab-4" onclick="plGoStage(4)">
+        <span class="pl-stage-num">4</span> 업로드 독촉
+        <span class="pl-stage-count" id="pl-cnt-4">2</span>
+      </button>
+      <span class="pl-stage-arrow">›</span>
+      <button class="pl-stage" id="pl-stab-5" onclick="plGoStage(5)">
+        <span class="pl-stage-num">5</span> 완료 / 트래킹
+        <span class="pl-stage-count" id="pl-cnt-5">3</span>
+      </button>
+    </div>
+
+    <div class="pl-body">
+      <!-- STAGE 1 -->
+      <div class="pl-stage-content active" id="pl-sc-1">
+        ${buildStage1()}
+      </div>
+      <!-- STAGE 2 -->
+      <div class="pl-stage-content" id="pl-sc-2">
+        ${buildStage2()}
+      </div>
+      <!-- STAGE 3 -->
+      <div class="pl-stage-content" id="pl-sc-3">
+        ${buildStage3()}
+      </div>
+      <!-- STAGE 4 -->
+      <div class="pl-stage-content" id="pl-sc-4">
+        ${buildStage4()}
+      </div>
+      <!-- STAGE 5 -->
+      <div class="pl-stage-content" id="pl-sc-5">
+        ${buildStage5()}
+      </div>
+    </div>
+  `;
+  return ov;
+}
+
+// ── Stage builders ────────────────────────────────────────────────────
+function buildStage1(){
+  const tmplCards = PL_TEMPLATES.map(t=>`
+    <div class="tmpl-card ${t.id===PL_SELECTED_TMPL.id?'sel':''}" id="tc-${t.id}" onclick="plSelectTmpl('${t.id}')">
+      <div class="tmpl-card-name">${t.name}</div>
+      <span class="tmpl-card-tag">${t.tag}</span>
+      <div class="tmpl-card-desc">${t.desc}</div>
+    </div>`).join('');
+
+  const recipRows = PL_INFLUENCERS.filter(r=>r.status==='Agree').map(r=>`
+    <div class="r-row ${PL_SELECTED_IDS.has(r.handle)?'sel':''}" onclick="plToggleRecip('${r.handle}',this)">
+      <input class="r-check" type="checkbox" ${PL_SELECTED_IDS.has(r.handle)?'checked':''} onclick="event.stopPropagation();plToggleRecip('${r.handle}',this.closest('.r-row'))">
+      <div class="r-av" style="background:${plColor(r.handle)};color:#fff">${r.handle.slice(1,3).toUpperCase()}</div>
+      <div class="r-info">
+        <div class="r-handle">${r.handle}</div>
+        <div class="r-sub">${r.followers} · ${r.email}</div>
+      </div>
+      <span class="r-status-badge" style="background:${r.sent?'var(--green-d)':'var(--s2)'};color:${r.sent?'var(--green)':'var(--text2)'}">${r.sent?'발송완료':'대기'}</span>
+    </div>`).join('');
+
+  return `<div class="email-stage">
+    <div class="tmpl-lib">
+      <div class="tmpl-lib-head">템플릿 라이브러리</div>
+      <div class="tmpl-list">${tmplCards}</div>
+      <div class="tmpl-vars">
+        <div class="tmpl-vars-title">변수 삽입</div>
+        ${['handle','followers','product','price','courier','tracking','ship_date'].map(v=>`<span class="var-chip" onclick="plInsertVar('{{${v}}}')">{{${v}}}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="email-center">
+      <div class="email-center-head">
+        <span class="email-center-head-title">수신자 목록</span>
+        <input class="recipient-search" placeholder="검색..." oninput="plFilterRecip(this.value)" id="recip-search">
+        <span class="sel-count-lbl" id="sel-count-lbl">0명 선택</span>
+        <button class="reply-btn" onclick="plSelectAll()" style="white-space:nowrap;font-size:11px">전체선택</button>
+      </div>
+      <div class="recipient-list" id="recip-list">${recipRows}</div>
+    </div>
+
+    <div class="email-preview">
+      <div class="email-preview-head">
+        <div class="email-preview-title">이메일 미리보기</div>
+        <div class="email-field">
+          <label>제목</label>
+          <input id="pl-subj" value="${PL_TEMPLATES[0].subject}" oninput="plSyncPreview()">
+        </div>
+        <div class="email-field">
+          <label>본문</label>
+          <textarea id="pl-body" oninput="plSyncPreview()">${PL_TEMPLATES[0].body}</textarea>
+        </div>
+      </div>
+      <div class="email-preview-footer">
+        <div class="send-progress" id="send-progress">
+          <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+          <div class="progress-lbl" id="prog-lbl">준비 중...</div>
+        </div>
+        <button class="send-all-btn" id="send-all-btn" onclick="plStartSend()">⚡ 일괄 발송</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildStage2(){
+  const replied = PL_INFLUENCERS.filter(r=>r.sent&&r.replied);
+  const noReply = PL_INFLUENCERS.filter(r=>r.sent&&!r.replied);
+  const repliedHTML = replied.map(r=>`
+    <div class="reply-card">
+      <div class="r-av" style="background:${plColor(r.handle)};color:#fff;width:36px;height:36px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">${r.handle.slice(1,3).toUpperCase()}</div>
+      <div class="reply-card-info">
+        <div class="reply-card-handle">${r.handle}</div>
+        <div class="reply-card-sub">${r.followers} · ${r.email}</div>
+      </div>
+      <span class="reply-status replied">답장 완료</span>
+      <div class="reply-actions">
+        <button class="reply-btn primary" onclick="plGoStage(3)">제품 발송 →</button>
+      </div>
+    </div>`).join('');
+  const noReplyHTML = noReply.map(r=>`
+    <div class="reply-card">
+      <div class="r-av" style="background:${plColor(r.handle)};color:#fff;width:36px;height:36px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">${r.handle.slice(1,3).toUpperCase()}</div>
+      <div class="reply-card-info">
+        <div class="reply-card-handle">${r.handle}</div>
+        <div class="reply-card-sub">${r.followers} · ${r.email}</div>
+      </div>
+      <span class="reply-status ${r.opened?'opened':'sent'}">${r.opened?'읽음':'미확인'}</span>
+      <div class="reply-actions">
+        <button class="reply-btn" onclick="plResendEmail('${r.handle}')">재발송</button>
+      </div>
+    </div>`).join('');
+  return `<div class="reply-stage">
+    <div>
+      <div class="reply-section-title">✅ 답장 완료 (${replied.length}명)</div>
+      ${repliedHTML}
+    </div>
+    <div>
+      <div class="reply-section-title">⏳ 미답장 (${noReply.length}명)</div>
+      ${noReplyHTML}
+    </div>
+  </div>`;
+}
+
+function buildStage3(){
+  const agreed = PL_INFLUENCERS.filter(r=>r.replied);
+  const rows = agreed.map(r=>`
+    <div class="ship-card" id="ship-card-${r.handle.replace('@','')}">
+      <div class="ship-av" style="background:${plColor(r.handle)};color:#fff">${r.handle.slice(1,3).toUpperCase()}</div>
+      <div>
+        <div class="ship-info-handle">${r.handle}</div>
+        <div class="ship-info-sub">${r.followers}</div>
+      </div>
+      <select class="ship-select" id="sc-${r.handle.replace('@','')}">
+        <option value="" ${!r.courier?'selected':''}>택배사 선택</option>
+        ${['UPS','USPS','FedEx','DHL'].map(c=>`<option ${r.courier===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+      <input class="ship-input" placeholder="운송장 번호" id="st-${r.handle.replace('@','')}" value="${r.tracking}">
+      <span class="ship-state-badge ${r.shipped?'shipped':'pending'}" id="sb-${r.handle.replace('@','')}">${r.shipped?'발송완료':'발송전'}</span>
+      <button class="ship-confirm-btn ${r.shipped?'done':''}" id="shbtn-${r.handle.replace('@','')}" onclick="plConfirmShip('${r.handle}')">
+        ${r.shipped?'✓ 완료':'발송 확인'}
+      </button>
+    </div>`).join('');
+  return `<div class="ship-stage">
+    <div class="ship-head">
+      <span style="font-size:13px;font-weight:700;color:var(--text)">제품 발송 관리</span>
+      <span style="font-size:12px;color:var(--text2);margin-left:8px">답장한 인플루언서 ${agreed.length}명</span>
+    </div>
+    <div class="ship-list">${rows}</div>
+  </div>`;
+}
+
+function buildStage4(){
+  const shippedNoPosts = PL_INFLUENCERS.filter(r=>r.shipped&&!r.posted_tt&&!r.posted_ig);
+  const rows = shippedNoPosts.map(r=>{
+    const daysAgo = r.shipped_date ? Math.floor((Date.now()-new Date(r.shipped_date))/(1000*60*60*24)) : 0;
+    const urgent = daysAgo > 10;
+    return `<div class="push-card">
+      <div class="r-av" style="background:${plColor(r.handle)};color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">${r.handle.slice(1,3).toUpperCase()}</div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)">${r.handle}</div>
+        <div style="font-size:11px;color:var(--text2)">${r.followers}</div>
+      </div>
+      <div class="push-days ${urgent?'urgent'}">${r.shipped_date?`발송 ${daysAgo}일 경과`:'날짜 미확인'} ${urgent?'⚠️':''}</div>
+      <span style="font-size:11px;color:var(--text2)">${r.courier} · ${r.tracking||'—'}</span>
+      <button class="push-btn ${r.push_sent?'done':''}" id="pushbtn-${r.handle.replace('@','')}" onclick="plSendPush('${r.handle}')">
+        ${r.push_sent?'✓ 발송됨':'독촉 이메일 발송'}
+      </button>
+    </div>`;
+  });
+  return `<div class="push-stage">
+    <div style="font-size:13px;font-weight:700;color:var(--text);padding-bottom:8px">
+      업로드 독촉 리스트 — 제품 발송 후 미업로드 ${shippedNoPosts.length}명
+    </div>
+    ${rows.join('')}
+  </div>`;
+}
+
+function buildStage5(){
+  const posted = PL_INFLUENCERS.filter(r=>r.posted_tt||r.posted_ig);
+  const totalViews = posted.reduce((s,r)=>s+r.views,0);
+  const totalLikes = posted.reduce((s,r)=>s+r.likes,0);
+  const totalComments = posted.reduce((s,r)=>s+r.comments,0);
+  const avgER = posted.length ? (posted.reduce((s,r)=>s+r.er,0)/posted.length).toFixed(1) : 0;
+
+  const cards = posted.map(r=>{
+    const thumb = (kocMap[r.handle.replace('@','')]||{}).thumb || '';
+    return `<div class="track-card">
+      ${thumb&&!_isExpired(thumb) ? `<img class="track-thumb" src="${thumb}" onerror="this.style.display='none'" loading="lazy">` : `<div class="track-thumb-placeholder">🎬</div>`}
+      <div class="track-card-body">
+        <div class="track-card-handle">${r.handle}</div>
+        <div class="track-card-cap">${r.followers} 팔로워</div>
+        <div class="track-metrics">
+          <div class="track-metric"><span>▶</span><span class="track-metric-val">${fmtNum(r.views)}</span></div>
+          <div class="track-metric"><span>♥</span><span class="track-metric-val">${fmtNum(r.likes)}</span></div>
+          <div class="track-metric"><span>💬</span><span class="track-metric-val">${fmtNum(r.comments)}</span></div>
+        </div>
+      </div>
+      <div class="track-card-footer">
+        ${r.posted_tt ? `<a class="track-view-btn" href="${r.posted_tt}" target="_blank">TikTok 보기 →</a>` : r.posted_ig ? `<a class="track-view-btn" href="${r.posted_ig}" target="_blank">Instagram 보기 →</a>` : '<span></span>'}
+        <span class="track-er">ER ${r.er}%</span>
+      </div>
+    </div>`;
+  });
+
+  return `<div class="track-stage">
+    <div class="track-summary">
+      <div class="track-stat"><div class="track-stat-val">${posted.length}</div><div class="track-stat-lbl">업로드 완료</div></div>
+      <div class="track-stat"><div class="track-stat-val">${fmtNum(totalViews)}</div><div class="track-stat-lbl">총 조회수</div></div>
+      <div class="track-stat"><div class="track-stat-val">${fmtNum(totalLikes)}</div><div class="track-stat-lbl">총 좋아요</div></div>
+      <div class="track-stat"><div class="track-stat-val">${fmtNum(totalComments)}</div><div class="track-stat-lbl">총 댓글</div></div>
+      <div class="track-stat"><div class="track-stat-val">${avgER}%</div><div class="track-stat-lbl">평균 ER</div></div>
+    </div>
+    <div class="track-toolbar">
+      <input placeholder="@handle 또는 URL 검색...">
+      <span style="font-size:12px;color:var(--text2)">플랫폼:</span>
+      <button class="reply-btn" style="font-size:12px">전체</button>
+      <button class="reply-btn" style="font-size:12px">TikTok</button>
+      <button class="reply-btn" style="font-size:12px">Instagram</button>
+      <button class="apify-btn" onclick="plApifyRefresh(this)">
+        <span class="apify-icon">⟳</span> Apify 새로고침
+      </button>
+    </div>
+    <div class="track-grid">${cards.join('')}</div>
+  </div>`;
+}
+
+// ── Stage navigation ─────────────────────────────────────────────────
+function plGoStage(n){
+  PL_STAGE = n;
+  for(let i=1;i<=5;i++){
+    document.getElementById(`pl-stab-${i}`)?.classList.toggle('active',i===n);
+    document.getElementById(`pl-sc-${i}`)?.classList.toggle('active',i===n);
+  }
+}
+
+// ── Actions ──────────────────────────────────────────────────────────
+function plSelectTmpl(id){
+  PL_SELECTED_TMPL = PL_TEMPLATES.find(t=>t.id===id);
+  document.querySelectorAll('.tmpl-card').forEach(el=>el.classList.remove('sel'));
+  document.getElementById(`tc-${id}`)?.classList.add('sel');
+  const subjEl = document.getElementById('pl-subj');
+  const bodyEl = document.getElementById('pl-body');
+  if(subjEl) subjEl.value = PL_SELECTED_TMPL.subject;
+  if(bodyEl) bodyEl.value = PL_SELECTED_TMPL.body;
+}
+
+function plInsertVar(v){
+  const ta = document.getElementById('pl-body');
+  if(!ta) return;
+  const s=ta.selectionStart, e=ta.selectionEnd;
+  ta.value = ta.value.slice(0,s)+v+ta.value.slice(e);
+  ta.setSelectionRange(s+v.length,s+v.length);
+  ta.focus();
+}
+
+function plToggleRecip(handle, row){
+  if(PL_SELECTED_IDS.has(handle)) PL_SELECTED_IDS.delete(handle);
+  else PL_SELECTED_IDS.add(handle);
+  row.classList.toggle('sel', PL_SELECTED_IDS.has(handle));
+  const cb = row.querySelector('.r-check');
+  if(cb) cb.checked = PL_SELECTED_IDS.has(handle);
+  plUpdateSelCount();
+}
+
+function plSelectAll(){
+  const rows = document.querySelectorAll('#recip-list .r-row');
+  const allSel = PL_SELECTED_IDS.size >= PL_INFLUENCERS.filter(r=>r.status==='Agree').length;
+  PL_SELECTED_IDS.clear();
+  rows.forEach(row=>{
+    const h = row.querySelector('.r-handle')?.textContent;
+    if(!allSel && h){ PL_SELECTED_IDS.add(h); row.classList.add('sel'); row.querySelector('.r-check').checked=true; }
+    else { row.classList.remove('sel'); row.querySelector('.r-check').checked=false; }
+  });
+  plUpdateSelCount();
+}
+
+function plUpdateSelCount(){
+  const el = document.getElementById('sel-count-lbl');
+  if(el) el.textContent = `${PL_SELECTED_IDS.size}명 선택`;
+  const btn = document.getElementById('send-all-btn');
+  if(btn) btn.disabled = PL_SELECTED_IDS.size === 0;
+}
+
+function plFilterRecip(q){
+  document.querySelectorAll('#recip-list .r-row').forEach(row=>{
+    const txt = row.textContent.toLowerCase();
+    row.style.display = txt.includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function plSyncPreview(){ /* live editing — textarea already reactive */ }
+
+async function plStartSend(){
+  if(PL_SENDING || PL_SELECTED_IDS.size===0) return;
+  PL_SENDING = true;
+  const btn = document.getElementById('send-all-btn');
+  const prog = document.getElementById('send-progress');
+  const fill = document.getElementById('prog-fill');
+  const lbl = document.getElementById('prog-lbl');
+  if(btn) btn.style.display='none';
+  if(prog) prog.classList.add('show');
+  const total = PL_SELECTED_IDS.size;
+  let done = 0;
+  for(const handle of PL_SELECTED_IDS){
+    await new Promise(r=>setTimeout(r, 280 + Math.random()*200));
+    done++;
+    const pct = Math.round(done/total*100);
+    if(fill) fill.style.width = pct+'%';
+    if(lbl) lbl.textContent = `${done}/${total} 발송 중... ${handle}`;
+    const inf = PL_INFLUENCERS.find(r=>r.handle===handle);
+    if(inf) inf.sent = true;
+  }
+  if(lbl) lbl.textContent = `✅ ${total}명 발송 완료!`;
+  PL_SENDING = false;
+  setTimeout(()=>{
+    if(prog) prog.classList.remove('show');
+    if(btn){ btn.style.display=''; btn.textContent='✓ 재발송'; }
+  }, 2500);
+}
+
+function plResendEmail(handle){
+  const inf = PL_INFLUENCERS.find(r=>r.handle===handle);
+  if(!inf) return;
+  const btn = event.target;
+  btn.textContent='발송 중...';btn.disabled=true;
+  setTimeout(()=>{ btn.textContent='✓ 발송됨'; inf.sent=true; },800);
+}
+
+function plConfirmShip(handle){
+  const key = handle.replace('@','');
+  const carrier = document.getElementById(`sc-${key}`)?.value;
+  const tracking = document.getElementById(`st-${key}`)?.value;
+  const inf = PL_INFLUENCERS.find(r=>r.handle===handle);
+  if(!inf) return;
+  inf.courier = carrier;
+  inf.tracking = tracking;
+  inf.shipped = true;
+  inf.shipped_date = new Date().toISOString().slice(0,10);
+  const badge = document.getElementById(`sb-${key}`);
+  if(badge){ badge.textContent='발송완료'; badge.className='ship-state-badge shipped'; }
+  const btn = document.getElementById(`shbtn-${key}`);
+  if(btn){ btn.textContent='✓ 완료'; btn.className='ship-confirm-btn done'; btn.disabled=true; }
+}
+
+function plSendPush(handle){
+  const key = handle.replace('@','');
+  const inf = PL_INFLUENCERS.find(r=>r.handle===handle);
+  if(!inf) return;
+  const btn = document.getElementById(`pushbtn-${key}`);
+  if(!btn || inf.push_sent) return;
+  btn.textContent='발송 중...'; btn.disabled=true;
+  setTimeout(()=>{
+    inf.push_sent = true;
+    btn.textContent='✓ 발송됨';
+    btn.className='push-btn done';
+  }, 700);
+}
+
+function plApifyRefresh(btn){
+  btn.classList.add('loading');
+  btn.querySelector('.apify-icon').textContent='⟳';
+  setTimeout(()=>{
+    btn.classList.remove('loading');
+    btn.querySelector('.apify-icon').textContent='⟳';
+    // Re-render stage 5 with updated kocMap data
+    const sc5 = document.getElementById('pl-sc-5');
+    if(sc5) sc5.innerHTML = buildStage5();
+  }, 1500);
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────
+function fmtNum(n){
+  if(n>=1000000) return (n/1000000).toFixed(1)+'M';
+  if(n>=1000) return (n/1000).toFixed(1)+'K';
+  return n.toString();
+}
+
+const PL_PALETTE = ['#4A6CF0','#0FA65C','#E06820','#7052CC','#0888D0','#C28800'];
+function plColor(handle){
+  let h=0; for(const c of handle) h=(h*31+c.charCodeAt(0))%PL_PALETTE.length;
+  return PL_PALETTE[Math.abs(h)%PL_PALETTE.length];
+}
 </script>
 </body>
 </html>
