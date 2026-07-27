@@ -909,27 +909,79 @@ function avInit(handle){
   return (handle||'').replace('@','').charAt(0).toUpperCase() || '?';
 }
 
-function avHtml(handle, size){
-  const [fg, bg] = avColor(handle);
-  const init = avInit(handle);
-  const cls  = size === 'lg' ? 'detail-av' : 'av';
-  return `style="background:${bg};color:${fg}">${init}<img src="${THUMB_BASE}${encodeURIComponent(handle)}" alt="" loading="lazy" onerror="this.style.display='none'">`;
+// ── AVATAR ASYNC LOADER ───────────────────────────────────────────────────────
+const AV_CACHE = new Map(); // handle → src (null = permanently failed)
+let _avObs = null;
+
+function initAvatarLoader(){
+  if(_avObs) return;
+  _avObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if(!e.isIntersecting) return;
+      _avObs.unobserve(e.target);
+      _loadAvDiv(e.target);
+    });
+  }, { rootMargin:'500px' });
 }
 
-// platform-aware avatar: TikTok first, Instagram fallback (or vice versa)
-function avImgTag(r, lazy){
-  const u = (r.url||'').toLowerCase();
-  const h = encodeURIComponent(r.handle);
-  const tt = `https://unavatar.io/tiktok/${h}`;
-  const ig = `https://unavatar.io/instagram/${h}`;
-  const tw = `https://unavatar.io/twitter/${h}`;
-  let primary, fb;
-  if(u.includes('instagram.com')){ primary=ig; fb=tt; }
-  else if(u.includes('x.com')||u.includes('twitter.com')){ primary=tw; fb=ig; }
-  else { primary=tt; fb=ig; }
-  const la = lazy ? ' loading="lazy"' : '';
-  // data-fb = fallback URL; on second error just hide
-  return `<img src="${primary}"${la} alt="" data-fb="${fb}" onerror="var f=this.getAttribute('data-fb');if(f){this.removeAttribute('data-fb');this.src=f}else{this.style.display='none'}">`;
+function observeAvatars(){
+  initAvatarLoader();
+  document.querySelectorAll('.av[data-h]').forEach(div => {
+    const h = div.dataset.h;
+    if(AV_CACHE.has(h)){
+      const src = AV_CACHE.get(h);
+      if(src) _injectAvImg(div, src);
+    } else {
+      _avObs.observe(div);
+    }
+  });
+}
+
+async function _loadAvDiv(div){
+  const handle = div.dataset.h;
+  const profileUrl = div.dataset.u || '';
+  const postUrl    = div.dataset.p || '';
+  if(!handle || AV_CACHE.has(handle)) return;
+
+  const h = encodeURIComponent(handle);
+  const u = profileUrl.toLowerCase();
+
+  const tries = u.includes('instagram.com')
+    ? [`https://unavatar.io/instagram/${h}`, `https://unavatar.io/tiktok/${h}`]
+    : [`https://unavatar.io/tiktok/${h}`,    `https://unavatar.io/instagram/${h}`];
+
+  for(const src of tries){
+    if(await _imgOk(src, 5000)){ AV_CACHE.set(handle, src); _injectAvImg(div, src); return; }
+  }
+
+  // Last resort: TikTok oEmbed thumbnail (actual video frame = influencer face)
+  if(postUrl && postUrl.includes('/video/')){
+    try{
+      const res = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(postUrl)}`);
+      if(res.ok){
+        const j = await res.json();
+        if(j.thumbnail_url){ AV_CACHE.set(handle, j.thumbnail_url); _injectAvImg(div, j.thumbnail_url); return; }
+      }
+    } catch(e){}
+  }
+  AV_CACHE.set(handle, null);
+}
+
+function _imgOk(src, ms){
+  return new Promise(ok => {
+    const img = new Image();
+    const t = setTimeout(()=>{ img.src=''; ok(false); }, ms);
+    img.onload  = ()=>{ clearTimeout(t); ok(img.naturalWidth > 1); };
+    img.onerror = ()=>{ clearTimeout(t); ok(false); };
+    img.src = src;
+  });
+}
+
+function _injectAvImg(div, src){
+  let img = div.querySelector('img');
+  if(!img){ img = document.createElement('img'); img.alt=''; div.appendChild(img); }
+  img.src = src;
+  img.style.display = '';
 }
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
@@ -1028,7 +1080,7 @@ function updateRangeTags(){
   const prMin=document.getElementById('pr-min')?.value;
   const prMax=document.getElementById('pr-max')?.value;
   const tags=[];
-  if(flMin||flMax) tags.push(`팔로워 ${flMin||'0'}K ~ ${flMax||'∞'}K`);
+  if(flMin||flMax) tags.push(`팔로워 ${Number(flMin||0).toLocaleString()} ~ ${flMax?Number(flMax).toLocaleString():'∞'}`);
   if(prMin||prMax) tags.push(`단가 $${prMin||'0'} ~ $${prMax||'∞'}`);
   const el=document.getElementById('range-tags');
   if(el) el.innerHTML=tags.map(t=>`<span class="range-active-tag">${t}</span>`).join('');
@@ -1151,7 +1203,7 @@ function applyFilter(){
   if(prMin>0||prMax<Infinity){
     d=d.filter(r=>{
       const p=parsePrice(r);
-      if(p===null) return false;
+      if(p===null) return true; // 단가 미제시 = 범위 가능성 있음 → 포함
       return p>=prMin&&p<=prMax;
     });
   }
@@ -1211,8 +1263,8 @@ function renderTable(){
       <td>${start+i+1}</td>
       <td>
         <div class="av-cell">
-          <div class="av" style="background:${bg};color:${fg}">
-            ${init}${avImgTag(r, true)}
+          <div class="av" style="background:${bg};color:${fg}" data-h="${esc(r.handle)}" data-u="${esc(r.url)}" data-p="${esc(r.postingTT)}">
+            ${init}
           </div>
           <div class="av-info">
             <div class="handle">
@@ -1230,6 +1282,7 @@ function renderTable(){
       <td class="price-cell after">${esc(shortPrice(r.afterNego))}</td>
     </tr>`;
   }).join('');
+  observeAvatars();
 }
 
 // ── PAGINATION ────────────────────────────────────────────────────────────────
@@ -1279,7 +1332,11 @@ function selectRow(idx){
 
   const avEl=document.getElementById('dp-av');
   avEl.style.background=bg; avEl.style.color=fg;
-  avEl.innerHTML=`${init}${avImgTag(r, false)}`;
+  avEl.innerHTML=`${init}`;
+  avEl.dataset.h = r.handle;
+  avEl.dataset.u = r.url||'';
+  avEl.dataset.p = r.postingTT||'';
+  _loadAvDiv(avEl);
 
   document.getElementById('dp-handle').textContent='@'+r.handle;
   document.getElementById('dp-sub').innerHTML=`<span class="sbadge" style="color:${sc.c};background:${sc.bg}">${esc(sc.lbl)}</span>`;
