@@ -758,10 +758,9 @@ tbody td:first-child{
 <div class="range-row" id="range-row">
   <div class="range-group">
     <span class="range-label">팔로워</span>
-    <input class="range-input" id="fl-min" type="number" min="0" placeholder="최소" oninput="applyFilter()">
+    <input class="range-input" id="fl-min" type="number" min="0" placeholder="예) 1000" oninput="applyFilter()">
     <span class="range-sep">~</span>
-    <input class="range-input" id="fl-max" type="number" min="0" placeholder="최대" oninput="applyFilter()">
-    <span class="range-unit">K</span>
+    <input class="range-input" id="fl-max" type="number" min="0" placeholder="예) 10000" oninput="applyFilter()">
   </div>
   <div style="width:1px;height:18px;background:var(--border);flex-shrink:0"></div>
   <div class="range-group">
@@ -932,11 +931,14 @@ let ratecardKey  = null;
 function parseFollowers(s){
   if(!s) return 0;
   s = s.trim();
+  // European decimal format: "29,4K" = 29.4K = 29,400
   if(/^\d+,\d+K$/i.test(s)) return Math.round(parseFloat(s.replace(',','.').replace(/K/i,''))*1000);
-  s = s.replace(/,/g,'');
-  if(/\d+\.?\d*M$/i.test(s)) return Math.round(parseFloat(s)*1000000);
-  if(/\d+\.?\d*K$/i.test(s)) return Math.round(parseFloat(s)*1000);
-  return parseInt(s)||0;
+  // Remove thousand commas ONLY if not European-style (i.e. multiple commas or ends in digits after comma)
+  // "2,472" → 2472 | "62,500" → 62500 | "1,234,567" → 1234567
+  const noComma = s.replace(/,(?=\d{3}(\D|$))/g,'');
+  if(/\d+\.?\d*M$/i.test(noComma)) return Math.round(parseFloat(noComma)*1000000);
+  if(/\d+\.?\d*K$/i.test(noComma)) return Math.round(parseFloat(noComma)*1000);
+  return parseInt(noComma)||0;
 }
 
 function fmtN(n){
@@ -976,11 +978,16 @@ function mockEngage(r){
 }
 
 function parsePrice(r){
-  const s = (r.afterNego || r.ratecard || '').split('\n')[0].trim();
-  if(!s) return null;
-  // strip currency symbols, commas, text suffixes
-  const m = s.replace(/[,]/g,'').match(/\$?\s*([\d]+)/);
-  return m ? parseInt(m[1]) : null;
+  // Try afterNego first, then ratecard — search full text (price may not be on line 1)
+  const raw = (r.afterNego || r.ratecard || '').trim();
+  if(!raw) return null;
+  const cleaned = raw.replace(/,/g,'');
+  // Match "$700", "US$700", "$50", "USD 700", "700 USD"
+  const m1 = cleaned.match(/(?:US)?\$\s*(\d+)/i);
+  if(m1) return parseInt(m1[1]);
+  const m2 = cleaned.match(/(\d+)\s*USD/i);
+  if(m2) return parseInt(m2[1]);
+  return null;
 }
 
 function getRanges(){
@@ -988,7 +995,8 @@ function getRanges(){
   const flMax = parseFloat(document.getElementById('fl-max')?.value)||Infinity;
   const prMin = parseFloat(document.getElementById('pr-min')?.value)||0;
   const prMax = parseFloat(document.getElementById('pr-max')?.value)||Infinity;
-  return {flMin:flMin*1000, flMax:flMax*1000, prMin, prMax};
+  // Followers: raw numbers (e.g. enter 1000 to find influencers with 1,000 followers)
+  return {flMin, flMax, prMin, prMax};
 }
 
 function clearRanges(){
