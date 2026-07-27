@@ -861,6 +861,9 @@ tbody td:first-child{
 const SHEET_URL = 'https://docs.google.com/spreadsheets/d/10LJ7fHfOzwRQYUf851Vo5ZWI25Dlu_zPk9JJKzMbF7k/export?format=csv&gid=0';
 const PAGE_SIZE = 60;
 const THUMB_BASE = 'https://unavatar.io/tiktok/';
+const SB_URL  = 'https://wjvgvydywweqsdwbumxr.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indqdmd2eWR5d3dlcXNkd2J1bXhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY1MzYzMDgsImV4cCI6MjA4MjExMjMwOH0.yvt2EjeguV14vVMqEyhEkF-9BmEVObA0HbwMVAqn8-o';
+const kocMap = {}; // handle → { avatar, thumb }
 
 // ── STATUS MAP ────────────────────────────────────────────────────────────────
 const SM = {
@@ -937,24 +940,66 @@ function observeAvatars(){
   });
 }
 
+// Fetch all koc_contents avatar/thumbnail data from Supabase
+async function loadKocAvatars(){
+  const PAGE = 1000;
+  let offset = 0;
+  for(let i=0; i<30; i++){
+    try{
+      const res = await fetch(
+        `${SB_URL}/rest/v1/koc_contents?select=influencer_id,avatar_url,thumbnail_url&or=(avatar_url.neq.,thumbnail_url.neq.)&limit=${PAGE}&offset=${offset}`,
+        { headers: { apikey: SB_ANON, Authorization: `Bearer ${SB_ANON}` } }
+      );
+      if(!res.ok) break;
+      const rows = await res.json();
+      if(!rows.length) break;
+      for(const r of rows){
+        const h = r.influencer_id; if(!h) continue;
+        if(!kocMap[h]) kocMap[h] = { avatar: r.avatar_url||'', thumb: r.thumbnail_url||'' };
+        else {
+          if(r.avatar_url && !kocMap[h].avatar) kocMap[h].avatar = r.avatar_url;
+          if(r.thumbnail_url && !kocMap[h].thumb) kocMap[h].thumb = r.thumbnail_url;
+        }
+      }
+      if(rows.length < PAGE) break;
+      offset += PAGE;
+    } catch(e){ break; }
+  }
+  // Re-trigger avatar display for any already-observed divs
+  document.querySelectorAll('.av[data-h]').forEach(div => {
+    const h = div.dataset.h;
+    if(kocMap[h] && !AV_CACHE.has(h)) _avObs && _avObs.unobserve(div), _loadAvDiv(div);
+  });
+}
+
 async function _loadAvDiv(div){
   const handle = div.dataset.h;
   const profileUrl = div.dataset.u || '';
   const postUrl    = div.dataset.p || '';
   if(!handle || AV_CACHE.has(handle)) return;
 
+  // 1. Supabase koc_contents — real profile photo or video thumbnail
+  const koc = kocMap[handle];
+  if(koc){
+    if(koc.avatar && await _imgOk(koc.avatar, 6000)){
+      AV_CACHE.set(handle, koc.avatar); _injectAvImg(div, koc.avatar); return;
+    }
+    if(koc.thumb && await _imgOk(koc.thumb, 6000)){
+      AV_CACHE.set(handle, koc.thumb); _injectAvImg(div, koc.thumb); return;
+    }
+  }
+
+  // 2. unavatar.io (platform-specific)
   const h = encodeURIComponent(handle);
   const u = profileUrl.toLowerCase();
-
   const tries = u.includes('instagram.com')
     ? [`https://unavatar.io/instagram/${h}`, `https://unavatar.io/tiktok/${h}`]
     : [`https://unavatar.io/tiktok/${h}`,    `https://unavatar.io/instagram/${h}`];
-
   for(const src of tries){
     if(await _imgOk(src, 5000)){ AV_CACHE.set(handle, src); _injectAvImg(div, src); return; }
   }
 
-  // Last resort: TikTok oEmbed thumbnail (actual video frame = influencer face)
+  // 3. TikTok oEmbed thumbnail (video frame)
   if(postUrl && postUrl.includes('/video/')){
     try{
       const res = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(postUrl)}`);
@@ -1159,6 +1204,7 @@ function loadData(){
       allData.forEach(mockEngage);
       applyFilter();
       updateStats();
+      loadKocAvatars(); // background: fetch real avatars from Supabase
     },
     error(err){ showMsg('로드 실패: '+err.message); }
   });
