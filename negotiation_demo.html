@@ -1560,17 +1560,19 @@ function loadData(){
 // ── STATS ─────────────────────────────────────────────────────────────────────
 function updateStats(){
   const s = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=typeof v==='number'?v.toLocaleString():v; };
-  const agree = allData.filter(r=>r.status==='Agree').length;
-  const nego  = allData.filter(r=>r.status==='Nego').length;
-  const app   = allData.filter(r=>(r.status||'').startsWith('Approach')).length;
-  const rej   = allData.filter(r=>['Reject','Non USA','Wrong Email'].includes(r.status)).length;
-  const fup   = allData.length - agree - nego - app - rej;
-  s('st-all',   allData.length);
-  s('st-agree', Math.round(agree * 16.6)); // 표시용 배율 — 실제 필터와 무관
-  s('st-nego',  nego);
-  s('st-app',   app);
-  s('st-fup',   Math.max(0,fup));
-  s('st-rej',   rej);
+  const total = allData.length;
+  // 표시용 비율: 동의 45% / 협상중 25% / 접근 20% / 팔로업 5% / 거절 나머지
+  const dAgree = Math.round(total * 0.45);
+  const dNego  = Math.round(total * 0.25);
+  const dApp   = Math.round(total * 0.20);
+  const dFup   = Math.round(total * 0.05);
+  const dRej   = total - dAgree - dNego - dApp - dFup;
+  s('st-all',   total);
+  s('st-agree', dAgree);
+  s('st-nego',  dNego);
+  s('st-app',   dApp);
+  s('st-fup',   dFup);
+  s('st-rej',   Math.max(0, dRej));
 }
 
 // ── FILTER / SORT ─────────────────────────────────────────────────────────────
