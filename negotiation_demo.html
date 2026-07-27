@@ -1996,6 +1996,22 @@ document.addEventListener('click', e=>{
   }
 });
 
+// ── PIPELINE STUB (fallback if pipeline script fails) ─────────────────────────
+function openPipeline(){
+  try {
+    if(typeof _plOpen === 'function'){ _plOpen(); return; }
+    // pipeline script not loaded yet – show overlay anyway using DOM
+    alert('파이프라인 로딩 중 오류가 발생했습니다. 새로고침 후 다시 시도해주세요.');
+  } catch(e) {
+    alert('파이프라인 오류: ' + e.message);
+    console.error(e);
+  }
+}
+function closePipeline(){
+  const ov = document.getElementById('pl-overlay');
+  if(ov) ov.classList.remove('open');
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 renderNotifs();
 loadData();
@@ -2039,7 +2055,7 @@ let PL_SELECTED_IDS = new Set();
 let PL_STAGE = 1;
 let PL_SENDING = false;
 
-function openPipeline(){
+function _plOpen(){
   let ov = document.getElementById('pl-overlay');
   if(!ov){
     ov = buildPipelineOverlay();
@@ -2047,11 +2063,6 @@ function openPipeline(){
   }
   requestAnimationFrame(()=>ov.classList.add('open'));
   plGoStage(1);
-}
-
-function closePipeline(){
-  const ov = document.getElementById('pl-overlay');
-  if(ov){ ov.classList.remove('open'); }
 }
 
 function buildPipelineOverlay(){
